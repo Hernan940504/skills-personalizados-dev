@@ -1,0 +1,122 @@
+package {{BASE_PACKAGE}}.controller;
+
+import {{BASE_PACKAGE}}.dto.{{Resource}}Request;
+import {{BASE_PACKAGE}}.dto.{{Resource}}Response;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+@Tag(name = "{{Resource}}", description = "Operaciones sobre {{resource_description}}")
+@SecurityRequirement(name = "bearerAuth")
+@RestController
+@RequestMapping("/api/v1/{{resource_path}}")
+@RequiredArgsConstructor
+public class {{Resource}}Controller {
+
+    private final {{Resource}}Service {{resourceCamel}}Service;
+
+    // ─── GET LIST ────────────────────────────────────────────────────────────
+
+    @Operation(
+        summary = "Lista todos los {{resource_plural}}",
+        description = "Retorna una lista paginada de {{resource_plural}}. Soporta paginación vía parámetros `page`, `size` y `sort`."
+    )
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Lista obtenida exitosamente",
+            content = @Content(schema = @Schema(implementation = {{Resource}}Response.class))),
+        @ApiResponse(responseCode = "401", description = "No autenticado",
+            content = @Content(schema = @Schema(hidden = true))),
+        @ApiResponse(responseCode = "500", description = "Error interno del servidor",
+            content = @Content(schema = @Schema(hidden = true)))
+    })
+    @GetMapping
+    public ResponseEntity<Page<{{Resource}}Response>> list(Pageable pageable) {
+        return ResponseEntity.ok({{resourceCamel}}Service.findAll(pageable));
+    }
+
+    // ─── GET BY ID ───────────────────────────────────────────────────────────
+
+    @Operation(summary = "Obtiene un {{resource}} por ID")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Recurso encontrado",
+            content = @Content(schema = @Schema(implementation = {{Resource}}Response.class))),
+        @ApiResponse(responseCode = "404", description = "Recurso no encontrado",
+            content = @Content(schema = @Schema(hidden = true)))
+    })
+    @GetMapping("/{id}")
+    public ResponseEntity<{{Resource}}Response> getById(
+        @Parameter(description = "ID del {{resource}}", required = true, example = "1")
+        @PathVariable Long id
+    ) {
+        return ResponseEntity.ok({{resourceCamel}}Service.findById(id));
+    }
+
+    // ─── POST ────────────────────────────────────────────────────────────────
+
+    @Operation(summary = "Crea un nuevo {{resource}}")
+    @ApiResponses({
+        @ApiResponse(responseCode = "201", description = "Creado exitosamente",
+            content = @Content(schema = @Schema(implementation = {{Resource}}Response.class))),
+        @ApiResponse(responseCode = "400", description = "Datos inválidos",
+            content = @Content(schema = @Schema(hidden = true))),
+        @ApiResponse(responseCode = "422", description = "Error de validación",
+            content = @Content(schema = @Schema(hidden = true)))
+    })
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    public ResponseEntity<{{Resource}}Response> create(
+        @io.swagger.v3.oas.annotations.parameters.RequestBody(
+            description = "Datos del nuevo {{resource}}",
+            required = true,
+            content = @Content(schema = @Schema(implementation = {{Resource}}Request.class))
+        )
+        @Valid @RequestBody {{Resource}}Request request
+    ) {
+        return ResponseEntity.status(HttpStatus.CREATED).body({{resourceCamel}}Service.create(request));
+    }
+
+    // ─── PUT ─────────────────────────────────────────────────────────────────
+
+    @Operation(summary = "Actualiza un {{resource}} completo")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Actualizado exitosamente",
+            content = @Content(schema = @Schema(implementation = {{Resource}}Response.class))),
+        @ApiResponse(responseCode = "400", description = "Datos inválidos"),
+        @ApiResponse(responseCode = "404", description = "Recurso no encontrado")
+    })
+    @PutMapping("/{id}")
+    public ResponseEntity<{{Resource}}Response> update(
+        @Parameter(description = "ID del {{resource}}", required = true) @PathVariable Long id,
+        @Valid @RequestBody {{Resource}}Request request
+    ) {
+        return ResponseEntity.ok({{resourceCamel}}Service.update(id, request));
+    }
+
+    // ─── DELETE ──────────────────────────────────────────────────────────────
+
+    @Operation(summary = "Elimina un {{resource}}")
+    @ApiResponses({
+        @ApiResponse(responseCode = "204", description = "Eliminado exitosamente"),
+        @ApiResponse(responseCode = "404", description = "Recurso no encontrado")
+    })
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public ResponseEntity<Void> delete(
+        @Parameter(description = "ID del {{resource}}", required = true) @PathVariable Long id
+    ) {
+        {{resourceCamel}}Service.delete(id);
+        return ResponseEntity.noContent().build();
+    }
+}

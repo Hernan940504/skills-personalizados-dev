@@ -1,0 +1,251 @@
+// Plantilla de rutas Express completamente anotadas con JSDoc para swagger-jsdoc
+// Copiar y adaptar para cada archivo de rutas del proyecto
+
+const express = require('express');
+const router = express.Router();
+// const { authenticate } = require('../middleware/auth'); // si tiene auth
+
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     {{Resource}}:
+ *       type: object
+ *       required:
+ *         - {{required_field}}
+ *       properties:
+ *         id:
+ *           type: integer
+ *           format: int64
+ *           description: ID único del recurso
+ *           example: 1
+ *         {{field_name}}:
+ *           type: string
+ *           description: {{field_description}}
+ *           example: "{{field_example}}"
+ *         createdAt:
+ *           type: string
+ *           format: date-time
+ *           description: Fecha de creación
+ *         updatedAt:
+ *           type: string
+ *           format: date-time
+ *           description: Fecha de última actualización
+ *
+ *     Create{{Resource}}Request:
+ *       type: object
+ *       required:
+ *         - {{required_field}}
+ *       properties:
+ *         {{field_name}}:
+ *           type: string
+ *           description: {{field_description}}
+ *           example: "{{field_example}}"
+ */
+
+/**
+ * @swagger
+ * /api/v1/{{resource_path}}:
+ *   get:
+ *     tags:
+ *       - {{TAG}}
+ *     summary: Lista todos los {{resource_plural}}
+ *     description: Retorna una lista paginada de {{resource_plural}}.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *           default: 1
+ *         description: Número de página
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *           maximum: 100
+ *           default: 20
+ *         description: Items por página
+ *     responses:
+ *       200:
+ *         description: Lista obtenida exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/{{Resource}}'
+ *                 total:
+ *                   type: integer
+ *                   example: 100
+ *       401:
+ *         description: No autenticado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ */
+router.get('/', /* authenticate, */ async (req, res, next) => {
+  try {
+    // implementación
+    res.json({ data: [], total: 0 });
+  } catch (err) {
+    next(err);
+  }
+});
+
+/**
+ * @swagger
+ * /api/v1/{{resource_path}}:
+ *   post:
+ *     tags:
+ *       - {{TAG}}
+ *     summary: Crea un nuevo {{resource}}
+ *     security:
+ *       - BearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Create{{Resource}}Request'
+ *           example:
+ *             {{field_name}}: "{{field_example}}"
+ *     responses:
+ *       201:
+ *         description: Creado exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/{{Resource}}'
+ *       400:
+ *         description: Datos inválidos
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ */
+router.post('/', /* authenticate, */ async (req, res, next) => {
+  try {
+    // implementación
+    res.status(201).json({});
+  } catch (err) {
+    next(err);
+  }
+});
+
+/**
+ * @swagger
+ * /api/v1/{{resource_path}}/{id}:
+ *   get:
+ *     tags:
+ *       - {{TAG}}
+ *     summary: Obtiene un {{resource}} por ID
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID del {{resource}}
+ *         example: 1
+ *     responses:
+ *       200:
+ *         description: Recurso encontrado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/{{Resource}}'
+ *       404:
+ *         description: No encontrado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ */
+router.get('/:id', /* authenticate, */ async (req, res, next) => {
+  try {
+    // implementación
+    res.json({});
+  } catch (err) {
+    next(err);
+  }
+});
+
+/**
+ * @swagger
+ * /api/v1/{{resource_path}}/{id}:
+ *   put:
+ *     tags:
+ *       - {{TAG}}
+ *     summary: Actualiza un {{resource}} completo
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Create{{Resource}}Request'
+ *     responses:
+ *       200:
+ *         description: Actualizado exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/{{Resource}}'
+ *       404:
+ *         description: No encontrado
+ */
+router.put('/:id', /* authenticate, */ async (req, res, next) => {
+  try {
+    res.json({});
+  } catch (err) {
+    next(err);
+  }
+});
+
+/**
+ * @swagger
+ * /api/v1/{{resource_path}}/{id}:
+ *   delete:
+ *     tags:
+ *       - {{TAG}}
+ *     summary: Elimina un {{resource}}
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       204:
+ *         description: Eliminado exitosamente
+ *       404:
+ *         description: No encontrado
+ */
+router.delete('/:id', /* authenticate, */ async (req, res, next) => {
+  try {
+    res.status(204).send();
+  } catch (err) {
+    next(err);
+  }
+});
+
+module.exports = router;

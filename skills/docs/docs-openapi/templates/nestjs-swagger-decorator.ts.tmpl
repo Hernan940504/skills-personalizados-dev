@@ -1,0 +1,105 @@
+// Ejemplo de controlador NestJS completamente anotado para Swagger
+// Reemplazar {{Resource}}, {{resource}}, {{TAG}} con los valores reales
+
+import {
+  Controller, Get, Post, Put, Delete, Param, Body,
+  HttpCode, HttpStatus, ParseIntPipe,
+} from '@nestjs/common';
+import {
+  ApiTags, ApiOperation, ApiParam, ApiBody,
+  ApiResponse, ApiBearerAuth, ApiQuery,
+} from '@nestjs/swagger';
+import { Create{{Resource}}Dto } from './dto/create-{{resource}}.dto';
+import { Update{{Resource}}Dto } from './dto/update-{{resource}}.dto';
+import { {{Resource}}ResponseDto } from './dto/{{resource}}-response.dto';
+import { {{Resource}}Service } from './{{resource}}.service';
+
+@ApiTags('{{TAG}}')
+@ApiBearerAuth('access-token')           // hace referencia al nombre en DocumentBuilder
+@Controller('{{resource_path}}')
+export class {{Resource}}Controller {
+  constructor(private readonly {{resourceCamel}}Service: {{Resource}}Service) {}
+
+  // ─── GET LIST ─────────────────────────────────────────────────────────────
+
+  @Get()
+  @ApiOperation({
+    summary: 'Lista todos los {{resource_plural}}',
+    description: 'Retorna una lista paginada. Soporta page y limit como query params.',
+  })
+  @ApiQuery({ name: 'page', required: false, type: Number, description: 'Número de página (base 1)', example: 1 })
+  @ApiQuery({ name: 'limit', required: false, type: Number, description: 'Items por página', example: 20 })
+  @ApiResponse({ status: 200, description: 'Lista obtenida exitosamente', type: [{{Resource}}ResponseDto] })
+  @ApiResponse({ status: 401, description: 'No autenticado' })
+  findAll() {
+    return this.{{resourceCamel}}Service.findAll();
+  }
+
+  // ─── GET BY ID ────────────────────────────────────────────────────────────
+
+  @Get(':id')
+  @ApiOperation({ summary: 'Obtiene un {{resource}} por ID' })
+  @ApiParam({ name: 'id', description: 'ID del {{resource}}', type: Number, example: 1 })
+  @ApiResponse({ status: 200, description: 'Recurso encontrado', type: {{Resource}}ResponseDto })
+  @ApiResponse({ status: 404, description: 'No encontrado' })
+  findOne(@Param('id', ParseIntPipe) id: number) {
+    return this.{{resourceCamel}}Service.findOne(id);
+  }
+
+  // ─── POST ─────────────────────────────────────────────────────────────────
+
+  @Post()
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Crea un nuevo {{resource}}' })
+  @ApiBody({ type: Create{{Resource}}Dto, description: 'Datos del nuevo {{resource}}' })
+  @ApiResponse({ status: 201, description: 'Creado exitosamente', type: {{Resource}}ResponseDto })
+  @ApiResponse({ status: 400, description: 'Datos inválidos' })
+  @ApiResponse({ status: 422, description: 'Error de validación' })
+  create(@Body() createDto: Create{{Resource}}Dto) {
+    return this.{{resourceCamel}}Service.create(createDto);
+  }
+
+  // ─── PUT ──────────────────────────────────────────────────────────────────
+
+  @Put(':id')
+  @ApiOperation({ summary: 'Actualiza un {{resource}} completo' })
+  @ApiParam({ name: 'id', description: 'ID del {{resource}}', type: Number })
+  @ApiBody({ type: Update{{Resource}}Dto })
+  @ApiResponse({ status: 200, description: 'Actualizado exitosamente', type: {{Resource}}ResponseDto })
+  @ApiResponse({ status: 404, description: 'No encontrado' })
+  update(@Param('id', ParseIntPipe) id: number, @Body() updateDto: Update{{Resource}}Dto) {
+    return this.{{resourceCamel}}Service.update(id, updateDto);
+  }
+
+  // ─── DELETE ───────────────────────────────────────────────────────────────
+
+  @Delete(':id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: 'Elimina un {{resource}}' })
+  @ApiParam({ name: 'id', description: 'ID del {{resource}}', type: Number })
+  @ApiResponse({ status: 204, description: 'Eliminado exitosamente' })
+  @ApiResponse({ status: 404, description: 'No encontrado' })
+  remove(@Param('id', ParseIntPipe) id: number) {
+    return this.{{resourceCamel}}Service.remove(id);
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// DTO con @ApiProperty — pegar en dto/create-{{resource}}.dto.ts
+// ─────────────────────────────────────────────────────────────────────────────
+/*
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsString, IsEmail, IsOptional, MinLength } from 'class-validator';
+
+export class Create{{Resource}}Dto {
+  @ApiProperty({ description: '{{field_description}}', example: '{{example_value}}' })
+  @IsString()
+  @MinLength(1)
+  {{fieldName}}: string;
+
+  @ApiPropertyOptional({ description: '{{optional_field_description}}', example: '{{optional_example}}' })
+  @IsOptional()
+  @IsString()
+  {{optionalField}}?: string;
+}
+*/

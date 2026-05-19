@@ -1,0 +1,61 @@
+// src/main.ts — configuración de SwaggerModule para NestJS
+// Añadir estas importaciones y llamadas a la función bootstrap existente
+
+import { NestFactory } from '@nestjs/core';
+import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import { ValidationPipe } from '@nestjs/common';
+import { AppModule } from './app.module';
+
+async function bootstrap() {
+  const app = await NestFactory.create(AppModule);
+
+  // Global prefix (ajustar si el proyecto ya lo tiene)
+  app.setGlobalPrefix('api/v1');
+
+  // Pipes de validación (recomendado para que los errores 400 sean descriptivos)
+  app.useGlobalPipes(new ValidationPipe({
+    whitelist: true,
+    forbidNonWhitelisted: true,
+    transform: true,
+  }));
+
+  // ── Swagger ──────────────────────────────────────────────────────────────
+  const swaggerConfig = new DocumentBuilder()
+    .setTitle('{{API_TITLE}}')
+    .setDescription('{{API_DESCRIPTION}}')
+    .setVersion('{{API_VERSION}}')
+    .addBearerAuth(
+      {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+        description: 'Token JWT. Obtenerlo en POST /api/v1/auth/login',
+      },
+      'access-token',  // nombre del esquema — referenciar con @ApiBearerAuth('access-token')
+    )
+    .addServer('http://localhost:{{PORT}}', 'Desarrollo local')
+    .addServer('https://{{STAGING_URL}}', 'Staging')
+    .setContact('{{CONTACT_NAME}}', '', '{{CONTACT_EMAIL}}')
+    .build();
+
+  const document = SwaggerModule.createDocument(app, swaggerConfig);
+
+  SwaggerModule.setup('api-docs', app, document, {
+    swaggerOptions: {
+      persistAuthorization: true,          // mantiene el token al refrescar la página
+      tagsSorter: 'alpha',                  // ordena los tags alfabéticamente
+      operationsSorter: 'method',           // ordena operaciones por método HTTP
+      defaultModelsExpandDepth: 2,
+      defaultModelExpandDepth: 2,
+    },
+    customSiteTitle: '{{API_TITLE}} — Swagger UI',
+  });
+
+  // Acceso a la spec en JSON: GET /api-docs-json
+  // Acceso a la spec en YAML: GET /api-docs-yaml
+
+  await app.listen({{PORT}});
+  console.log(`Swagger UI disponible en: http://localhost:{{PORT}}/api-docs`);
+}
+
+bootstrap();

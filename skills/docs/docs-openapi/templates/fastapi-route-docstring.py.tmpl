@@ -1,0 +1,158 @@
+# Plantilla de router FastAPI completamente documentado
+# Copiar y adaptar para cada módulo de la API
+
+from typing import Optional
+from fastapi import APIRouter, Path, Query, Body, HTTPException, status
+from pydantic import BaseModel, Field
+
+router = APIRouter(prefix="/{{resource_path}}", tags=["{{TAG}}"])
+
+
+# ─── Schemas ──────────────────────────────────────────────────────────────────
+
+class {{Resource}}Base(BaseModel):
+    """Campos base compartidos entre request y response."""
+    {{field_name}}: str = Field(
+        ...,
+        min_length=1,
+        max_length=255,
+        description="{{field_description}}",
+        example="{{field_example}}",
+    )
+    {{optional_field}}: Optional[str] = Field(
+        None,
+        description="{{optional_field_description}}",
+        example="{{optional_example}}",
+    )
+
+
+class Create{{Resource}}Request({{Resource}}Base):
+    """Body para crear un nuevo {{resource}}."""
+    pass
+
+
+class Update{{Resource}}Request(BaseModel):
+    """Body para actualizar (todos los campos opcionales para PATCH)."""
+    {{field_name}}: Optional[str] = Field(None, description="{{field_description}}")
+    {{optional_field}}: Optional[str] = Field(None, description="{{optional_field_description}}")
+
+
+class {{Resource}}Response({{Resource}}Base):
+    """Response completo del recurso."""
+    id: int = Field(..., description="Identificador único", example=1)
+
+    class Config:
+        from_attributes = True  # Pydantic v2 (era orm_mode en v1)
+
+
+class PaginatedResponse(BaseModel):
+    data: list[{{Resource}}Response]
+    total: int = Field(..., description="Total de registros", example=150)
+    page: int = Field(..., description="Página actual", example=1)
+    size: int = Field(..., description="Tamaño de página", example=20)
+
+
+# ─── Endpoints ────────────────────────────────────────────────────────────────
+
+@router.get(
+    "/",
+    response_model=PaginatedResponse,
+    summary="Lista todos los {{resource_plural}}",
+    status_code=status.HTTP_200_OK,
+)
+async def list_{{resource_snake}}(
+    page: int = Query(1, ge=1, description="Número de página (base 1)"),
+    size: int = Query(20, ge=1, le=100, description="Items por página"),
+):
+    """
+    Retorna una lista paginada de **{{resource_plural}}**.
+
+    - **page**: número de página, base 1
+    - **size**: cantidad de items por página (máximo 100)
+    """
+    # Implementación
+    return PaginatedResponse(data=[], total=0, page=page, size=size)
+
+
+@router.get(
+    "/{id}",
+    response_model={{Resource}}Response,
+    summary="Obtiene un {{resource}} por ID",
+    responses={
+        404: {"description": "Recurso no encontrado"},
+    },
+)
+async def get_{{resource_snake}}(
+    id: int = Path(..., gt=0, description="ID del {{resource}}", example=1),
+):
+    """
+    Busca y retorna un **{{resource}}** por su ID único.
+
+    Lanza `404` si el recurso no existe.
+    """
+    # Implementación
+    raise HTTPException(status_code=404, detail="{{Resource}} no encontrado")
+
+
+@router.post(
+    "/",
+    response_model={{Resource}}Response,
+    status_code=status.HTTP_201_CREATED,
+    summary="Crea un nuevo {{resource}}",
+    responses={
+        400: {"description": "Datos inválidos"},
+        422: {"description": "Error de validación"},
+    },
+)
+async def create_{{resource_snake}}(
+    data: Create{{Resource}}Request = Body(..., description="Datos del nuevo {{resource}}"),
+):
+    """
+    Crea un nuevo **{{resource}}** con los datos proporcionados.
+
+    - Valida que todos los campos obligatorios estén presentes.
+    - Retorna el recurso creado con su ID asignado.
+    """
+    # Implementación
+    return {{Resource}}Response(id=1, **data.model_dump())
+
+
+@router.put(
+    "/{id}",
+    response_model={{Resource}}Response,
+    summary="Actualiza un {{resource}} completo",
+    responses={
+        404: {"description": "Recurso no encontrado"},
+    },
+)
+async def update_{{resource_snake}}(
+    id: int = Path(..., gt=0, description="ID del {{resource}}"),
+    data: Create{{Resource}}Request = Body(...),
+):
+    """
+    Reemplaza todos los campos de un **{{resource}}** existente.
+
+    Para actualización parcial usar `PATCH /{id}`.
+    """
+    # Implementación
+    return {{Resource}}Response(id=id, **data.model_dump())
+
+
+@router.delete(
+    "/{id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    summary="Elimina un {{resource}}",
+    responses={
+        404: {"description": "Recurso no encontrado"},
+    },
+)
+async def delete_{{resource_snake}}(
+    id: int = Path(..., gt=0, description="ID del {{resource}}"),
+):
+    """
+    Elimina permanentemente un **{{resource}}** por su ID.
+
+    No retorna contenido (`204 No Content`).
+    """
+    # Implementación
+    pass
