@@ -94,6 +94,7 @@ Con `--mode=link` editas en el repo y los cambios se reflejan al instante.
 | `devops-kubernetes` | K8s | ⏳ | Manifests, Helm charts básicos, sondas y recursos |
 | `devops-terraform` | Terraform | ⏳ | Módulos reutilizables, state remoto, naming consistente |
 | `devops-cicd-gha` | GitHub Actions | ⏳ | Workflows reutilizables, matrix builds, caching |
+| `cloud-well-architected-review` | AWS + GCP | ✅ | Assessment de arquitectura cloud contra Well-Architected, riesgos, tradeoffs y plan de acción |
 
 ### Testing
 
