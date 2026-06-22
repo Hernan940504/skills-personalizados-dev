@@ -1,0 +1,44 @@
+{
+  "diagramType": "Architecture",
+  "title": "Data center corporativo — ERP",
+  "elements": [
+    { "id": "users", "type": "users", "name": "Empleados" },
+    { "id": "internet", "type": "internet", "name": "Internet" },
+    { "id": "fw", "type": "firewall", "name": "Perimeter Firewall", "technology": "Palo Alto PA-3260", "description": "Filtra tráfico entrante.", "parent": "dmz" },
+    { "id": "lb", "type": "load_balancer", "name": "Load Balancer", "technology": "F5 Big-IP", "description": "Balancea entre web servers.", "parent": "dmz" },
+    { "id": "proxy", "type": "proxy", "name": "Reverse Proxy", "technology": "nginx 1.27", "description": "Termina TLS y enruta.", "parent": "dmz" },
+
+    { "id": "web1", "type": "web_server", "name": "Web Server 1", "technology": "Apache HTTPD", "description": "Sirve estáticos.", "parent": "intweb" },
+    { "id": "web2", "type": "web_server", "name": "Web Server 2", "technology": "Apache HTTPD", "description": "Sirve estáticos.", "parent": "intweb" },
+    { "id": "app1", "type": "application_server", "name": "App Server 1", "technology": "Tomcat 10", "description": "Lógica de negocio ERP.", "parent": "intapp" },
+    { "id": "app2", "type": "application_server", "name": "App Server 2", "technology": "Tomcat 10", "description": "Lógica de negocio ERP.", "parent": "intapp" },
+
+    { "id": "db1", "type": "database", "name": "ERP DB Primary", "technology": "Oracle 19c", "description": "Base de datos transaccional.", "parent": "intdata" },
+    { "id": "db2", "type": "database", "name": "ERP DB Standby", "technology": "Oracle 19c (Data Guard)", "description": "Réplica para HA.", "parent": "intdata" },
+    { "id": "nas", "type": "nas", "name": "NAS Documentos", "technology": "NetApp", "description": "Archivos compartidos.", "parent": "intdata" },
+    { "id": "backup", "type": "backup", "name": "Backup", "technology": "Veeam", "description": "Backups nocturnos.", "parent": "intdata" }
+  ],
+  "groups": [
+    { "id": "dc", "type": "data_center", "name": "DC Corporativo — Bogotá" },
+    { "id": "dmz", "type": "dmz", "name": "DMZ", "parent": "dc" },
+    { "id": "intnet", "type": "internal_network", "name": "Red Interna", "parent": "dc" },
+    { "id": "intweb", "type": "vlan", "name": "VLAN Web (10.1.0.0/24)", "parent": "intnet" },
+    { "id": "intapp", "type": "vlan", "name": "VLAN App (10.2.0.0/24)", "parent": "intnet" },
+    { "id": "intdata", "type": "vlan", "name": "VLAN Data (10.3.0.0/24)", "parent": "intnet" }
+  ],
+  "relationships": [
+    { "source": "users", "target": "internet", "description": "Navegan" },
+    { "source": "internet", "target": "fw", "description": "Tráfico HTTPS" },
+    { "source": "fw", "target": "lb", "description": "Pasa filtrado" },
+    { "source": "lb", "target": "proxy", "description": "Balancea TLS" },
+    { "source": "proxy", "target": "web1", "description": "Reenvía", "technology": "HTTP" },
+    { "source": "proxy", "target": "web2", "description": "Reenvía", "technology": "HTTP" },
+    { "source": "web1", "target": "app1", "description": "Llama", "technology": "AJP" },
+    { "source": "web2", "target": "app2", "description": "Llama", "technology": "AJP" },
+    { "source": "app1", "target": "db1", "description": "Lee/escribe", "technology": "JDBC" },
+    { "source": "app2", "target": "db1", "description": "Lee/escribe", "technology": "JDBC" },
+    { "source": "app1", "target": "nas", "description": "Lee/escribe", "technology": "NFS" },
+    { "source": "db1", "target": "db2", "description": "Replica", "technology": "Data Guard", "async": true },
+    { "source": "db1", "target": "backup", "description": "Backup nocturno", "technology": "RMAN", "async": true }
+  ]
+}

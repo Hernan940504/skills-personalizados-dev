@@ -1,0 +1,94 @@
+{
+  "diagramType": "Container",
+  "title": "Contenedores — Sistema de Banca por Internet",
+  "scopeBoundary": "Sistema de Banca por Internet",
+  "elements": [
+    {
+      "id": "customer",
+      "type": "person",
+      "name": "Cliente de Banca Personal",
+      "description": "Opera sus cuentas, transferencias y pagos."
+    },
+    {
+      "id": "spa",
+      "type": "container",
+      "name": "Aplicación Web (SPA)",
+      "technology": "TypeScript, Angular 17",
+      "description": "Provee la funcionalidad de banca en el navegador.",
+      "scope": true
+    },
+    {
+      "id": "mobile",
+      "type": "container",
+      "name": "App Móvil",
+      "technology": "Kotlin / Swift",
+      "description": "Acceso a la banca desde dispositivos móviles.",
+      "scope": true
+    },
+    {
+      "id": "api",
+      "type": "container",
+      "name": "API REST",
+      "technology": "Java 21, Spring Boot 3",
+      "description": "Expone la lógica de negocio a la SPA y a la app móvil.",
+      "scope": true
+    },
+    {
+      "id": "queue",
+      "type": "queue",
+      "name": "Cola de Transacciones",
+      "technology": "RabbitMQ 3.13",
+      "description": "Encola transacciones que requieren validación con el mainframe.",
+      "scope": true
+    },
+    {
+      "id": "worker",
+      "type": "container",
+      "name": "Worker de Transacciones",
+      "technology": "Java 21, Spring Boot 3",
+      "description": "Procesa transacciones encoladas y las concilia con el mainframe.",
+      "scope": true
+    },
+    {
+      "id": "db",
+      "type": "database",
+      "name": "BD Operacional",
+      "technology": "PostgreSQL 16",
+      "description": "Almacena usuarios, sesiones y estados de transacciones.",
+      "scope": true
+    },
+    {
+      "id": "mainframe",
+      "type": "system",
+      "name": "Sistema Mainframe de Banca",
+      "description": "Almacena la información core de cuentas y movimientos.",
+      "external": true
+    },
+    {
+      "id": "email",
+      "type": "system",
+      "name": "Sistema de Correo (SendGrid)",
+      "description": "Envía notificaciones a los clientes.",
+      "external": true
+    },
+    {
+      "id": "pasarela",
+      "type": "system",
+      "name": "Pasarela de Pagos",
+      "description": "Liquida pagos externos con tarjeta.",
+      "external": true
+    }
+  ],
+  "relationships": [
+    { "source": "customer", "target": "spa", "description": "Usa", "technology": "HTTPS" },
+    { "source": "customer", "target": "mobile", "description": "Usa", "technology": "HTTPS" },
+    { "source": "spa", "target": "api", "description": "Hace llamadas", "technology": "JSON/HTTPS" },
+    { "source": "mobile", "target": "api", "description": "Hace llamadas", "technology": "JSON/HTTPS" },
+    { "source": "api", "target": "db", "description": "Lee/escribe", "technology": "JDBC" },
+    { "source": "api", "target": "queue", "description": "Publica transacciones", "technology": "AMQP", "async": true },
+    { "source": "worker", "target": "queue", "description": "Consume transacciones", "technology": "AMQP", "async": true },
+    { "source": "worker", "target": "mainframe", "description": "Concilia movimientos", "technology": "XML/HTTPS" },
+    { "source": "api", "target": "email", "description": "Envía notificaciones", "technology": "SMTP", "async": true },
+    { "source": "api", "target": "pasarela", "description": "Liquida pagos", "technology": "HTTPS/REST" }
+  ]
+}

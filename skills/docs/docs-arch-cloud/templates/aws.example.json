@@ -1,0 +1,47 @@
+{
+  "diagramType": "Cloud",
+  "title": "API serverless AWS multi-AZ",
+  "elements": [
+    { "id": "users", "type": "users", "name": "Clientes Web" },
+    { "id": "r53", "type": "route_53", "name": "Route 53", "description": "DNS público." },
+    { "id": "cf", "type": "cloudfront", "name": "CloudFront", "description": "CDN global." },
+    { "id": "alb", "type": "alb", "name": "ALB", "description": "Balanceador de aplicación.", "parent": "publicA" },
+    { "id": "apigw", "type": "api_gateway", "name": "API Gateway", "description": "API REST regional.", "parent": "publicA" },
+
+    { "id": "lambda1", "type": "lambda", "name": "Get Orders", "technology": "Python 3.12", "description": "Lee pedidos.", "parent": "privateA" },
+    { "id": "lambda2", "type": "lambda", "name": "Create Order", "technology": "Python 3.12", "description": "Crea pedidos.", "parent": "privateB" },
+
+    { "id": "ddb", "type": "dynamodb", "name": "Orders Table", "description": "Tabla principal de pedidos.", "parent": "vpc" },
+    { "id": "s3", "type": "s3", "name": "Order Documents", "description": "Documentos adjuntos.", "parent": "vpc" },
+    { "id": "sqs", "type": "sqs", "name": "Order Events", "description": "Cola asíncrona para procesamiento.", "parent": "vpc" },
+    { "id": "worker", "type": "lambda", "name": "Order Worker", "technology": "Python 3.12", "description": "Procesa eventos de pedidos.", "parent": "privateB" },
+
+    { "id": "cw", "type": "cloudwatch", "name": "CloudWatch", "description": "Métricas y logs.", "parent": "region" },
+    { "id": "iam", "type": "iam", "name": "IAM", "description": "Identidad y permisos.", "parent": "account" }
+  ],
+  "groups": [
+    { "id": "account", "type": "account", "name": "AWS Account: production" },
+    { "id": "region", "type": "region", "name": "us-east-1", "parent": "account" },
+    { "id": "vpc", "type": "vpc", "name": "VPC 10.0.0.0/16", "parent": "region" },
+    { "id": "azA", "type": "availability_zone", "name": "us-east-1a", "parent": "vpc" },
+    { "id": "azB", "type": "availability_zone", "name": "us-east-1b", "parent": "vpc" },
+    { "id": "publicA", "type": "public_subnet", "name": "public-1a (10.0.1.0/24)", "parent": "azA" },
+    { "id": "privateA", "type": "private_subnet", "name": "private-1a (10.0.10.0/24)", "parent": "azA" },
+    { "id": "privateB", "type": "private_subnet", "name": "private-1b (10.0.11.0/24)", "parent": "azB" }
+  ],
+  "relationships": [
+    { "source": "users", "target": "r53", "description": "Resuelve DNS" },
+    { "source": "r53", "target": "cf", "description": "Apunta a" },
+    { "source": "cf", "target": "alb", "description": "Reenvía estáticos miss", "technology": "HTTPS" },
+    { "source": "cf", "target": "apigw", "description": "Reenvía API", "technology": "HTTPS" },
+    { "source": "alb", "target": "lambda1", "description": "Invoca", "technology": "Lambda invoke" },
+    { "source": "apigw", "target": "lambda1", "description": "Invoca GET", "technology": "Lambda invoke" },
+    { "source": "apigw", "target": "lambda2", "description": "Invoca POST", "technology": "Lambda invoke" },
+    { "source": "lambda1", "target": "ddb", "description": "Lee", "technology": "DynamoDB SDK" },
+    { "source": "lambda2", "target": "ddb", "description": "Escribe", "technology": "DynamoDB SDK" },
+    { "source": "lambda2", "target": "s3", "description": "Sube documento", "technology": "S3 SDK" },
+    { "source": "lambda2", "target": "sqs", "description": "Encola evento", "technology": "SQS SDK", "async": true },
+    { "source": "worker", "target": "sqs", "description": "Consume", "technology": "SQS SDK", "async": true },
+    { "source": "worker", "target": "ddb", "description": "Actualiza estado", "technology": "DynamoDB SDK" }
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "diagramType": "Cloud",
+  "title": "Pipeline de datos GCP",
+  "elements": [
+    { "id": "users", "type": "users", "name": "Apps Cliente" },
+    { "id": "lb", "type": "cloud_load_balancing", "name": "External HTTPS LB", "description": "Punto de entrada global.", "parent": "project" },
+    { "id": "armor", "type": "cloud_armor", "name": "Cloud Armor", "description": "WAF y políticas de seguridad.", "parent": "project" },
+    { "id": "run", "type": "cloud_run", "name": "Ingest API", "technology": "Go 1.22", "description": "Recibe eventos de los clientes.", "parent": "subnet-a" },
+    { "id": "ps", "type": "pubsub", "name": "events-topic", "description": "Topic de eventos crudos.", "parent": "project" },
+    { "id": "df", "type": "dataflow", "name": "ETL Stream", "description": "Limpieza y enriquecimiento en streaming.", "parent": "subnet-a" },
+    { "id": "bq", "type": "bigquery", "name": "analytics", "description": "Data warehouse analítico.", "parent": "project" },
+    { "id": "looker", "type": "ai_platform", "name": "Vertex AI", "description": "Modelos sobre el dataset.", "parent": "project" },
+    { "id": "gcs", "type": "cloud_storage", "name": "raw-events bucket", "description": "Backup de eventos crudos.", "parent": "project" },
+    { "id": "monitor", "type": "cloud_monitoring", "name": "Cloud Monitoring", "description": "Métricas y alertas.", "parent": "project" },
+    { "id": "logs", "type": "cloud_logging", "name": "Cloud Logging", "description": "Logs centralizados.", "parent": "project" },
+    { "id": "iam", "type": "iam", "name": "IAM", "description": "Identidad y permisos.", "parent": "project" }
+  ],
+  "groups": [
+    { "id": "project", "type": "project", "name": "data-platform-prod" },
+    { "id": "region", "type": "region", "name": "us-central1", "parent": "project" },
+    { "id": "zone-a", "type": "zone", "name": "us-central1-a", "parent": "region" },
+    { "id": "vpc", "type": "vpc", "name": "vpc-data", "parent": "region" },
+    { "id": "subnet-a", "type": "subnet", "name": "subnet-private (10.0.0.0/24)", "parent": "vpc" }
+  ],
+  "relationships": [
+    { "source": "users", "target": "lb", "description": "Solicita", "technology": "HTTPS" },
+    { "source": "lb", "target": "armor", "description": "Filtra" },
+    { "source": "armor", "target": "run", "description": "Reenvía", "technology": "HTTPS" },
+    { "source": "run", "target": "ps", "description": "Publica eventos", "technology": "gRPC", "async": true },
+    { "source": "ps", "target": "df", "description": "Stream subscription", "async": true },
+    { "source": "ps", "target": "gcs", "description": "Backup", "async": true },
+    { "source": "df", "target": "bq", "description": "Escribe", "technology": "Storage Write API" },
+    { "source": "bq", "target": "looker", "description": "Alimenta modelos" }
+  ]
+}

@@ -2,7 +2,7 @@
 name: aws-sso-refresh
 description: Refresca credenciales temporales de AWS SSO (Soluciones Bolívar Identity Center) para cualquier perfil configurado en ~/.aws/credentials. Úsalo cuando el usuario diga que sus credenciales de AWS expiraron, necesite autenticarse a una cuenta AWS, quiera refrescar un perfil específico o pida ejecutar aws-refresh.
 version: 1.0.0
-author: HernanBetancurBolivar01
+author: Hernan940504
 category: devops
 tags: [aws, sso, credentials, iam, identity-center, autenticacion]
 compatibility: [claude-code]

@@ -1,0 +1,55 @@
+{
+  "diagramType": "Context",
+  "title": "Contexto — Sistema de Banca por Internet",
+  "scopeBoundary": "Sistema de Banca por Internet",
+  "elements": [
+    {
+      "id": "customer",
+      "type": "person",
+      "name": "Cliente de Banca Personal",
+      "description": "Cliente del banco que opera sus cuentas, transferencias y pagos en línea."
+    },
+    {
+      "id": "soporte",
+      "type": "person",
+      "name": "Personal de Soporte",
+      "description": "Atiende incidencias y consultas de los clientes.",
+      "external": false
+    },
+    {
+      "id": "banca",
+      "type": "system",
+      "name": "Sistema de Banca por Internet",
+      "description": "Permite a los clientes consultar saldos, hacer transferencias y pagar servicios.",
+      "scope": true
+    },
+    {
+      "id": "mainframe",
+      "type": "system",
+      "name": "Sistema Mainframe de Banca",
+      "description": "Almacena la información de cuentas y transacciones del banco.",
+      "external": true
+    },
+    {
+      "id": "email",
+      "type": "system",
+      "name": "Sistema de Correo",
+      "description": "Envía notificaciones por email a los clientes.",
+      "external": true
+    },
+    {
+      "id": "pasarela",
+      "type": "system",
+      "name": "Pasarela de Pagos",
+      "description": "Procesa cobros y transferencias con entidades externas.",
+      "external": true
+    }
+  ],
+  "relationships": [
+    { "source": "customer", "target": "banca", "description": "Consulta cuentas y opera transferencias" },
+    { "source": "soporte", "target": "banca", "description": "Gestiona casos de clientes" },
+    { "source": "banca", "target": "mainframe", "description": "Consulta y registra movimientos" },
+    { "source": "banca", "target": "email", "description": "Envía notificaciones al cliente" },
+    { "source": "banca", "target": "pasarela", "description": "Liquida pagos externos" }
+  ]
+}

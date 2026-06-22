@@ -1,0 +1,88 @@
+{
+  "diagramType": "Component",
+  "title": "Componentes — API de Pedidos",
+  "scopeBoundary": "API de Pedidos",
+  "elements": [
+    {
+      "id": "order-ctrl",
+      "type": "component",
+      "name": "OrderController",
+      "technology": "Spring MVC",
+      "description": "Expone endpoints REST de pedidos (CRUD y consultas).",
+      "scope": true
+    },
+    {
+      "id": "auth-int",
+      "type": "component",
+      "name": "AuthInterceptor",
+      "technology": "Spring Security",
+      "description": "Valida JWT y resuelve el usuario en cada request.",
+      "scope": true
+    },
+    {
+      "id": "order-svc",
+      "type": "component",
+      "name": "OrderService",
+      "technology": "Java 21",
+      "description": "Orquesta la creación, consulta y cancelación de pedidos.",
+      "scope": true
+    },
+    {
+      "id": "order-repo",
+      "type": "component",
+      "name": "OrderRepository",
+      "technology": "Spring Data JPA",
+      "description": "Persiste y recupera pedidos en la BD operacional.",
+      "scope": true
+    },
+    {
+      "id": "pay-gw",
+      "type": "component",
+      "name": "PaymentGateway",
+      "technology": "WebClient",
+      "description": "Cliente HTTP hacia la pasarela de pagos.",
+      "scope": true
+    },
+    {
+      "id": "evt-pub",
+      "type": "component",
+      "name": "OrderEventPublisher",
+      "technology": "Spring Kafka",
+      "description": "Publica eventos de cambio de estado de pedido.",
+      "scope": true
+    },
+    {
+      "id": "db",
+      "type": "database",
+      "name": "BD de Pedidos",
+      "technology": "PostgreSQL 16",
+      "description": "Tablas de pedidos, ítems y eventos de estado.",
+      "external": true
+    },
+    {
+      "id": "queue",
+      "type": "queue",
+      "name": "Topic order-events",
+      "technology": "Kafka 3.6",
+      "description": "Eventos de pedidos consumidos por otros servicios.",
+      "external": true
+    },
+    {
+      "id": "pasarela",
+      "type": "system",
+      "name": "Pasarela de Pagos (Stripe)",
+      "description": "Procesa cobros con tarjeta.",
+      "external": true
+    }
+  ],
+  "relationships": [
+    { "source": "order-ctrl", "target": "auth-int", "description": "Pasa request por" },
+    { "source": "order-ctrl", "target": "order-svc", "description": "Invoca" },
+    { "source": "order-svc", "target": "order-repo", "description": "Persiste pedido" },
+    { "source": "order-svc", "target": "pay-gw", "description": "Solicita cobro" },
+    { "source": "order-svc", "target": "evt-pub", "description": "Publica evento" },
+    { "source": "order-repo", "target": "db", "description": "Lee/escribe", "technology": "JDBC" },
+    { "source": "pay-gw", "target": "pasarela", "description": "Cobra", "technology": "HTTPS/REST" },
+    { "source": "evt-pub", "target": "queue", "description": "Publica", "technology": "Kafka", "async": true }
+  ]
+}

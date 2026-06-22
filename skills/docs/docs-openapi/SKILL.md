@@ -7,7 +7,7 @@ description: Analiza controladores y handlers de API REST para generar especific
   tenga endpoints sin documentar, pida generar un openapi.yaml, quiera habilitar
   /docs o /swagger-ui, o necesite documentar entradas, salidas y códigos de respuesta.
 version: 0.1.0
-author: HernanBetancurBolivar01
+author: Hernan940504
 category: docs
 tags: [openapi, swagger, rest-api, spring-boot, nestjs, express, fastapi, gin, documentation]
 compatibility: [claude-code, cursor, kiro, opencode]

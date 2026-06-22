@@ -2,7 +2,7 @@
 name: cloud-well-architected-review
 description: Evalúa arquitecturas de aplicaciones cloud contra AWS Well-Architected y Google Cloud Well-Architected/Architecture Framework. Úsalo cuando el usuario pida revisar diseños AWS, GCP, híbridos o multicloud, detectar riesgos, tradeoffs, problemas de diseño, recomendaciones o planes de mejora.
 version: 0.2.0
-author: HernanBetancurBolivar01
+author: Hernan940504
 category: devops
 tags: [aws, gcp, well-architected, arquitectura-cloud, arquitectura-soluciones, seguridad, resiliencia, costos, performance]
 compatibility: [claude-code, cursor, kiro, opencode]
