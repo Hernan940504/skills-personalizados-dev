@@ -7,7 +7,7 @@ description: Genera el diagrama C4 de **Componentes (Nivel 3)** como archivo
   usuario pida "cómo funciona por dentro el servicio X", "componentes de
   la API", "C4 nivel 3", o un diagrama de módulos internos.
 version: 0.1.0
-author: HernanBetancurBolivar01
+author: Hernan940504
 category: docs
 tags: [c4-model, componentes, components, arquitectura-soluciones, drawio]
 compatibility: [claude-code, cursor, kiro, opencode]

@@ -8,7 +8,7 @@ description: Genera el diagrama C4 de **Contexto del Sistema (Nivel 1)** como
   Úsalo cuando el usuario pida "diagrama de contexto", "visión general",
   "cómo encaja el sistema en la organización", o un C4 nivel 1.
 version: 0.1.0
-author: HernanBetancurBolivar01
+author: Hernan940504
 category: docs
 tags: [c4-model, contexto, context, arquitectura-empresarial, drawio]
 compatibility: [claude-code, cursor, kiro, opencode]

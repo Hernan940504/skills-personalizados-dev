@@ -1,0 +1,37 @@
+name: release
+
+# Publica @hbetancur/skills-dev a npm al hacer push de un tag vX.Y.Z.
+# Requiere el secret NPM_TOKEN. El repo es privado por ahora: este workflow
+# solo corre si existe el tag, no se dispara solo.
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: 'https://registry.npmjs.org'
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Validar antes de publicar
+        run: |
+          python3 scripts/validate.py
+          node --test tests/
+
+      - name: Publicar a npm
+        run: npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

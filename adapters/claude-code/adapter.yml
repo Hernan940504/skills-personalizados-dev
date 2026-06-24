@@ -1,0 +1,20 @@
+# Adaptador Claude Code — NATIVO. No transforma; copia/symlinka la carpeta del skill.
+target: claude-code
+output:
+  # La carpeta completa del skill va al destino (no un solo archivo).
+  path: "~/.claude/skills/{{name}}/"
+  format: skill-dir          # carpeta nativa: SKILL.md + scripts/ + templates/ + references/
+
+# Claude Code consume SKILL.md tal cual: sin reescritura de frontmatter ni body.
+frontmatter: passthrough
+
+# Dependencia compartida _lib/: se empaqueta junto al skill (ver ARCHITECTURE §5.3b).
+shared_lib:
+  bundle: true
+  dest: "~/.claude/skills/_lib/"
+
+capabilities:
+  description_discovery: true
+  restrict_tools: true        # respeta allowed-tools
+  run_scripts: true
+  project_scope: true         # .claude/skills/<name>/ sobrescribe el global

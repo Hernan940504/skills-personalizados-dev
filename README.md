@@ -37,7 +37,12 @@ Este repo se construye sobre 4 principios:
 
 ## Instalación rápida
 
-### Opción A — usuario final (recomendada)
+> 🚧 **Estado:** el CLI npm `@hbetancur/skills-dev` está en construcción (Fase 3 del
+> roadmap). **Hoy, usa los scripts bash** (`scripts/install.sh`) descritos en la Opción B —
+> ya funcionan e instalan en Claude Code, incluyendo el motor compartido `_lib/`. La Opción A
+> documenta el destino una vez el CLI esté publicado.
+
+### Opción A — usuario final (cuando el CLI esté publicado)
 
 ```bash
 # Instalar un skill en Claude Code (default)
@@ -53,15 +58,21 @@ npx @hbetancur/skills-dev add --category devops
 npx @hbetancur/skills-dev add backend-java --target cursor
 ```
 
-### Opción B — desarrollo activo (clonando el repo)
+### Opción B — desarrollo activo (clonando el repo) ✅ disponible hoy
 
 ```bash
-git clone https://github.com/HernanBetancurBolivar01/skills-personalizados-dev.git
+git clone https://github.com/Hernan940504/skills-personalizados-dev.git
 cd skills-personalizados-dev
-./scripts/install.sh --mode=link    # symlinks a ~/.claude/skills/
+
+./scripts/install.sh docs-c4-context --mode=link   # un skill (symlink)
+./scripts/install.sh --category=docs --mode=copy   # una categoría (copia)
+./scripts/install.sh --all --mode=link             # todo el catálogo
+./scripts/validate.sh                              # lintea todos los SKILL.md
 ```
 
-Con `--mode=link` editas en el repo y los cambios se reflejan al instante.
+Con `--mode=link` editas en el repo y los cambios se reflejan al instante; el motor
+compartido `skills/_lib/` se resuelve vía el repo. Con `--mode=copy` el skill queda
+independiente y `_lib/` se vendoriza en `~/.claude/skills/_lib/`.
 
 ---
 
@@ -95,6 +106,7 @@ Con `--mode=link` editas en el repo y los cambios se reflejan al instante.
 | `devops-terraform` | Terraform | ⏳ | Módulos reutilizables, state remoto, naming consistente |
 | `devops-cicd-gha` | GitHub Actions | ⏳ | Workflows reutilizables, matrix builds, caching |
 | `cloud-well-architected-review` | AWS + GCP | ✅ | Assessment de arquitectura cloud contra Well-Architected, riesgos, tradeoffs y plan de acción |
+| `aws-sso-refresh` | AWS SSO | ✅ | Refresca credenciales temporales de AWS SSO por perfil (skill personal, solo `claude-code`) |
 
 ### Testing
 
@@ -114,8 +126,17 @@ Con `--mode=link` editas en el repo y los cambios se reflejan al instante.
 
 | Skill | Estado | Descripción corta |
 |---|---|---|
+| `docs-openapi` | ✅ | Genera OpenAPI 3.0 + Swagger UI para Spring/NestJS/Express/FastAPI/Gin |
+| `docs-c4-context` | ✅ | Diagrama C4 de Contexto (Nivel 1) como `.drawio` nativo |
+| `docs-c4-containers` | ✅ | Diagrama C4 de Contenedores (Nivel 2) como `.drawio` nativo |
+| `docs-c4-components` | ✅ | Diagrama C4 de Componentes (Nivel 3) como `.drawio` nativo |
+| `docs-arch-cloud` | ✅ | Diagramas de arquitectura con íconos AWS/GCP/On-Prem como `.drawio` |
 | `docs-adr` | ⏳ | Crea Architectural Decision Records bien estructurados |
 | `docs-readme` | ⏳ | Genera/actualiza README desde el estado real del repo |
+
+> Los skills `docs-c4-*` y `docs-arch-cloud` comparten el motor de render
+> [`skills/_lib/drawio/`](skills/_lib/drawio/) (flavors `c4`/`aws`/`gcp`/`onprem`).
+> Ver [Librería compartida `_lib/`](#librería-compartida-_lib) y `docs/ARCHITECTURE.md`.
 
 ### Workspace
 
@@ -130,6 +151,30 @@ Con `--mode=link` editas en el repo y los cambios se reflejan al instante.
 |---|---|---|
 | `files-pdf` | ⏳ | Lectura/extracción/manipulación de PDFs |
 | `files-csv` | ⏳ | Procesamiento de CSV grandes con streaming |
+
+---
+
+## Librería compartida `_lib/`
+
+Algunos skills relacionados comparten código en lugar de duplicarlo. El caso actual es
+[`skills/_lib/drawio/`](skills/_lib/drawio/): un motor que convierte un modelo JSON en un
+archivo `.drawio` nativo, con varios *flavors*:
+
+| Flavor | Usado por | Qué dibuja |
+|---|---|---|
+| `c4` | `docs-c4-context`, `docs-c4-containers`, `docs-c4-components` | Notación C4 (paleta Structurizr) |
+| `aws` | `docs-arch-cloud` | Íconos oficiales AWS (`mxgraph.aws4.*`) |
+| `gcp` | `docs-arch-cloud` | Íconos oficiales GCP (`mxgraph.gcp2.*`) |
+| `onprem` | `docs-arch-cloud` | Equipamiento on-premise |
+
+Cada skill llama al motor a través de su wrapper `scripts/generate.sh`. Al instalar:
+
+- **`--mode=link`** → el wrapper resuelve `_lib/` vía el repo (el symlink apunta al árbol real).
+- **`--mode=copy`** → `install.sh` vendoriza `_lib/` en `~/.claude/skills/_lib/` y reescribe
+  la ruta del wrapper en la copia, dejando el skill funcional de forma autónoma.
+
+> Excepción consciente al principio de "skill autocontenido": ver la justificación en
+> [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md#53b-excepción-librerías-compartidas-_lib).
 
 ---
 

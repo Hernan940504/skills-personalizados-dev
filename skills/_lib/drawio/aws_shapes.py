@@ -51,12 +51,12 @@ SERVICES: dict[str, tuple[str, str]] = {
     "batch":              ("mxgraph.aws4.batch", "compute"),
     "elastic_beanstalk":  ("mxgraph.aws4.elastic_beanstalk", "compute"),
     "fargate":            ("mxgraph.aws4.fargate", "containers"),
-    "ecs":                ("mxgraph.aws4.elastic_container_service", "containers"),
-    "eks":                ("mxgraph.aws4.elastic_kubernetes_service", "containers"),
-    "ecr":                ("mxgraph.aws4.elastic_container_registry", "containers"),
+    "ecs":                ("mxgraph.aws4.ecs", "containers"),
+    "eks":                ("mxgraph.aws4.eks", "containers"),
+    "ecr":                ("mxgraph.aws4.ecr", "containers"),
     "app_runner":         ("mxgraph.aws4.app_runner", "compute"),
     # Storage
-    "s3":                 ("mxgraph.aws4.simple_storage_service_s3", "storage"),
+    "s3":                 ("mxgraph.aws4.s3", "storage"),
     "ebs":                ("mxgraph.aws4.elastic_block_store", "storage"),
     "efs":                ("mxgraph.aws4.elastic_file_system", "storage"),
     "fsx":                ("mxgraph.aws4.fsx", "storage"),
@@ -85,11 +85,11 @@ SERVICES: dict[str, tuple[str, str]] = {
     "transit_gateway":    ("mxgraph.aws4.transit_gateway", "network"),
     "app_mesh":           ("mxgraph.aws4.app_mesh", "network"),
     # Security
-    "iam":                ("mxgraph.aws4.identity_and_access_management_iam", "security"),
+    "iam":                ("mxgraph.aws4.identity_and_access_management", "security"),
     "cognito":            ("mxgraph.aws4.cognito", "security"),
     "kms":                ("mxgraph.aws4.key_management_service", "security"),
     "secrets_manager":    ("mxgraph.aws4.secrets_manager", "security"),
-    "acm":                ("mxgraph.aws4.certificate_manager", "security"),
+    "acm":                ("mxgraph.aws4.certificate_manager_3", "security"),
     "waf":                ("mxgraph.aws4.waf", "security"),
     "shield":             ("mxgraph.aws4.shield", "security"),
     "guardduty":          ("mxgraph.aws4.guardduty", "security"),
@@ -104,8 +104,8 @@ SERVICES: dict[str, tuple[str, str]] = {
     "control_tower":      ("mxgraph.aws4.control_tower", "mgmt"),
     "trusted_advisor":    ("mxgraph.aws4.trusted_advisor", "mgmt"),
     # Application integration
-    "sqs":                ("mxgraph.aws4.simple_queue_service_sqs", "integration"),
-    "sns":                ("mxgraph.aws4.simple_notification_service_sns", "integration"),
+    "sqs":                ("mxgraph.aws4.sqs", "integration"),
+    "sns":                ("mxgraph.aws4.sns", "integration"),
     "eventbridge":        ("mxgraph.aws4.eventbridge", "integration"),
     "step_functions":     ("mxgraph.aws4.step_functions", "integration"),
     "mq":                 ("mxgraph.aws4.mq", "integration"),
@@ -187,6 +187,20 @@ class Catalog:
     @staticmethod
     def element_size() -> tuple[int, int]:
         return 78, 78
+
+    @staticmethod
+    def cell_size() -> tuple[int, int]:
+        # Celda de layout: icono 78 + ~100px de ancho para el label, y
+        # ~70px adicionales en alto para 2-3 líneas de label/stereotipo.
+        return 180, 150
+
+    @staticmethod
+    def brief_label() -> bool:
+        return True
+
+    @staticmethod
+    def label_width() -> int:
+        return 160
 
     @staticmethod
     def rank(el: dict) -> int:

@@ -111,13 +111,26 @@ def validate(model: dict, shape_catalog) -> None:
                 )
 
 
-def _vertex_label(name: str, stereotype: str, description: str | None) -> str:
+def _vertex_label(
+    name: str,
+    stereotype: str,
+    description: str | None,
+    *,
+    brief: bool = False,
+    max_width: int | None = None,
+) -> str:
     parts = [f"<b>{escape(name)}</b>"]
     if stereotype:
         parts.append(f'<font style="font-size:10px">{escape(stereotype)}</font>')
-    if description:
+    if description and not brief:
         parts.append(f'<font style="font-size:10px">{escape(description)}</font>')
-    return "<br>".join(parts)
+    inner = "<br>".join(parts)
+    if max_width:
+        return (
+            f'<div style="width:{max_width}px;text-align:center;'
+            f'word-wrap:break-word;white-space:normal;">{inner}</div>'
+        )
+    return inner
 
 
 def _edge_label(description: str, technology: str | None) -> str:
@@ -127,13 +140,65 @@ def _edge_label(description: str, technology: str | None) -> str:
     return desc
 
 
-def _edge_style(rel: dict) -> str:
+def _edge_style(
+    rel: dict,
+    src_pos: tuple | None = None,
+    tgt_pos: tuple | None = None,
+    src_offset_idx: int = 0,
+    tgt_offset_idx: int = 0,
+    src_total: int = 1,
+    tgt_total: int = 1,
+) -> str:
+    """Estilo del edge. Distribuye exit/entry en múltiples puntos del borde
+    cuando un nodo es origen/destino de varias flechas (fan-out / fan-in)
+    para que no se apilen en el mismo pixel."""
     dashed = "1" if rel.get("async") else "0"
-    return (
+    base = (
         "endArrow=block;endFill=1;html=1;fontSize=10;fontColor=#404040;"
         f"strokeColor=#707070;dashed={dashed};rounded=0;"
         "labelBackgroundColor=#FFFFFF;edgeStyle=orthogonalEdgeStyle;"
+        "jettySize=auto;"
     )
+    if src_pos is None or tgt_pos is None:
+        return base
+    sx, sy, sw, sh = src_pos
+    tx, ty, tw, th = tgt_pos
+    src_cx, src_cy = sx + sw / 2, sy + sh / 2
+    tgt_cx, tgt_cy = tx + tw / 2, ty + th / 2
+    dx, dy = tgt_cx - src_cx, tgt_cy - src_cy
+
+    # Distribuir puntos de exit/entry en el borde para fan-out/fan-in:
+    # con N flechas, los puntos van de 0.3 a 0.7 (un tercio central del borde)
+    # para que queden separados pero centrados.
+    def _spread(total: int, idx: int) -> float:
+        if total <= 1:
+            return 0.5
+        return 0.3 + (0.4 * idx / (total - 1))
+
+    src_spread = _spread(src_total, src_offset_idx)
+    tgt_spread = _spread(tgt_total, tgt_offset_idx)
+
+    if abs(dy) >= abs(dx):
+        if dy > 0:
+            exit_x, exit_y = src_spread, 1.0
+            entry_x, entry_y = tgt_spread, 0.0
+        else:
+            exit_x, exit_y = src_spread, 0.0
+            entry_x, entry_y = tgt_spread, 1.0
+    else:
+        if dx > 0:
+            exit_x, exit_y = 1.0, src_spread
+            entry_x, entry_y = 0.0, tgt_spread
+        else:
+            exit_x, exit_y = 0.0, src_spread
+            entry_x, entry_y = 1.0, tgt_spread
+    return (
+        base
+        + f"exitX={exit_x:.3f};exitY={exit_y:.3f};exitDx=0;exitDy=0;"
+        + f"entryX={entry_x:.3f};entryY={entry_y:.3f};entryDx=0;entryDy=0;"
+    )
+
+
 
 
 def _xml_attr(value: str) -> str:
@@ -192,45 +257,64 @@ def _layout_rank_based(model: dict, shape_catalog) -> tuple[dict, tuple | None, 
 def _layout_nested(model: dict, shape_catalog) -> dict[str, tuple]:
     """Layout para diagramas con grupos anidados (cloud).
 
-    Calcula tamaño de cada grupo en función de sus hijos, en grid simple.
-    Devuelve {id: (x, y, w, h)} en coordenadas absolutas; los grupos se emiten
-    como vertices con `container=1` y los hijos referencian al padre por id en
-    el atributo `parent` del mxCell. Las coordenadas de los hijos quedan
-    relativas al padre cuando hay anidamiento.
+    Distingue entre "celda de layout" (donde se posiciona el elemento incluyendo
+    espacio para su label externo) y "tamaño del ícono" (geometría real del
+    mxCell). El ícono se centra horizontalmente dentro de su celda y el label
+    fluye debajo dentro del ancho reservado.
+
+    Devuelve {id: (x, y, w, h)} en coordenadas absolutas; para elementos, (x,y)
+    es la esquina del ícono y (w,h) sus dimensiones. Para grupos, (x,y,w,h) es
+    el bounding box completo del contenedor.
     """
     elements = model.get("elements", [])
     groups = model.get("groups", []) or []
-    all_items = {it["id"]: it for it in elements + groups}
+    group_ids = {g["id"] for g in groups}
 
-    leaf_w = shape_catalog.element_size()
-    leaf_box_w, leaf_box_h = leaf_w
+    icon_w, icon_h = shape_catalog.element_size()
+    cell_w_attr = getattr(shape_catalog, "cell_size", None)
+    if cell_w_attr is not None:
+        cell_w, cell_h = cell_w_attr()
+        cell_w = max(cell_w, icon_w)
+        cell_h = max(cell_h, icon_h)
+    else:
+        cell_w, cell_h = icon_w, icon_h
+
+    def _cols_for(children: list[dict]) -> int:
+        """Si todos los hijos son grupos (estructura), apilar vertical (1 col).
+        Si son elementos hoja, usar grid sqrt(n) compacto."""
+        if not children:
+            return 1
+        all_groups = all(c["id"] in group_ids for c in children)
+        if all_groups:
+            return 1
+        n = len(children)
+        return max(1, int(n**0.5 + 0.999))
 
     def size_of(node_id: str | None) -> tuple[float, float]:
         children = _children_of(node_id, elements) + _children_of(node_id, groups)
         if not children:
-            return float(leaf_box_w), float(leaf_box_h)
+            return float(cell_w), float(cell_h)
         widths: list[float] = []
         heights: list[float] = []
         for ch in children:
-            if ch["id"] in {g["id"] for g in groups}:
+            if ch["id"] in group_ids:
                 cw, chh = size_of(ch["id"])
             else:
-                cw, chh = leaf_box_w, leaf_box_h
+                cw, chh = float(cell_w), float(cell_h)
             widths.append(cw)
             heights.append(chh)
-        # grid: ceil(sqrt(n)) columnas
+        cols = _cols_for(children)
         n = len(children)
-        cols = max(1, int(n**0.5 + 0.999))
         rows_n = (n + cols - 1) // cols
         max_w_per_col = max(widths)
-        max_h_per_row = max(heights)
+        if cols == 1:
+            # Stack vertical: sumar alturas reales (no padear al máximo).
+            total_h_inner = sum(heights) + (rows_n - 1) * V_GAP
+        else:
+            max_h_per_row = max(heights)
+            total_h_inner = rows_n * max_h_per_row + (rows_n - 1) * V_GAP
         total_w = cols * max_w_per_col + (cols - 1) * H_GAP + 2 * GROUP_PAD_SIDE
-        total_h = (
-            rows_n * max_h_per_row
-            + (rows_n - 1) * V_GAP
-            + GROUP_PAD_TOP
-            + GROUP_PAD_BOTTOM
-        )
+        total_h = total_h_inner + GROUP_PAD_TOP + GROUP_PAD_BOTTOM
         return total_w, total_h
 
     positions: dict[str, tuple[float, float, float, float]] = {}
@@ -239,55 +323,51 @@ def _layout_nested(model: dict, shape_catalog) -> dict[str, tuple]:
         children = _children_of(node_id, elements) + _children_of(node_id, groups)
         if not children:
             return
-        n = len(children)
-        cols = max(1, int(n**0.5 + 0.999))
+        cols = _cols_for(children)
         sizes = []
         for ch in children:
-            if ch["id"] in {g["id"] for g in groups}:
+            if ch["id"] in group_ids:
                 sizes.append(size_of(ch["id"]))
             else:
-                sizes.append((leaf_box_w, leaf_box_h))
+                sizes.append((float(cell_w), float(cell_h)))
         max_w = max(s[0] for s in sizes)
-        max_h = max(s[1] for s in sizes)
-        for i, ch in enumerate(children):
-            col = i % cols
-            row = i // cols
-            w, h = sizes[i]
-            # Anchor child within its cell (centered horizontally, top-aligned).
-            cell_x = origin_x + GROUP_PAD_SIDE + col * (max_w + H_GAP)
-            cell_y = origin_y + GROUP_PAD_TOP + row * (max_h + V_GAP)
-            cx = cell_x + (max_w - w) / 2
-            cy = cell_y
-            positions[ch["id"]] = (cx, cy, w, h)
-            if ch["id"] in {g["id"] for g in groups}:
-                place(ch["id"], cx, cy)
-
-    # Roots: items sin parent.
-    roots = _children_of(None, elements) + _children_of(None, groups)
-    # Placeable roots como un super-grupo virtual.
-    n = len(roots)
-    cols = max(1, int(n**0.5 + 0.999))
-    sizes = []
-    for ch in roots:
-        if ch["id"] in {g["id"] for g in groups}:
-            sizes.append(size_of(ch["id"]))
+        if cols == 1:
+            # Stack vertical: avanzar cursor_y por la altura real de cada hijo.
+            cursor_y = origin_y + GROUP_PAD_TOP
+            for ch, (w, h) in zip(children, sizes):
+                slot_x = origin_x + GROUP_PAD_SIDE
+                slot_y = cursor_y
+                if ch["id"] in group_ids:
+                    cx = slot_x + (max_w - w) / 2
+                    cy = slot_y
+                    positions[ch["id"]] = (cx, cy, w, h)
+                    place(ch["id"], cx, cy)
+                else:
+                    ix = slot_x + (max_w - icon_w) / 2
+                    iy = slot_y
+                    positions[ch["id"]] = (ix, iy, float(icon_w), float(icon_h))
+                cursor_y += h + V_GAP
         else:
-            sizes.append((leaf_box_w, leaf_box_h))
-    if sizes:
-        max_w = max(s[0] for s in sizes)
-        max_h = max(s[1] for s in sizes)
-        for i, ch in enumerate(roots):
-            col = i % cols
-            row = i // cols
-            w, h = sizes[i]
-            cell_x = LEFT + col * (max_w + H_GAP)
-            cell_y = TOP + row * (max_h + V_GAP)
-            cx = cell_x + (max_w - w) / 2
-            cy = cell_y
-            positions[ch["id"]] = (cx, cy, w, h)
-            if ch["id"] in {g["id"] for g in groups}:
-                place(ch["id"], cx, cy)
+            max_h = max(s[1] for s in sizes)
+            for i, ch in enumerate(children):
+                col = i % cols
+                row = i // cols
+                w, h = sizes[i]
+                slot_x = origin_x + GROUP_PAD_SIDE + col * (max_w + H_GAP)
+                slot_y = origin_y + GROUP_PAD_TOP + row * (max_h + V_GAP)
+                if ch["id"] in group_ids:
+                    cx = slot_x + (max_w - w) / 2
+                    cy = slot_y
+                    positions[ch["id"]] = (cx, cy, w, h)
+                    place(ch["id"], cx, cy)
+                else:
+                    ix = slot_x + (max_w - icon_w) / 2
+                    iy = slot_y
+                    positions[ch["id"]] = (ix, iy, float(icon_w), float(icon_h))
 
+    roots = _children_of(None, elements) + _children_of(None, groups)
+    if roots:
+        place(None, LEFT - GROUP_PAD_SIDE, TOP - GROUP_PAD_TOP)
     return positions
 
 
@@ -318,9 +398,26 @@ def build_xml(model: dict, shape_catalog) -> str:
             (positions[i][0] + positions[i][2] for i in positions),
             default=800,
         )
+        canvas_h = max(
+            (positions[i][1] + positions[i][3] for i in positions),
+            default=600,
+        )
         canvas_w = int(canvas_w + LEFT)
+        canvas_h = int(canvas_h + TOP)
     else:
         positions, boundary_box, canvas_w = _layout_rank_based(model, shape_catalog)
+        canvas_h = 1200
+
+    brief = (
+        shape_catalog.brief_label()
+        if hasattr(shape_catalog, "brief_label")
+        else False
+    )
+    label_width = (
+        shape_catalog.label_width()
+        if hasattr(shape_catalog, "label_width")
+        else None
+    )
 
     cells: list[str] = []
 
@@ -374,22 +471,81 @@ def build_xml(model: dict, shape_catalog) -> str:
             name=el.get("name", el["id"]),
             stereotype=shape_catalog.element_stereotype(el),
             description=el.get("description"),
+            brief=brief,
+            max_width=label_width,
         )
-        cells.append(
-            f'<mxCell id="{_xml_attr(el["id"])}" value="{_xml_attr(label)}" '
-            f'style="{shape_catalog.element_style(el)}" vertex="1" '
-            f'parent="{_xml_attr(parent_xml_id(el))}">'
+        style = shape_catalog.element_style(el)
+        parent_id = parent_xml_id(el)
+        geom = (
             f'<mxGeometry x="{ex:.0f}" y="{ey:.0f}" '
             f'width="{ew:.0f}" height="{eh:.0f}" as="geometry"/>'
-            "</mxCell>"
         )
+        tooltip = el.get("tooltip")
+        props = el.get("properties") or {}
+        members = el.get("members")
+        if tooltip or props or members:
+            # Envolver en <object> para exponer tooltip on-hover y propiedades
+            # editables (panel lateral de draw.io).
+            obj_attrs = [
+                f'id="{_xml_attr(el["id"])}"',
+                f'label="{_xml_attr(label)}"',
+            ]
+            if tooltip:
+                obj_attrs.append(f'tooltip="{_xml_attr(tooltip)}"')
+            if members:
+                # Lista de items (ej. nombres de Lambdas individuales) — los
+                # serializamos como un solo string con saltos de línea HTML
+                # para que el panel los muestre como bloque legible.
+                members_str = "\n".join(str(m) for m in members)
+                obj_attrs.append(f'members="{_xml_attr(members_str)}"')
+            for k, v in props.items():
+                obj_attrs.append(f'{_xml_attr(str(k))}="{_xml_attr(str(v))}"')
+            cells.append(
+                f'<object {" ".join(obj_attrs)}>'
+                f'<mxCell style="{style}" vertex="1" parent="{_xml_attr(parent_id)}">'
+                f"{geom}"
+                "</mxCell>"
+                "</object>"
+            )
+        else:
+            cells.append(
+                f'<mxCell id="{_xml_attr(el["id"])}" value="{_xml_attr(label)}" '
+                f'style="{style}" vertex="1" '
+                f'parent="{_xml_attr(parent_id)}">'
+                f"{geom}"
+                "</mxCell>"
+            )
 
-    # Relaciones.
+    # Relaciones — pre-contar fan-out/fan-in para distribuir exit/entry
+    # ports en el borde de los nodos hub (varias flechas entran/salen del
+    # mismo ícono, separadas por puntos distintos del borde).
+    src_totals: dict[str, int] = {}
+    tgt_totals: dict[str, int] = {}
+    for r in relationships:
+        src_totals[r["source"]] = src_totals.get(r["source"], 0) + 1
+        tgt_totals[r["target"]] = tgt_totals.get(r["target"], 0) + 1
+    src_counter: dict[str, int] = {}
+    tgt_counter: dict[str, int] = {}
     for i, r in enumerate(relationships):
         label = _edge_label(r.get("description", ""), r.get("technology"))
+        src_pos = positions.get(r["source"])
+        tgt_pos = positions.get(r["target"])
+        src_idx = src_counter.get(r["source"], 0)
+        tgt_idx = tgt_counter.get(r["target"], 0)
+        src_counter[r["source"]] = src_idx + 1
+        tgt_counter[r["target"]] = tgt_idx + 1
+        style = _edge_style(
+            r,
+            src_pos,
+            tgt_pos,
+            src_idx,
+            tgt_idx,
+            src_totals[r["source"]],
+            tgt_totals[r["target"]],
+        )
         cells.append(
             f'<mxCell id="rel{i}" value="{_xml_attr(label)}" '
-            f'style="{_edge_style(r)}" edge="1" parent="1" '
+            f'style="{style}" edge="1" parent="1" '
             f'source="{_xml_attr(r["source"])}" '
             f'target="{_xml_attr(r["target"])}">'
             '<mxGeometry relative="1" as="geometry"/>'
@@ -400,7 +556,7 @@ def build_xml(model: dict, shape_catalog) -> str:
         model.get("title", model.get("diagramType", "Architecture diagram"))
     )
     page_w = max(canvas_w, 1600)
-    page_h = 1200
+    page_h = max(canvas_h, 1200)
     body = "\n        ".join(cells)
     return (
         '<mxfile host="app.diagrams.net" type="device">\n'

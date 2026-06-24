@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(rsvg-convert -w 1400 /Users/HernanDarioBetancurCardenas/Desktop/ciencuadras-v2-preview.svg -o /Users/HernanDarioBetancurCardenas/Desktop/ciencuadras-v2-preview.png)",
+      "Bash(rsvg-convert -w 1600 /tmp/v3-preview.svg -o /tmp/v3-preview.png)",
+      "Bash(rm -rf /tmp/aws-meta /tmp/v3-preview.svg /tmp/v3-preview.png && ls -lah ~/Desktop/ciencuadras-prod-aws*)"
+    ],
+    "additionalDirectories": [
+      "/private/tmp"
+    ]
+  }
+}

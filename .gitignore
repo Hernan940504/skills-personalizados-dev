@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# Node
+node_modules/
+npm-debug.log*
+*.tgz
+.npm/
+
+# Build / caché de instalación
+.skills-build/
+dist/
+build/
+
+# Sistema
+.DS_Store
+Thumbs.db
+
+# Editores
+.idea/
+*.swp
+.vscode/*
+!.vscode/extensions.json
+
+# Credenciales locales (defensa en profundidad; nunca commitear secretos)
+*.local
+.env
+.env.*
+!.env.example

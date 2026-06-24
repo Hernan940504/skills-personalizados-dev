@@ -1,0 +1,40 @@
+name: validate-skills
+
+on:
+  pull_request:
+  push:
+    branches: [main, dev]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Lint SKILL.md (reglas SKILL-FORMAT §5)
+        run: python3 scripts/validate.py
+
+      - name: Tests (CLI + adaptadores + parser)
+        run: node --test tests/
+
+      - name: Smoke del motor de diagramas (_lib)
+        run: |
+          cat > /tmp/m.json <<'JSON'
+          {"diagramType":"Context","title":"t",
+           "elements":[
+             {"id":"a","type":"person","name":"User","description":"x"},
+             {"id":"b","type":"system","name":"Sys","description":"y","scope":true}],
+           "relationships":[{"source":"a","target":"b","description":"usa","technology":"HTTPS"}]}
+          JSON
+          python3 skills/_lib/drawio/render.py c4 /tmp/m.json /tmp/out.drawio
+          test -s /tmp/out.drawio

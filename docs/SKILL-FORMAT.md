@@ -18,7 +18,7 @@ Un `SKILL.md` válido tiene dos partes:
 name: backend-java
 description: Crea y refactoriza código Spring Boot...
 version: 1.0.0
-author: HernanBetancurBolivar01
+author: Hernan940504
 category: backend
 tags: [java, spring-boot, junit, maven]
 compatibility: [claude-code, cursor, kiro, opencode]
@@ -78,14 +78,14 @@ description: Crea y refactoriza código Spring Boot siguiendo convenciones de ca
   de SonarQube. Úsalo cuando el usuario trabaje en proyectos Java/Maven/Gradle o
   pida scaffolding de endpoints REST.
 version: 1.2.0
-author: HernanBetancurBolivar01
+author: Hernan940504
 category: backend
 tags: [java, spring-boot, junit, maven, gradle]
 compatibility: [claude-code, cursor, kiro, opencode]
 allowed-tools: [Read, Edit, Write, Bash, Grep, Glob]
 requires: [testing-generation]
 min-cli-version: 0.1.0
-homepage: https://github.com/HernanBetancurBolivar01/skills-personalizados-dev/tree/main/skills/backend/backend-java
+homepage: https://github.com/Hernan940504/skills-personalizados-dev/tree/main/skills/backend/backend-java
 examples:
   - prompt: "crea un endpoint REST POST /users con validación"
   - prompt: "genera tests JUnit5 para UserService"

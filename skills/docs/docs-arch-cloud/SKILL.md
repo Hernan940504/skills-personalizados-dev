@@ -10,7 +10,7 @@ description: Genera diagramas de arquitectura **cloud** (AWS, GCP) o
   "diagrama con íconos de Lambda/EC2/Cloud Run/Firewall", o un `.drawio`
   con la pinta del proveedor.
 version: 0.1.0
-author: HernanBetancurBolivar01
+author: Hernan940504
 category: docs
 tags: [arquitectura, cloud, aws, gcp, onpremise, drawio, infraestructura]
 compatibility: [claude-code, cursor, kiro, opencode]
@@ -82,7 +82,17 @@ Para conocer en detalle los servicios disponibles en cada proveedor, lee:
       "name": "Etiqueta visible",
       "technology": "Detalle opcional", // p.ej. "Python 3.12"
       "description": "Responsabilidad", // opcional pero recomendado
-      "parent": "<id del grupo padre>"  // opcional, para anidar
+      "parent": "<id del grupo padre>", // opcional, para anidar
+      "tooltip": "Texto on-hover",      // opcional — aparece al pasar el mouse
+      "properties": {                     // opcional — panel lateral de draw.io
+        "CPU": "0.5 vCPU",
+        "RAM": "0.25 GB",
+        "Tasks": "2-4"
+      },
+      "members": [                        // opcional — para íconos agregados
+        "ciencuadras-prod-users-get",     // (ej. lista de Lambdas individuales
+        "ciencuadras-prod-users-create"   // bajo un solo ícono "Lambdas users")
+      ]
     }
   ],
   "groups": [
@@ -110,6 +120,64 @@ Diferencias frente a C4:
 - **No hay** estereotipos `[Person]` / `[Container]`; el ícono y su categoría
   ya identifican el servicio.
 - `type` proviene del catálogo del proveedor — no son tipos C4.
+
+### Metadata interactiva: `tooltip`, `properties`, `members`
+
+Tres campos opcionales por elemento exponen detalle al usuario sin saturar el
+label visible:
+
+| Campo | Cómo se ve en draw.io | Para qué sirve |
+|---|---|---|
+| `tooltip` | On-hover sobre el ícono | Resumen rápido (CPU, RAM, image tag, etc.) |
+| `properties` (dict) | Panel "Arrange > Properties" al seleccionar el ícono | Pares clave/valor editables |
+| `members` (list) | Atributo `members` del objeto | Lista de items que componen un agregado (ej. nombres reales de las 10 Lambdas bajo un solo ícono "Lambdas: users") |
+
+Ejemplo típico de ECS Fargate task con metadata útil para operación:
+
+```json
+{
+  "id": "fargate_orders",
+  "type": "ecs",
+  "name": "orders-svc",
+  "tooltip": "ECS Fargate: orders-svc · 2-4 tasks · 0.5 vCPU / 0.25 GB",
+  "properties": {
+    "CPU":         "0.5 vCPU",
+    "RAM":         "0.25 GB",
+    "Tasks":       "2-4 (auto-scaling)",
+    "Image":       "012345.dkr.ecr.us-east-1.amazonaws.com/orders:v1.2",
+    "DeployedAt":  "2026-06-15",
+    "TaskDefArn":  "arn:aws:ecs:us-east-1:012345:task-definition/orders:42"
+  }
+}
+```
+
+Ejemplo de ícono agregado de Lambdas con detalle de funciones miembro:
+
+```json
+{
+  "id": "lambdas_users",
+  "type": "lambda",
+  "name": "Lambdas: users (4)",
+  "tooltip": "4 funciones del dominio users.",
+  "members": [
+    "ciencuadras-prod-users-get",
+    "ciencuadras-prod-users-create",
+    "ciencuadras-prod-users-update",
+    "ciencuadras-prod-users-delete"
+  ],
+  "properties": {
+    "Runtime": "Python 3.12",
+    "Memory":  "256 MB",
+    "Timeout": "30s"
+  }
+}
+```
+
+En el `.drawio` resultante:
+- El ícono se ve normal (no añade ruido visual).
+- Al pasar el mouse → aparece el `tooltip`.
+- Al seleccionarlo → en el panel derecho de draw.io aparecen `CPU`, `RAM`, `Tasks`, etc. como propiedades editables.
+- `members` queda como atributo accesible vía `Edit > Find/Replace` o copy-paste del XML.
 
 ### Anidamiento típico
 

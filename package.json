@@ -1,0 +1,50 @@
+{
+  "name": "@hbetancur/skills-dev",
+  "version": "0.1.0",
+  "description": "Fábrica de skills agénticos para desarrollo, multi-herramienta (Claude Code, Cursor, Kiro, OpenCode).",
+  "type": "commonjs",
+  "bin": {
+    "skills-dev": "bin/skills-cli.js"
+  },
+  "files": [
+    "bin/",
+    "src/",
+    "skills/",
+    "adapters/",
+    "templates/",
+    "scripts/",
+    "docs/",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "test": "node --test tests/",
+    "validate": "node bin/skills-cli.js validate",
+    "lint:skills": "python3 scripts/validate.py",
+    "prepack": "node scripts/prepack-guard.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "claude-code",
+    "cursor",
+    "kiro",
+    "opencode",
+    "skills",
+    "agents",
+    "ai",
+    "scaffolding"
+  ],
+  "author": "Hernan940504",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Hernan940504/skills-personalizados-dev.git"
+  },
+  "homepage": "https://github.com/Hernan940504/skills-personalizados-dev#readme",
+  "bugs": {
+    "url": "https://github.com/Hernan940504/skills-personalizados-dev/issues"
+  },
+  "dependencies": {}
+}

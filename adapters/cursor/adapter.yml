@@ -1,0 +1,56 @@
+# Adaptador Cursor — SKILL.md → .mdc (Markdown con frontmatter MDC).
+target: cursor
+output:
+  path: "~/.cursor/rules/{{name}}.mdc"
+  project_path: ".cursor/rules/{{name}}.mdc"
+  format: mdc
+
+# El body se copia intacto; solo se reescribe el frontmatter.
+frontmatter:
+  description: "{{description}}"
+  globs: "{{tags | toGlobs}}"   # tags → globs heurísticos (ver mapping abajo)
+  alwaysApply: false
+
+# El nombre del skill va en el filename, no en el frontmatter.
+name_strategy: filename
+
+# Cursor no ejecuta scripts ni resuelve _lib/; el body debe instruir al modelo
+# a invocarlos por terminal, o degradar a explicación.
+shared_lib:
+  bundle: false
+
+drop:
+  - name
+  - version
+  - category
+  - author
+  - allowed-tools
+  - compatibility
+  - examples
+
+# Heurística tags → globs (ajustable). Si un tag no está, no añade glob.
+glob_map:
+  java:        ["**/*.java", "**/pom.xml", "**/build.gradle"]
+  spring-boot: ["**/*.java", "**/application.yml", "**/application.properties"]
+  node:        ["**/*.js", "**/*.ts", "**/package.json"]
+  nestjs:      ["**/*.ts", "**/nest-cli.json"]
+  express:     ["**/*.js", "**/*.ts"]
+  fastapi:     ["**/*.py", "**/requirements.txt", "**/pyproject.toml"]
+  gin:         ["**/*.go", "**/go.mod"]
+  python:      ["**/*.py"]
+  go:          ["**/*.go", "**/go.mod"]
+  react:       ["**/*.tsx", "**/*.jsx"]
+  vue:         ["**/*.vue"]
+  angular:     ["**/*.ts", "**/angular.json"]
+  docker:      ["**/Dockerfile", "**/docker-compose*.yml"]
+  terraform:   ["**/*.tf"]
+  drawio:      ["**/*.drawio", "**/*.json"]
+  openapi:     ["**/openapi*.yaml", "**/openapi*.yml", "**/swagger*.json"]
+
+warnings:
+  - field: allowed-tools
+    message: "Cursor no soporta restricción de tools; ignorado."
+  - field: scripts
+    message: "Cursor no ejecuta scripts/ automáticamente; el rule debe instruir al modelo."
+  - condition: needs_lib
+    message: "Este skill usa skills/_lib/; en Cursor el render no se ejecuta solo — usa Claude Code para generar el artefacto."

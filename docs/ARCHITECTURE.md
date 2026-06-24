@@ -12,7 +12,7 @@ Este documento describe la **topología del monorepo**, el **flujo de instalaci�
 | 2 | Instalación trivial (`npx ... add <skill>`) | CLI publicado en npm con resolución por nombre |
 | 3 | Desarrollo activo sin reinstalar tras cada edit | Modo `--mode=link` con symlinks |
 | 4 | Compatibilidad con Claude Code, Cursor, Kiro, OpenCode | Adaptadores que reescriben frontmatter, no body |
-| 5 | Crecimiento sostenible sin acoplar skills entre sí | Cada skill es autocontenido (sin imports cruzados) |
+| 5 | Crecimiento sostenible sin acoplar skills entre sí | Cada skill es autocontenido por defecto; el código genuinamente compartido vive en `skills/_lib/` y se empaqueta al instalar (ver §5.3b) |
 | 6 | CI valida calidad antes de mergear | Workflow `validate-skills.yml` lintea todo PR |
 
 ---
@@ -37,6 +37,8 @@ skills-personalizados-dev/
 │   └── utils/
 │
 ├── skills/                         # ★ CATÁLOGO — fuente de verdad
+│   ├── _lib/                        # Código compartido (no es skill; ver §5.3b)
+│   │   └── drawio/                  # Motor JSON → .drawio (flavors c4/aws/gcp/onprem)
 │   ├── backend/
 │   │   ├── backend-java/
 │   │   ├── backend-node/
@@ -58,8 +60,13 @@ skills-personalizados-dev/
 │   │   ├── security-owasp/
 │   │   └── security-deps-audit/
 │   ├── docs/
-│   │   ├── docs-adr/
-│   │   └── docs-readme/
+│   │   ├── docs-openapi/            # ✅
+│   │   ├── docs-c4-context/         # ✅ C4 Nivel 1
+│   │   ├── docs-c4-containers/      # ✅ C4 Nivel 2
+│   │   ├── docs-c4-components/      # ✅ C4 Nivel 3
+│   │   ├── docs-arch-cloud/         # ✅ íconos AWS/GCP/On-Prem
+│   │   ├── docs-adr/                # ⏳
+│   │   └── docs-readme/             # ⏳
 │   ├── workspace/
 │   │   ├── workspace-git-flow/
 │   │   └── workspace-monorepo/
@@ -197,6 +204,34 @@ La navegación humana en GitHub es el caso de uso principal. Las categorías son
 
 Mismo patrón que usa Anthropic en su repo oficial: optimiza el uso de contexto del agente. El `SKILL.md` queda corto y enfocado; el material pesado se carga **bajo demanda**.
 
+### 5.3b Excepción: librerías compartidas (`_lib/`)
+
+El principio "skill autocontenido" (objetivo 5) tiene una excepción consciente: cuando varios
+skills relacionados necesitan **el mismo motor no trivial**, duplicarlo cuesta más que el
+acoplamiento de compartirlo. El caso actual es el render de diagramas
+`skills/_lib/drawio/` (`core.py`, `c4_shapes.py`, `aws_shapes.py`, `gcp_shapes.py`,
+`onprem_shapes.py`, `render.py`), usado por `docs-c4-context`, `docs-c4-containers`,
+`docs-c4-components` y `docs-arch-cloud`.
+
+**Reglas para que `_lib/` no rompa la portabilidad:**
+
+1. Vive en `skills/_lib/<modulo>/`. El prefijo `_` lo excluye del catálogo (no es un skill;
+   `install.sh --all` y el resolvedor lo ignoran).
+2. Cada skill consumidor expone un wrapper `scripts/generate.sh` que es su **único punto de
+   contacto** con `_lib/`. El `SKILL.md` invoca el wrapper, no `_lib/` directamente.
+3. El wrapper localiza el motor por ruta relativa a sí mismo
+   (`$SCRIPT_DIR/../../../_lib/...` en el layout del repo).
+4. El instalador resuelve la dependencia según el modo:
+   - **link** → el symlink apunta al árbol real del repo; el wrapper resuelve `_lib/` solo.
+   - **copy** → `install.sh` vendoriza `skills/_lib/` en `<dest>/_lib/` y reescribe la ruta
+     del wrapper en la copia (`../../../_lib` → `../../_lib`), dejando el skill autónomo.
+5. **Limitación multi-herramienta:** Cursor/Kiro/OpenCode no ejecutan scripts; en esos
+   targets el `.drawio` se genera con Claude Code y el adaptador emite un warning. Ver
+   `docs/COMPATIBILITY.md`.
+
+> Criterio para crear un `_lib/` nuevo: el código compartido es no trivial (≳ varios cientos
+> de líneas), lo usan ≥ 2 skills, y tiene un contrato estable. Si no, prefiere duplicar.
+
 ### 5.4 ¿Por qué un CLI propio en vez de solo `git clone`?
 
 Tres razones:
@@ -227,13 +262,17 @@ El usuario es el autor; quiere iterar rápido sobre skills sin reinstalar. Symli
 
 | Fase | Entregable | Estado |
 |---|---|---|
-| 0 — Diseño documental | README + 4 docs core | ✅ esta sesión |
-| 1 — Bootstrap estructural | Carpetas `skills/`, `adapters/`, `templates/`, `scripts/install.sh` | ⏳ |
-| 2 — Golden path | `backend-java` completo como referencia | ⏳ |
-| 3 — CLI v0 | `add`, `list`, `sync` para target `claude-code` | ⏳ |
-| 4 — Adaptadores | `cursor`, `kiro`, `opencode` | ⏳ |
-| 5 — Catálogo MVP | 8 skills MVP completos | ⏳ |
-| 6 — Publicación npm | `@hbetancur/skills-dev` v0.1.0 | ⏳ |
+| 0 — Diseño documental | README + 4 docs core | ✅ |
+| 1 — Bootstrap estructural | `templates/skill-template/`, `scripts/{install,validate,new-skill}.sh`, `.gitignore` | ✅ |
+| 2 — Catálogo | Skills `docs-*` por nivel + `_lib/drawio` compartido (golden path: en curso) | 🔄 |
+| 3 — CLI v0 | `add`/`list`/`sync`/`remove`/`new`/`validate` (cero deps) | ✅ |
+| 4 — Adaptadores | `claude-code`, `cursor`, `kiro`, `opencode` (declarativos + tests) | ✅ |
+| 5 — Catálogo MVP | 8 skills completos (hoy 7 reales) | 🔄 |
+| 6 — Publicación npm | `@hbetancur/skills-dev` v0.1.0 | ⏸️ pausa (repo privado) |
+
+**Bloqueadores antes de publicar (Fase 6):** el `prepack-guard` aborta el paquete mientras
+existan (a) `skills/devops/aws-sso-refresh/` con Account IDs y config de empresa, y (b) los
+`__pycache__/*.pyc` aún trackeados (`git rm -r --cached skills/**/__pycache__`).
 
 ---
 

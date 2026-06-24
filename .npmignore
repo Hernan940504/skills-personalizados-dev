@@ -1,0 +1,16 @@
+# Defensa de publicación: nunca empaquetar datos sensibles ni artefactos.
+# (npm usa este archivo; el whitelist `files` de package.json sigue aplicando.)
+
+# Skill personal/interno con Account IDs y config de empresa — NO publicar.
+skills/devops/aws-sso-refresh/
+
+# Artefactos Python
+**/__pycache__/
+**/*.pyc
+
+# Tests y CI no hacen falta en el paquete instalado
+tests/
+.github/
+
+# Caché de build local
+.skills-build/

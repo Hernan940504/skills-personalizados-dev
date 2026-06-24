@@ -8,7 +8,7 @@ description: Genera el diagrama C4 de **Contenedores (Nivel 2)** como archivo
   Soluciones**. Úsalo cuando el usuario pida "diagrama de contenedores",
   "C4 nivel 2", "arquitectura técnica", o quiera ver servicios, BDs y colas.
 version: 0.1.0
-author: HernanBetancurBolivar01
+author: Hernan940504
 category: docs
 tags: [c4-model, contenedores, containers, arquitectura-soluciones, drawio]
 compatibility: [claude-code, cursor, kiro, opencode]

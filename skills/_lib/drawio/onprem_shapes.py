@@ -132,7 +132,19 @@ class Catalog:
 
     @staticmethod
     def element_size() -> tuple[int, int]:
-        return 140, 90
+        return 80, 80
+
+    @staticmethod
+    def cell_size() -> tuple[int, int]:
+        return 180, 140
+
+    @staticmethod
+    def brief_label() -> bool:
+        return True
+
+    @staticmethod
+    def label_width() -> int:
+        return 160
 
     @staticmethod
     def rank(el: dict) -> int:

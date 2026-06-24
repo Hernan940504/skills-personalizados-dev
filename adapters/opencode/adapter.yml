@@ -1,0 +1,40 @@
+# Adaptador OpenCode — SKILL.md → agent file (~/.config/opencode/agents/<name>.md).
+target: opencode
+output:
+  path: "~/.config/opencode/agents/{{name}}.md"
+  format: markdown
+
+frontmatter:
+  name: "{{name}}"
+  description: "{{description}}"
+  tags: "{{tags}}"
+  tools: "{{allowed-tools | toOpenCodeTools}}"   # mapeo de nombres si existen
+
+name_strategy: frontmatter
+
+shared_lib:
+  bundle: false
+
+drop:
+  - version
+  - category
+  - author
+  - compatibility
+  - examples
+
+# Tools de Claude Code sin equivalente en OpenCode → se eliminan con warning.
+tool_map:
+  Read: read
+  Write: write
+  Edit: edit
+  Bash: bash
+  Grep: grep
+  Glob: glob
+  WebFetch: webfetch
+  # Task / NotebookEdit / TodoWrite: sin equivalente → drop + warning
+
+warnings:
+  - field: allowed-tools
+    message: "Tools sin equivalente en OpenCode se eliminan silenciosamente (con aviso)."
+  - condition: needs_lib
+    message: "Este skill usa skills/_lib/; verifica que OpenCode pueda ejecutar el script o usa Claude Code."

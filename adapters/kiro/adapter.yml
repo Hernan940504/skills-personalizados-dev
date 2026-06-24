@@ -1,0 +1,32 @@
+# Adaptador Kiro — SKILL.md → steering file (.kiro/steering/<name>.md).
+target: kiro
+output:
+  # Kiro es orientado a proyecto; no tiene scope global.
+  project_path: ".kiro/steering/{{name}}.md"
+  format: markdown
+
+frontmatter:
+  inclusion: "{{description}}"   # define cuándo aplicar el steering
+
+name_strategy: filename
+
+shared_lib:
+  bundle: false
+
+drop:
+  - name
+  - version
+  - category
+  - author
+  - tags
+  - allowed-tools
+  - compatibility
+  - examples
+
+warnings:
+  - field: scope
+    message: "Kiro no tiene scope global; cada proyecto recibe su copia."
+  - field: scripts
+    message: "Kiro no ejecuta scripts/ directamente; depende del agente que lo use."
+  - condition: needs_lib
+    message: "Este skill usa skills/_lib/; en Kiro el render no se ejecuta solo — usa Claude Code."
