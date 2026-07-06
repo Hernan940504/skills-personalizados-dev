@@ -1,0 +1,22 @@
+{
+  "name": "arkan-e2e",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Suite E2E + generador de manual para portales web (Arkan por defecto), basado en Playwright.",
+  "scripts": {
+    "test": "playwright test",
+    "test:ui": "playwright test --ui",
+    "test:headed": "playwright test --headed",
+    "auth": "playwright test --project=setup",
+    "report": "playwright show-report",
+    "codegen": "playwright codegen",
+    "manual": "playwright test --project=manual manual.capture.spec.ts"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.50.0",
+    "@types/node": "^22.10.0",
+    "dotenv": "^16.4.7",
+    "typescript": "^5.7.0"
+  }
+}

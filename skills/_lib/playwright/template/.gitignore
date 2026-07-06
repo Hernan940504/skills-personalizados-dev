@@ -1,0 +1,18 @@
+# Proyecto E2E scaffoldeado — nunca commitees secretos ni artefactos.
+node_modules/
+.env
+.env.*
+!.env.example
+
+# Estado de sesión autenticada (contiene cookies/tokens — SECRETO).
+.auth/
+playwright/.auth/
+
+# Artefactos de ejecución.
+test-results/
+playwright-report/
+blob-report/
+playwright/.cache/
+
+# Salida del manual de usuario.
+manual-output/

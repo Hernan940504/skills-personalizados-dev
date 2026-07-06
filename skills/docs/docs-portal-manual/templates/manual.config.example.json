@@ -1,0 +1,37 @@
+{
+  "title": "Manual de Usuario — Portal Arkan",
+  "baseURL": "https://arkan.bolnet.com.co/",
+  "intro": "Esta guía describe, módulo a módulo, cómo usar el portal Arkan. Cada sección incluye una captura real de la pantalla y los pasos para operarla.",
+  "modules": [
+    {
+      "slug": "inicio",
+      "name": "Inicio / Dashboard",
+      "path": "/",
+      "description": "Pantalla principal tras iniciar sesión. Resume la información clave y da acceso a los módulos.",
+      "waitFor": "networkidle",
+      "steps": [
+        "Inicia sesión con tu usuario y contraseña.",
+        "Revisa el resumen del tablero.",
+        "Usa el menú para navegar a cada módulo."
+      ],
+      "mask": [],
+      "notes": [
+        "Las zonas con datos personales pueden ocultarse agregando su selector al arreglo 'mask'."
+      ]
+    },
+    {
+      "slug": "modulo-ejemplo",
+      "name": "Nombre del módulo",
+      "path": "/ruta-del-modulo",
+      "description": "Para qué sirve este módulo y qué puede hacer el usuario aquí.",
+      "waitFor": "networkidle",
+      "steps": [
+        "Paso 1 para usar el módulo.",
+        "Paso 2 ...",
+        "Paso 3 ..."
+      ],
+      "mask": [".clock", ".banner-publicidad"],
+      "notes": []
+    }
+  ]
+}

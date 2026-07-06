@@ -112,6 +112,7 @@ independiente y `_lib/` se vendoriza en `~/.claude/skills/_lib/`.
 
 | Skill | Estado | Descripción corta |
 |---|---|---|
+| `testing-arkan-playwright` | ✅ | Pruebas E2E del portal Arkan con Playwright: login reutilizable, exploración por módulo, Page Objects + specs, reporte con trazas |
 | `testing-generation` | ⏳ | Genera tests unitarios e integración a partir de código existente |
 | `testing-coverage` | ⏳ | Analiza coverage y propone tests faltantes con razonamiento |
 
@@ -131,6 +132,7 @@ independiente y `_lib/` se vendoriza en `~/.claude/skills/_lib/`.
 | `docs-c4-containers` | ✅ | Diagrama C4 de Contenedores (Nivel 2) como `.drawio` nativo |
 | `docs-c4-components` | ✅ | Diagrama C4 de Componentes (Nivel 3) como `.drawio` nativo |
 | `docs-arch-cloud` | ✅ | Diagramas de arquitectura con íconos AWS/GCP/On-Prem como `.drawio` |
+| `docs-portal-manual` | ✅ | Genera el manual de usuario de un portal (Arkan) con Playwright: captura por pantalla + pasos, salida Markdown |
 | `docs-adr` | ⏳ | Crea Architectural Decision Records bien estructurados |
 | `docs-readme` | ⏳ | Genera/actualiza README desde el estado real del repo |
 
@@ -175,6 +177,13 @@ Cada skill llama al motor a través de su wrapper `scripts/generate.sh`. Al inst
 
 > Excepción consciente al principio de "skill autocontenido": ver la justificación en
 > [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md#53b-excepción-librerías-compartidas-_lib).
+
+El segundo caso es [`skills/_lib/playwright/`](skills/_lib/playwright/): un harness
+Playwright con autenticación reutilizable (login una vez → `storageState`) usado por
+`testing-arkan-playwright` (pruebas E2E por módulo) y `docs-portal-manual` (manual de
+usuario con capturas). `bootstrap.sh` scaffolda un proyecto E2E listo; cada skill lo
+invoca vía su wrapper `scripts/setup.sh`. Las credenciales viven **solo** en
+`_lib/playwright/.env` (gitignored), nunca en archivos versionados.
 
 ---
 

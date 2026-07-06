@@ -1,0 +1,44 @@
+import { test } from '@playwright/test';
+import { readFileSync, mkdirSync } from 'node:fs';
+import path from 'node:path';
+
+/**
+ * Captura UNA imagen por pantalla para el manual de usuario.
+ * Corre en el proyecto `manual` -> ya autenticado vía storageState.
+ *
+ * Lee la lista de módulos desde manual.config.json y genera, por cada uno, una
+ * captura estable (animaciones congeladas, cursor oculto) en manual-output/img/.
+ * Cada módulo es un test independiente (aislado y paralelizable).
+ *
+ *   npm run manual          # genera las capturas
+ */
+type Modulo = {
+  slug: string;
+  name: string;
+  path: string;
+  waitFor?: 'load' | 'domcontentloaded' | 'networkidle';
+  mask?: string[];
+};
+type ManualConfig = { title?: string; modules: Modulo[] };
+
+const cfgPath = process.env.MANUAL_CONFIG ?? path.resolve('manual.config.json');
+const outDir = process.env.MANUAL_OUT ?? 'manual-output';
+const cfg: ManualConfig = JSON.parse(readFileSync(cfgPath, 'utf-8'));
+
+mkdirSync(path.join(outDir, 'img'), { recursive: true });
+
+cfg.modules.forEach((m, i) => {
+  test(`captura: ${m.name}`, async ({ page }) => {
+    const idx = String(i + 1).padStart(2, '0');
+    await page.goto(m.path);
+    await page.waitForLoadState(m.waitFor ?? 'networkidle');
+    await page.screenshot({
+      path: path.join(outDir, 'img', `${idx}-${m.slug}.png`),
+      fullPage: true,
+      animations: 'disabled',
+      caret: 'hide',
+      scale: 'css',
+      mask: (m.mask ?? []).map((s) => page.locator(s)),
+    });
+  });
+});

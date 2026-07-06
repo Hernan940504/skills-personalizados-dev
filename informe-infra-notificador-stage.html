@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Informe de cambios de infraestructura — Notificaciones Transversales STG</title>
+<style>
+  :root{
+    --verde:#008d36; --verde-osc:#00662a; --verde-cl:#e8f5ec;
+    --gris:#5b6670; --gris-cl:#f4f6f8; --borde:#e2e8ec; --texto:#1f2933;
+    --amarillo:#f4a900; --rojo:#d64545; --azul:#2d6cdf;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    color:var(--texto);background:var(--gris-cl);line-height:1.5;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1040px;margin:0 auto;padding:0 20px 60px}
+  header.hero{background:linear-gradient(135deg,var(--verde-osc),var(--verde));color:#fff;padding:34px 0 30px;
+    box-shadow:0 2px 8px rgba(0,0,0,.12)}
+  header.hero .wrap{padding-bottom:0}
+  .eyebrow{text-transform:uppercase;letter-spacing:.14em;font-size:12px;font-weight:700;opacity:.85;margin:0}
+  header.hero h1{margin:6px 0 14px;font-size:27px;font-weight:700}
+  .meta{display:flex;flex-wrap:wrap;gap:10px 26px;font-size:14px}
+  .meta div{opacity:.95}
+  .meta b{opacity:.75;font-weight:600;margin-right:5px}
+  .card{background:#fff;border:1px solid var(--borde);border-radius:12px;padding:22px 24px;margin-top:22px;
+    box-shadow:0 1px 3px rgba(20,40,60,.05)}
+  h2{font-size:19px;margin:0 0 4px;display:flex;align-items:center;gap:9px}
+  h2 .n{background:var(--verde-cl);color:var(--verde-osc);border-radius:8px;font-size:14px;font-weight:700;
+    width:26px;height:26px;display:inline-flex;align-items:center;justify-content:center}
+  .sub{color:var(--gris);font-size:13.5px;margin:0 0 16px}
+  table{width:100%;border-collapse:collapse;font-size:14px;margin-top:4px}
+  th{text-align:left;font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--gris);
+    border-bottom:2px solid var(--borde);padding:8px 10px}
+  td{padding:9px 10px;border-bottom:1px solid var(--borde);vertical-align:top}
+  tr:last-child td{border-bottom:none}
+  td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+  code{background:var(--gris-cl);border:1px solid var(--borde);border-radius:5px;padding:1px 6px;
+    font-family:"SF Mono",Menlo,Consolas,monospace;font-size:12.5px;color:#0b3d20}
+  .badge{display:inline-block;font-size:11px;font-weight:700;padding:2px 9px;border-radius:20px;white-space:nowrap}
+  .b-gh{background:#eef3ff;color:#2d4fb0}
+  .b-tf{background:#efe9ff;color:#6b3fd0}
+  .b-hu{background:#fff3d6;color:#8a5b00}
+  .b-new{background:var(--verde-cl);color:var(--verde-osc)}
+  .b-del{background:#fde8e8;color:#a02020}
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:2px}
+  .kpi{background:#fff;border:1px solid var(--borde);border-radius:12px;padding:16px 18px;text-align:center;
+    box-shadow:0 1px 3px rgba(20,40,60,.05)}
+  .kpi .v{font-size:30px;font-weight:800;color:var(--verde-osc);line-height:1}
+  .kpi .l{font-size:12.5px;color:var(--gris);margin-top:6px}
+  .lead{font-size:15px}
+  .lead b{color:var(--verde-osc)}
+  ul.tl{list-style:none;padding:0;margin:6px 0 0}
+  ul.tl li{padding:8px 0 8px 20px;border-left:2px solid var(--borde);position:relative;font-size:14px}
+  ul.tl li::before{content:"";position:absolute;left:-6px;top:14px;width:10px;height:10px;border-radius:50%;
+    background:var(--verde);border:2px solid #fff;box-shadow:0 0 0 1px var(--borde)}
+  ul.tl li .t{color:var(--gris);font-variant-numeric:tabular-nums;font-size:12.5px;margin-right:8px}
+  .note{background:var(--verde-cl);border-left:4px solid var(--verde);border-radius:0 8px 8px 0;
+    padding:13px 16px;font-size:13.5px;margin-top:6px}
+  .cols2{display:grid;grid-template-columns:1fr 1fr;gap:22px}
+  footer{color:var(--gris);font-size:12.5px;text-align:center;margin-top:30px}
+  @media(max-width:720px){.kpis{grid-template-columns:repeat(2,1fr)}.cols2{grid-template-columns:1fr}
+    header.hero h1{font-size:22px}}
+  @media print{body{background:#fff}.card,.kpi{box-shadow:none}header.hero{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
+</style>
+</head>
+<body>
+<header class="hero">
+  <div class="wrap">
+    <p class="eyebrow">Informe de infraestructura · Seguros Bolívar</p>
+    <h1>Cambios de infraestructura — Notificaciones Transversales (STG)</h1>
+    <div class="meta">
+      <div><b>Cuenta</b> 243755603146</div>
+      <div><b>Ambiente</b> Stage</div>
+      <div><b>Región</b> us-east-1</div>
+      <div><b>Periodo</b> 01-jun → 01-jul 2026</div>
+      <div><b>Fuente</b> AWS CloudTrail · CloudFormation</div>
+      <div><b>Generado</b> 01-jul-2026</div>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="kpis">
+    <div class="kpi"><div class="v">31</div><div class="l">Despliegues ECS reales</div></div>
+    <div class="kpi"><div class="v">8</div><div class="l">Servicios afectados</div></div>
+    <div class="kpi"><div class="v">2/1</div><div class="l">APIs creadas / eliminada</div></div>
+    <div class="kpi"><div class="v">~16</div><div class="l">Cambios de config Lambda</div></div>
+  </div>
+
+  <div class="card">
+    <h2>Resumen ejecutivo</h2>
+    <p class="lead">La infraestructura del notificador se compone de <b>servicios ECS (contenedores)
+    + API Gateway + Lambdas</b>, desplegados por <b>GitHub Actions</b> (CI/CD de las aplicaciones) y
+    <b>Terraform</b> (infra base). El <b>1-jul fue el día más movido</b> del mes: varios redeploys de
+    servicios, creación de una API nueva y eliminación de otra. Se ignoraron 366 cambios de
+    <em>autoescalado</em> (ruido operativo) para contar solo despliegues reales.</p>
+    <div class="note">La gestión es vía <b>Terraform + CI/CD</b>, no CloudFormation: de 37 stacks CFN,
+    solo 1 cambió en el mes (un rol cross-account de gobierno de <code>arkan</code>).</div>
+  </div>
+
+  <div class="card">
+    <h2><span class="n">1</span> Despliegues ECS</h2>
+    <p class="sub">31 despliegues reales en el mes (excluye 366 cambios de autoescalado).</p>
+    <table>
+      <thead><tr>
+        <th>Servicio</th><th class="num">Deploys</th><th>Último despliegue</th><th>Responsable</th>
+      </tr></thead>
+      <tbody>
+        <tr><td><code>transversales-envio-email-service</code></td><td class="num">8</td><td>01-jul 16:48</td><td><span class="badge b-gh">GitHub Actions</span> <span class="badge b-hu">atlasops</span></td></tr>
+        <tr><td><code>transversales-send-email-provider</code></td><td class="num">3</td><td>01-jul 15:07</td><td><span class="badge b-gh">GitHub Actions</span></td></tr>
+        <tr><td><code>transversales-generate-url-presg</code></td><td class="num">3</td><td>01-jul 15:06</td><td><span class="badge b-gh">GitHub Actions</span></td></tr>
+        <tr><td><code>transversales-integracion-whatsapp-ms</code></td><td class="num">2</td><td>01-jul 15:06</td><td><span class="badge b-gh">GitHub Actions</span></td></tr>
+        <tr><td><code>transversales-plantillas-correo-service</code></td><td class="num">2</td><td>24-jun 11:36</td><td><span class="badge b-gh">GitHub Actions</span> <span class="badge b-hu">atlasops</span></td></tr>
+        <tr><td><code>transversales-adm-perfiles-usuarios-service</code></td><td class="num">1</td><td>12-jun 09:30</td><td><span class="badge b-hu">atlasops</span></td></tr>
+        <tr><td><code>transversales-wrapper-envio-email-ms</code></td><td class="num">1</td><td>12-jun 09:29</td><td><span class="badge b-hu">atlasops</span></td></tr>
+        <tr><td><code>fakesmtp-stage-service</code> <span style="color:var(--gris)">(+ task-def v9→v12)</span></td><td class="num">7</td><td>01-jul 11:17</td><td><span class="badge b-tf">Terraform</span> <span class="badge b-hu">J. S. Ruedo</span></td></tr>
+      </tbody>
+    </table>
+    <div class="note"><b>Destacado de infra:</b> el componente <code>fakesmtp-stage</code> (servidor SMTP
+    falso para pruebas) tuvo trabajo activo vía Terraform y Juan.Sebastian.Ruedo (Kyndryl): 4 nuevas
+    task definitions (revisiones 9 → 12) entre el 24-jun y el 1-jul.</div>
+  </div>
+
+  <div class="card">
+    <h2><span class="n">2</span> API Gateway</h2>
+    <p class="sub">Creación, eliminación y despliegues de stages a lo largo del mes.</p>
+    <ul class="tl">
+      <li><span class="t">01-jul 16:50</span> Deploy de stage sobre API <code>rvatgukcvj</code> <span class="badge b-gh">GitHub Actions</span></li>
+      <li><span class="t">01-jul 14:40</span> <span class="badge b-new">API creada</span> por Juan.Sebastian.Ruedo <span class="badge b-hu">humano</span></li>
+      <li><span class="t">01-jul 11:17</span> <span class="badge b-new">API creada</span> <code>rvatgukcvj</code> + deploy de stage <span class="badge b-tf">Terraform</span></li>
+      <li><span class="t">01-jul 10:59</span> <span class="badge b-del">API eliminada</span> <code>fzw08l73uf</code> — recibía deploys hasta el 25-jun, fue retirada <span class="badge b-hu">J. S. Ruedo</span></li>
+      <li><span class="t">22–25 jun</span> Deploys recurrentes de stage sobre <code>tjtymemgec</code>, <code>fzw08l73uf</code> <span class="badge b-gh">GitHub Actions</span></li>
+      <li><span class="t">10-jun</span> Deploys de stage sobre <code>r1d40s5xha</code> <span class="badge b-gh">GitHub Actions</span></li>
+    </ul>
+    <div class="note">Terraform también tocó <b>CloudFront</b> (<code>UpdateDistribution</code>) y los ajustes de
+    cuenta de API Gateway (<code>UpdateAccount</code>) el 1-jul.</div>
+  </div>
+
+  <div class="card">
+    <h2><span class="n">3</span> Lambdas — cambios de configuración</h2>
+    <p class="sub">Actualizaciones de <code>UpdateFunctionConfiguration</code> durante el mes.</p>
+    <ul class="tl">
+      <li><span class="t">03-jun</span> Rollout de configuración sobre varias funciones: <code>PrivateRestAPI</code>,
+        <code>PrivateSoapAPI</code>, <code>healthcheck</code>, <code>emailValidation</code>, <code>emailValidationAPI</code>…</li>
+      <li><span class="t">09-jun</span> <code>SendingPaused</code> / <code>SenderSMS</code> / <code>SendingPausedV2</code>
+        actualizadas 4× cada una (probable toggling de pausa de envío SES)</li>
+      <li><span class="t">10-jun</span> <code>emailActivityWebhookAPI</code>, <code>custom-activity-whatsapp</code></li>
+    </ul>
+  </div>
+
+  <div class="cols2">
+    <div class="card" style="margin-top:22px">
+      <h2><span class="n">4</span> Quién cambia la infra</h2>
+      <table>
+        <tbody>
+          <tr><td><span class="badge b-gh">GitHub Actions</span></td><td>Deploys de apps ECS + API Gateway (lo más frecuente)</td></tr>
+          <tr><td><span class="badge b-tf">Terraform</span></td><td>Infra base: fakesmtp, CloudFront, API nueva, roles</td></tr>
+          <tr><td><span class="badge b-hu">Humanos</span></td><td>J.&nbsp;S.&nbsp;Ruedo (Kyndryl) · D.&nbsp;Cruz (Seguros&nbsp;Bolívar)</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="card" style="margin-top:22px">
+      <h2>Alcance y notas</h2>
+      <ul style="margin:6px 0 0;padding-left:18px;font-size:13.5px">
+        <li>Revisado solo <code>us-east-1</code> (donde vive toda la infra del notificador).</li>
+        <li>Eventos de despliegue capturados <b>completos</b> para el mes (<code>UpdateService</code>=393 &lt; tope).</li>
+        <li>Perfil de acceso <code>not-stage</code> = <b>solo lectura</b> (rol <code>ViewOnlyAccess</code>).</li>
+        <li>Datos obtenidos vía <code>aws cloudtrail lookup-events</code>.</li>
+      </ul>
+    </div>
+  </div>
+
+  <footer>
+    Generado a partir de AWS CloudTrail y CloudFormation · Cuenta 243755603146 (Notificaciones Transversales STG) · 01-jul-2026
+  </footer>
+
+</div>
+</body>
+</html>

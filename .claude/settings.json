@@ -3,7 +3,22 @@
     "allow": [
       "Bash(rsvg-convert -w 1400 /Users/HernanDarioBetancurCardenas/Desktop/ciencuadras-v2-preview.svg -o /Users/HernanDarioBetancurCardenas/Desktop/ciencuadras-v2-preview.png)",
       "Bash(rsvg-convert -w 1600 /tmp/v3-preview.svg -o /tmp/v3-preview.png)",
-      "Bash(rm -rf /tmp/aws-meta /tmp/v3-preview.svg /tmp/v3-preview.png && ls -lah ~/Desktop/ciencuadras-prod-aws*)"
+      "Bash(rm -rf /tmp/aws-meta /tmp/v3-preview.svg /tmp/v3-preview.png && ls -lah ~/Desktop/ciencuadras-prod-aws*)",
+      "Bash(cat skills/devops/aws-sso-refresh/scripts/aws-refresh.sh 2>/dev/null; echo \"=== config ===\"; cat skills/devops/aws-sso-refresh/cuentas/ciencuadras/config.env 2>/dev/null; echo \"=== sso_vars ===\"; cat ~/.aws/.sso_vars 2>/dev/null)",
+      "Read(//Users/HernanDarioBetancurCardenas/.aws/**)",
+      "WebFetch(domain:playwright.dev)",
+      "WebSearch",
+      "Bash(git check-ignore *)",
+      "WebFetch(domain:docs.dndocs.com)",
+      "Bash(npm install *)",
+      "Bash(aws --version)",
+      "Bash(aws configure *)",
+      "Bash(break)",
+      "Bash(SCRATCH=\"/private/tmp/claude-502/-Users-HernanDarioBetancurCardenas-arquitectura-skills-personalizados-dev/bc2bc095-bf3b-4b2d-bb0b-f0e9c0566481/scratchpad\" *)",
+      "Read(//private/tmp/claude-502/-Users-HernanDarioBetancurCardenas-arquitectura-skills-personalizados-dev/bc2bc095-bf3b-4b2d-bb0b-f0e9c0566481/tasks/**)",
+      "Bash(.venv/bin/pip install *)",
+      "Bash(.venv/bin/python -c \"import openpyxl; print\\('OK openpyxl', openpyxl.__version__\\)\")",
+      "Bash(open \"/Users/HernanDarioBetancurCardenas/arquitectura/skills-personalizados-dev/informe-infra-notificador-stage.html\")"
     ],
     "additionalDirectories": [
       "/private/tmp"

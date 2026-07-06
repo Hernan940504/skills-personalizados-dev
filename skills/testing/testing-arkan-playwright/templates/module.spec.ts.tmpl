@@ -1,0 +1,35 @@
+import { test, expect } from '@playwright/test';
+import { {{MODULE_CLASS}}Page } from '../pages/{{MODULE_SLUG}}.page';
+
+/**
+ * Pruebas E2E del módulo "{{MODULE_NAME}}".
+ * Corre en el proyecto `e2e` -> ya autenticado vía storageState (sin re-login).
+ *
+ * Estructura sugerida por escenario:
+ *  - Camino feliz (la funcionalidad principal del módulo).
+ *  - Validaciones (errores esperados, campos requeridos).
+ *  - Estados/datos (filtros, paginación, vacío).
+ */
+test.describe('{{MODULE_NAME}}', () => {
+  let modulo: {{MODULE_CLASS}}Page;
+
+  test.beforeEach(async ({ page }) => {
+    modulo = new {{MODULE_CLASS}}Page(page);
+    await modulo.goto();
+  });
+
+  test('carga el módulo y muestra su contenido principal', async () => {
+    await modulo.assertLoaded();
+  });
+
+  test('camino feliz: {{HAPPY_PATH_DESC}}', async ({ page }) => {
+    // await modulo.{{ACTION_METHOD}}();
+    // Web-first assertion (auto-retry): verifica comportamiento visible al usuario.
+    await expect(page.getByText(/{{EXPECTED_RESULT}}/i)).toBeVisible();
+  });
+
+  test('validación: {{VALIDATION_DESC}}', async ({ page }) => {
+    // Disparar el flujo inválido y verificar el mensaje de error esperado.
+    await expect(page.getByText(/{{EXPECTED_ERROR}}/i)).toBeVisible();
+  });
+});
