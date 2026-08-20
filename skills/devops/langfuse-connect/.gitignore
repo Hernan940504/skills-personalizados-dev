@@ -1,0 +1,8 @@
+# Nunca commitear llaves reales de Langfuse
+proyectos/*/secret.env
+proyectos/*/config.env
+!proyectos/_ejemplo/config.env
+
+# python
+__pycache__/
+*.pyc

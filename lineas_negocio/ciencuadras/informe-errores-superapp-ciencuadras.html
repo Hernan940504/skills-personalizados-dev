@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Informe de Errores — SuperApp Davivienda ↔ Ciencuadras</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0f172a; color: #e2e8f0; line-height: 1.6; padding: 2rem; }
+        .container { max-width: 1400px; margin: 0 auto; }
+        h1 { font-size: 2rem; margin-bottom: 0.5rem; color: #f8fafc; }
+        h2 { font-size: 1.4rem; margin: 2rem 0 1rem; color: #94a3b8; border-bottom: 1px solid #334155; padding-bottom: 0.5rem; }
+        h3 { font-size: 1.1rem; margin: 1.5rem 0 0.75rem; color: #cbd5e1; }
+        .subtitle { color: #64748b; margin-bottom: 2rem; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin: 1.5rem 0; }
+        .card { background: #1e293b; border-radius: 12px; padding: 1.5rem; border: 1px solid #334155; }
+        .card-title { font-size: 0.85rem; text-transform: uppercase; color: #64748b; letter-spacing: 0.05em; }
+        .card-value { font-size: 2rem; font-weight: 700; margin: 0.5rem 0; }
+        .card-detail { font-size: 0.85rem; color: #94a3b8; }
+        .green { color: #4ade80; }
+        .yellow { color: #fbbf24; }
+        .red { color: #f87171; }
+        .orange { color: #fb923c; }
+        .blue { color: #60a5fa; }
+</style>
+</head>
+<body>
+<div class="container">
+<h1>Informe de Errores — Flujo SuperApp Davivienda ↔ Ciencuadras</h1>
+<p class="subtitle">Periodo: 17-18 julio 2026 (48h) | Generado: 19 julio 2026 02:15 COT</p>
+
+<h2>1. Resumen Ejecutivo</h2>
+<div class="grid">
+    <div class="card">
+        <div class="card-title">Ecosistema Home (935071422812)</div>
+        <div class="card-value green">0 errores</div>
+        <div class="card-detail">0 errores 4xx / 0 errores 5xx en 48h<br>Latencia promedio: 315ms</div>
+    </div>
+    <div class="card">
+        <div class="card-title">Auth Silenciosa (automatic-auth-ms)</div>
+        <div class="card-value green">0 errores</div>
+        <div class="card-detail">Flujo operando correctamente<br>Procesando requests con tokenPM y channel AL002</div>
+    </div>
+    <div class="card">
+        <div class="card-title">API Gateway Ciencuadras PROD</div>
+        <div class="card-value yellow">1,033 5xx/24h</div>
+        <div class="card-detail">~28,590 errores 4xx/24h<br>Pico: 136 5xx entre 11:00-12:00</div>
+    </div>
+    <div class="card">
+        <div class="card-title">Token Cache (apiterra-ch)</div>
+        <div class="card-value green">0 errores 5xx</div>
+        <div class="card-detail">Proxy de tokens Cognito funcionando<br>Sin interrupciones en generación de tokens</div>
+    </div>
+</div>
+
+<h2>2. Arquitectura del Flujo</h2>
+<div class="card" style="overflow-x:auto;">
+<pre style="font-size:0.8rem; color:#94a3b8; line-height:1.8;">
+┌───────────────────────┐       ┌─────────────────────────────────────────┐       ┌────────────────────────────────────────────┐
+│   SuperApp Davivienda │       │   Ecosistema Home (935071422812)        │       │   Ciencuadras (290296201161)               │
+│                       │       │                                         │       │                                            │
+│  1. Obtiene token M2M │──────▶│  API: ecohome-integration-prod-alb-ga   │       │  API Gateway: ciencuadras-prod-api-gateway │
+│     (Cognito OAuth2)  │       │  (Private API Gateway + VPC Endpoint)   │       │                                            │
+│                       │       │                                         │       │  ┌─ /automatic-auth/api/v1/auth ───────┐   │
+│  2. POST /customers   │──────▶│  ECS: ecohome-integration-prod-service  │       │  │  automatic-auth-ms (ECS, 2 tasks)   │   │
+│     (datos PGP)       │       │  (7 tasks Fargate + Redis cache)        │       │  │  → Perfilamiento → Login silencioso  │   │
+│                       │       │                                         │       │  └──────────────────────────────────────┘   │
+│  3. GET /customers/v2 │──────▶│  Cognito Pool: us-east-1_ttPKjn5Uo      │       │                                            │
+│     (recupera datos)  │       │  Scopes: customers/read, urls/read,     │       │  ┌─ /auth/{proxy+} ────────────────────┐   │
+│                       │       │          customers/update, clean/read    │       │  │  auth-ms (ECS, 4 tasks)              │   │
+│  4. Carga MF inmuebles│       │                                         │       │  │  → Registro / Login tradicional      │   │
+│     venta/arriendo/   │       │  Partners: 106 (Cien cuadras),          │       │  └──────────────────────────────────────┘   │
+│     proyectos/remates │       │            107 (Cien cuadras)           │       │                                            │
+│                       │       │                                         │       │  ┌─ Microfrontends (ECS, 2 tasks c/u) ─┐   │
+│                       │       │  Estado: <span class="green">SIN ERRORES 48h</span>               │       │  │  mf-result-venta (compra usado)      │   │
+│                       │       │  Latencia avg: 315ms / max: 2.9s        │       │  │  mf-result-proyectos (compra nuevo)  │   │
+└───────────────────────┘       └─────────────────────────────────────────┘       │  │  mf-result-arriendo                  │   │
+                                                                                   │  │  mf-result-remate                    │   │
+                                                                                   │  └──────────────────────────────────────┘   │
+                                                                                   └────────────────────────────────────────────┘
+</pre>
+</div>
+
+<h2>3. Estado de Servicios</h2>
+<div class="card" style="overflow-x:auto;">
+<table style="width:100%; border-collapse:collapse; font-size:0.85rem;">
+<thead><tr style="border-bottom:1px solid #475569; text-align:left;">
+<th style="padding:0.75rem;">Servicio</th><th style="padding:0.75rem;">Cuenta</th><th style="padding:0.75rem;">Tasks</th><th style="padding:0.75rem;">Estado</th><th style="padding:0.75rem;">Errores 48h</th><th style="padding:0.75rem;">Severidad</th>
+</tr></thead>
+<tbody>
+<tr style="border-bottom:1px solid #1e293b;"><td style="padding:0.75rem;">ecohome-integration-prod-service</td><td>935071422812</td><td>7/7</td><td class="green">ACTIVE</td><td class="green">0</td><td class="green">OK</td></tr>
+<tr style="border-bottom:1px solid #1e293b;"><td style="padding:0.75rem;">eh-admincomponents-prod-service</td><td>935071422812</td><td>2/2</td><td class="green">ACTIVE</td><td class="green">0</td><td class="green">OK</td></tr>
+<tr style="border-bottom:1px solid #1e293b;"><td style="padding:0.75rem;">automatic-auth-ms</td><td>290296201161</td><td>2/2</td><td class="green">ACTIVE</td><td class="green">0</td><td class="green">OK</td></tr>
+<tr style="border-bottom:1px solid #1e293b;"><td style="padding:0.75rem;">Lambda Authorizer (validate-token)</td><td>290296201161</td><td>—</td><td class="green">OK</td><td class="green">0</td><td class="green">OK</td></tr>
+<tr style="border-bottom:1px solid #1e293b;"><td style="padding:0.75rem;">mf-result-venta (compra usado)</td><td>290296201161</td><td>2/2</td><td class="green">ACTIVE</td><td class="yellow">1</td><td class="yellow">BAJA</td></tr>
+<tr style="border-bottom:1px solid #1e293b;"><td style="padding:0.75rem;">mf-result-proyectos (compra nuevo)</td><td>290296201161</td><td>2/2</td><td class="green">ACTIVE</td><td class="green">0</td><td class="green">OK</td></tr>
+<tr style="border-bottom:1px solid #1e293b;"><td style="padding:0.75rem;">mf-result-arriendo</td><td>290296201161</td><td>2/2</td><td class="green">ACTIVE</td><td class="green">0</td><td class="green">OK</td></tr>
+<tr style="border-bottom:1px solid #1e293b;"><td style="padding:0.75rem;">mf-result-remate</td><td>290296201161</td><td>2/2</td><td class="green">ACTIVE</td><td class="green">0</td><td class="green">OK</td></tr>
+<tr style="border-bottom:1px solid #1e293b;"><td style="padding:0.75rem;">auth-ms (registro/login)</td><td>290296201161</td><td>4/4</td><td class="green">ACTIVE</td><td class="red">ALTO</td><td class="red">ALTA</td></tr>
+<tr style="border-bottom:1px solid #1e293b;"><td style="padding:0.75rem;">publicaciones-ms</td><td>290296201161</td><td>—</td><td class="green">ACTIVE</td><td class="orange">MEDIO</td><td class="orange">MEDIA</td></tr>
+<tr style="border-bottom:1px solid #1e293b;"><td style="padding:0.75rem;">resultados-ms</td><td>290296201161</td><td>—</td><td class="green">ACTIVE</td><td class="yellow">BAJO</td><td class="yellow">BAJA</td></tr>
+</tbody></table>
+</div>
+
+<h2>4. Errores 5xx API Gateway Ciencuadras — Línea de Tiempo (24h)</h2>
+<div class="card">
+<div style="display:flex; align-items:flex-end; gap:2px; height:120px; padding:1rem 0;">
+<div style="display:flex; flex-direction:column; align-items:center; flex:1;" title="00:00 - 15"><div style="background:#4ade80; width:100%; height:9px; border-radius:2px;"></div><span style="font-size:0.6rem; color:#64748b;">00</span></div>
+<div style="display:flex; flex-direction:column; align-items:center; flex:1;" title="01:00 - 13"><div style="background:#4ade80; width:100%; height:8px; border-radius:2px;"></div><span style="font-size:0.6rem; color:#64748b;">01</span></div>
+<div style="display:flex; flex-direction:column; align-items:center; flex:1;" title="02:00 - 15"><div style="background:#4ade80; width:100%; height:9px; border-radius:2px;"></div><span style="font-size:0.6rem; color:#64748b;">02</span></div>
+<div style="display:flex; flex-direction:column; align-items:center; flex:1;" title="03:00 - 20"><div style="background:#4ade80; width:100%; height:12px; border-radius:2px;"></div><span style="font-size:0.6rem; color:#64748b;">03</span></div>
+<div style="display:flex; flex-direction:column; align-items:center; flex:1;" title="04:00 - 48"><div style="background:#fbbf24; width:100%; height:29px; border-radius:2px;"></div><span style="font-size:0.6rem; color:#64748b;">04</span></div>
+<div style="display:flex; flex-direction:column; align-items:center; flex:1;" title="05:00 - 46"><div style="background:#fbbf24; width:100%; height:28px; border-radius:2px;"></div><span style="font-size:0.6rem; color:#64748b;">05</span></div>
+<div style="display:flex; flex-direction:column; align-items:center; flex:1;" title="06:00 - 51"><div style="background:#fbbf24; width:100%; height:31px; border-radius:2px;"></div><span style="font-size:0.6rem; color:#64748b;">06</span></div>
+<div style="display:flex; flex-direction:column; align-items:center; flex:1;" title="07:00 - 64"><div style="background:#fb923c; width:100%; height:39px; border-radius:2px;"></div><span style="font-size:0.6rem; color:#64748b;">07</span></div>
+<div style="display:flex; flex-direction:column; align-items:center; flex:1;" title="08:00 - 82"><div style="background:#fb923c; width:100%; height:50px; border-radius:2px;"></div><span style="font-size:0.6rem; color:#64748b;">08</span></div>
+<div style="display:flex; flex-direction:column; align-items:center; flex:1;" title="09:00 - 92"><div style="background:#f87171; width:100%; height:56px; border-radius:2px;"></div><span style="font-size:0.6rem; color:#64748b;">09</span></div>
+<div style="display:flex; flex-direction:column; align-items:center; flex:1;" title="10:00 - 44"><div style="background:#fbbf24; width:100%; height:27px; border-radius:2px;"></div><span style="font-size:0.6rem; color:#64748b;">10</span></div>
+<div style="display:flex; flex-direction:column; align-items:center; flex:1;" title="11:00 - 136"><div style="background:#f87171; width:100%; height:83px; border-radius:2px;"></div><span style="font-size:0.6rem; color:#f87171; font-weight:bold;">11</span></div>
+<div style="display:flex; flex-direction:column; align-items:center; flex:1;" title="12:00 - 31"><div style="background:#4ade80; width:100%; height:19px; border-radius:2px;"></div><span style="font-size:0.6rem; color:#64748b;">12</span></div>
+<div style="display:flex; flex-direction:column; align-items:center; flex:1;" title="13:00 - 30"><div style="background:#4ade80; width:100%; height:18px; border-radius:2px;"></div><span style="font-size:0.6rem; color:#64748b;">13</span></div>
+<div style="display:flex; flex-direction:column; align-items:center; flex:1;" title="14:00 - 33"><div style="background:#4ade80; width:100%; height:20px; border-radius:2px;"></div><span style="font-size:0.6rem; color:#64748b;">14</span></div>
+<div style="display:flex; flex-direction:column; align-items:center; flex:1;" title="15:00 - 65"><div style="background:#fb923c; width:100%; height:40px; border-radius:2px;"></div><span style="font-size:0.6rem; color:#64748b;">15</span></div>
+<div style="display:flex; flex-direction:column; align-items:center; flex:1;" title="16:00 - 31"><div style="background:#4ade80; width:100%; height:19px; border-radius:2px;"></div><span style="font-size:0.6rem; color:#64748b;">16</span></div>
+<div style="display:flex; flex-direction:column; align-items:center; flex:1;" title="17:00 - 25"><div style="background:#4ade80; width:100%; height:15px; border-radius:2px;"></div><span style="font-size:0.6rem; color:#64748b;">17</span></div>
+<div style="display:flex; flex-direction:column; align-items:center; flex:1;" title="18:00 - 28"><div style="background:#4ade80; width:100%; height:17px; border-radius:2px;"></div><span style="font-size:0.6rem; color:#64748b;">18</span></div>
+<div style="display:flex; flex-direction:column; align-items:center; flex:1;" title="19:00 - 30"><div style="background:#4ade80; width:100%; height:18px; border-radius:2px;"></div><span style="font-size:0.6rem; color:#64748b;">19</span></div>
+<div style="display:flex; flex-direction:column; align-items:center; flex:1;" title="20:00 - 26"><div style="background:#4ade80; width:100%; height:16px; border-radius:2px;"></div><span style="font-size:0.6rem; color:#64748b;">20</span></div>
+<div style="display:flex; flex-direction:column; align-items:center; flex:1;" title="21:00 - 25"><div style="background:#4ade80; width:100%; height:15px; border-radius:2px;"></div><span style="font-size:0.6rem; color:#64748b;">21</span></div>
+</div>
+<p style="font-size:0.75rem; color:#64748b; text-align:center;">Hora (COT) — Errores 5xx por hora | Pico: 136 errores a las 11:00</p>
+</div>
+
+<h2>5. Detalle de Errores por Tipo</h2>
+
+<h3>5.1 — auth-ms: Registro Duplicado (RUS-401) <span class="red">▲ ALTA FRECUENCIA</span></h3>
+<div class="card">
+<table style="width:100%; font-size:0.85rem; border-collapse:collapse;">
+<tr style="border-bottom:1px solid #334155;"><td style="padding:0.5rem; color:#64748b; width:140px;">Servicio</td><td style="padding:0.5rem;">ciencuadras-prod-java-auth-ms</td></tr>
+<tr style="border-bottom:1px solid #334155;"><td style="padding:0.5rem; color:#64748b;">Error</td><td style="padding:0.5rem;"><code style="color:#f87171;">RUS-401 — RegisterException: Ya existe una cuenta con estos datos</code></td></tr>
+<tr style="border-bottom:1px solid #334155;"><td style="padding:0.5rem; color:#64748b;">Clase</td><td style="padding:0.5rem;">AuthExceptionHandler / UserServiceImp</td></tr>
+<tr style="border-bottom:1px solid #334155;"><td style="padding:0.5rem; color:#64748b;">Frecuencia</td><td style="padding:0.5rem;">Ráfagas de 10-15 reintentos consecutivos cada ~10s (patrón exponencial backoff del cliente)</td></tr>
+<tr style="border-bottom:1px solid #334155;"><td style="padding:0.5rem; color:#64748b;">Horarios</td><td style="padding:0.5rem;">03:18, 03:43, 03:44, 03:45, 03:46 (madrugada — posible bot o proceso batch)</td></tr>
+<tr style="border-bottom:1px solid #334155;"><td style="padding:0.5rem; color:#64748b;">Impacto</td><td style="padding:0.5rem;">No afecta auth silenciosa. Genera ruido en logs y carga innecesaria al servicio.</td></tr>
+<tr><td style="padding:0.5rem; color:#64748b;">Causa raíz</td><td style="padding:0.5rem;">Cliente/frontend intenta registrar usuario con documento existente y reintenta agresivamente sin respetar el error. El WARN muestra <code>cuenta con documento existente: Optional.empty</code> — el usuario no se encuentra por email pero sí por documento.</td></tr>
+</table>
+</div>
+
+<h3>5.2 — auth-ms: Habeas Data 400 Bad Request <span class="orange">▲ MEDIA FRECUENCIA</span></h3>
+<div class="card">
+<table style="width:100%; font-size:0.85rem; border-collapse:collapse;">
+<tr style="border-bottom:1px solid #334155;"><td style="padding:0.5rem; color:#64748b; width:140px;">Servicio</td><td style="padding:0.5rem;">ciencuadras-prod-java-auth-ms → HabeasDataServiceImpl</td></tr>
+<tr style="border-bottom:1px solid #334155;"><td style="padding:0.5rem; color:#64748b;">Error</td><td style="padding:0.5rem;"><code style="color:#fb923c;">Error sending habeas data for user X: 400 Bad Request from POST /prod/utilities/habeasData</code></td></tr>
+<tr style="border-bottom:1px solid #334155;"><td style="padding:0.5rem; color:#64748b;">Frecuencia</td><td style="padding:0.5rem;">~15-20 errores/hora durante actividad de registro</td></tr>
+<tr style="border-bottom:1px solid #334155;"><td style="padding:0.5rem; color:#64748b;">Impacto</td><td style="padding:0.5rem;"><strong>Riesgo regulatorio</strong> — La aceptación de habeas data del usuario no se persiste correctamente. Normativa colombiana de protección de datos (Ley 1581).</td></tr>
+<tr><td style="padding:0.5rem; color:#64748b;">Causa raíz</td><td style="padding:0.5rem;">El endpoint <code>/prod/utilities/habeasData</code> rechaza el payload con 400. Posible cambio de contrato en el servicio utilities o datos del usuario incompletos/malformados.</td></tr>
+</table>
+</div>
+
+<h3>5.3 — publicaciones-ms: Fallo sincronización ElasticSearch <span class="orange">▲ MEDIA</span></h3>
+<div class="card">
+<table style="width:100%; font-size:0.85rem; border-collapse:collapse;">
+<tr style="border-bottom:1px solid #334155;"><td style="padding:0.5rem; color:#64748b; width:140px;">Servicio</td><td style="padding:0.5rem;">ciencuadras-prod-java-publicaciones-ms → SyncService</td></tr>
+<tr style="border-bottom:1px solid #334155;"><td style="padding:0.5rem; color:#64748b;">Error</td><td style="padding:0.5rem;"><code style="color:#fb923c;">Error Elastic method updateByPublicationId propertyId:XXXX</code><br><code>SimpleAsyncUncaughtExceptionHandler: Unexpected exception on async method</code></td></tr>
+<tr style="border-bottom:1px solid #334155;"><td style="padding:0.5rem; color:#64748b;">Frecuencia</td><td style="padding:0.5rem;">Ráfagas de ~20 errores en batch nocturno (22:04 COT)</td></tr>
+<tr style="border-bottom:1px solid #334155;"><td style="padding:0.5rem; color:#64748b;">PropertyIds afectados</td><td style="padding:0.5rem;">3347868, 3261025, 2042248, 3393732, 1497225, 3380235, 1925328, 3221528, 3245276, 3278457 (entre otros)</td></tr>
+<tr style="border-bottom:1px solid #334155;"><td style="padding:0.5rem; color:#64748b;">Impacto</td><td style="padding:0.5rem;"><strong>Inmuebles desactualizados en búsqueda</strong> — Los componentes de venta, arriendo, proyectos y remates pueden mostrar datos obsoletos para estas publicaciones (fotos, precio, estado).</td></tr>
+<tr><td style="padding:0.5rem; color:#64748b;">Causa raíz</td><td style="padding:0.5rem;">El proceso async de sincronización falla al conectar con ElasticSearch. El error no se logea completamente (el message termina en <code>error:</code> sin detalle). Probable timeout o rechazo de ES por bulk rate.</td></tr>
+</table>
+</div>
+
+<h3>5.4 — resultados-ms: Bug de Serialización Redis <span class="yellow">▲ BAJA (pero constante)</span></h3>
+<div class="card">
+<table style="width:100%; font-size:0.85rem; border-collapse:collapse;">
+<tr style="border-bottom:1px solid #334155;"><td style="padding:0.5rem; color:#64748b; width:140px;">Servicio</td><td style="padding:0.5rem;">ciencuadras-prod-java-resultados-ms → RedisConfiguration</td></tr>
+<tr style="border-bottom:1px solid #334155;"><td style="padding:0.5rem; color:#64748b;">Error</td><td style="padding:0.5rem;"><code style="color:#fbbf24;">Failure getting from cache: suggested — Cannot serialize; java.io.NotSerializableException: java.util.ArrayList$SubList</code></td></tr>
+<tr style="border-bottom:1px solid #334155;"><td style="padding:0.5rem; color:#64748b;">Frecuencia</td><td style="padding:0.5rem;">Constante — cada 3-5 minutos (cada vez que se intenta cachear resultados sugeridos)</td></tr>
+<tr style="border-bottom:1px solid #334155;"><td style="padding:0.5rem; color:#64748b;">Impacto</td><td style="padding:0.5rem;"><strong>Degradación de performance</strong> — La caché de inmuebles sugeridos NUNCA funciona. Cada request a sugeridos golpea directamente ElasticSearch/BD, aumentando latencia (~300ms extra por request) y carga en el cluster ES.</td></tr>
+<tr><td style="padding:0.5rem; color:#64748b;">Causa raíz</td><td style="padding:0.5rem;"><strong>Bug de código confirmado</strong> — Se usa <code>list.subList()</code> que retorna un <code>ArrayList$SubList</code> (no serializable). Fix: envolver con <code>new ArrayList&lt;&gt;(subList)</code> antes de guardar en Redis.</td></tr>
+</table>
+</div>
+
+<h3>5.5 — mf-result-venta: Error de Routing Angular <span class="yellow">▲ BAJA (aislado)</span></h3>
+<div class="card">
+<table style="width:100%; font-size:0.85rem; border-collapse:collapse;">
+<tr style="border-bottom:1px solid #334155;"><td style="padding:0.5rem; color:#64748b; width:140px;">Servicio</td><td style="padding:0.5rem;">ciencuadras-prod-node-result-venta-service (SSR Angular)</td></tr>
+<tr style="border-bottom:1px solid #334155;"><td style="padding:0.5rem; color:#64748b;">Error</td><td style="padding:0.5rem;"><code style="color:#fbbf24;">Cannot match any routes. URL Segment: 'envigado'</code></td></tr>
+<tr style="border-bottom:1px solid #334155;"><td style="padding:0.5rem; color:#64748b;">Frecuencia</td><td style="padding:0.5rem;">Aislado (1 ocurrencia en 48h)</td></tr>
+<tr><td style="padding:0.5rem; color:#64748b;">Impacto</td><td style="padding:0.5rem;">Mínimo — Un crawler/bot accede a un path SEO no registrado en el router Angular. No afecta usuarios normales.</td></tr>
+</table>
+</div>
+
+<h2>6. Tasa de Error por Servicio</h2>
+<div class="grid">
+    <div class="card">
+        <div class="card-title">API Gateway CC Prod — 5xx Rate</div>
+        <div class="card-value orange">~43/hora</div>
+        <div class="card-detail">Total 24h: ~1,033 errores 5xx<br>Pico: 136 (11:00 COT) — correlaciona con hora pico de tráfico</div>
+    </div>
+    <div class="card">
+        <div class="card-title">API Gateway CC Prod — 4xx Rate</div>
+        <div class="card-value yellow">~1,191/hora</div>
+        <div class="card-detail">Total 24h: ~28,590 errores 4xx<br>Incluye 403 del authorizer (tokens expirados) y 404s legítimos</div>
+    </div>
+    <div class="card">
+        <div class="card-title">Ecosistema Home (intermediario)</div>
+        <div class="card-value green">0/hora</div>
+        <div class="card-detail">48h sin un solo error<br>Latencia p50: 315ms | p99: 2.9s</div>
+    </div>
+    <div class="card">
+        <div class="card-title">Token Cache (apiterra-ch)</div>
+        <div class="card-value green">0/hora</div>
+        <div class="card-detail">Cognito token endpoint respondiendo sin fallas<br>Cache habilitado por origin+auth+scope</div>
+    </div>
+</div>
+
+<h2>7. Latencia del API Ecosistema Home (935071422812)</h2>
+<div class="card">
+<table style="width:100%; font-size:0.85rem; border-collapse:collapse;">
+<thead><tr style="border-bottom:1px solid #475569; text-align:left;">
+<th style="padding:0.5rem;">Hora (COT)</th><th style="padding:0.5rem;">Promedio</th><th style="padding:0.5rem;">Máximo</th><th style="padding:0.5rem;">Estado</th>
+</tr></thead>
+<tbody>
+<tr style="border-bottom:1px solid #1e293b;"><td style="padding:0.5rem;">00:00</td><td>294ms</td><td>894ms</td><td class="green">OK</td></tr>
+<tr style="border-bottom:1px solid #1e293b;"><td style="padding:0.5rem;">02:00</td><td>292ms</td><td>923ms</td><td class="green">OK</td></tr>
+<tr style="border-bottom:1px solid #1e293b;"><td style="padding:0.5rem;">05:00</td><td>267ms</td><td>1,441ms</td><td class="green">OK</td></tr>
+<tr style="border-bottom:1px solid #1e293b;"><td style="padding:0.5rem;">06:00</td><td>352ms</td><td>2,051ms</td><td class="yellow">Latencia alta</td></tr>
+<tr style="border-bottom:1px solid #1e293b;"><td style="padding:0.5rem;">07:00</td><td>323ms</td><td>1,798ms</td><td class="green">OK</td></tr>
+<tr style="border-bottom:1px solid #1e293b;"><td style="padding:0.5rem;">08:00</td><td>310ms</td><td>1,482ms</td><td class="green">OK</td></tr>
+<tr style="border-bottom:1px solid #1e293b;"><td style="padding:0.5rem;">10:00</td><td>284ms</td><td>1,202ms</td><td class="green">OK</td></tr>
+<tr style="border-bottom:1px solid #1e293b;"><td style="padding:0.5rem;">12:00</td><td>313ms</td><td>2,069ms</td><td class="yellow">Pico latencia</td></tr>
+<tr style="border-bottom:1px solid #1e293b;"><td style="padding:0.5rem;">15:00</td><td>350ms</td><td>2,199ms</td><td class="yellow">Pico latencia</td></tr>
+<tr style="border-bottom:1px solid #1e293b;"><td style="padding:0.5rem;">18:00</td><td>342ms</td><td>2,970ms</td><td class="orange">Máximo del día</td></tr>
+<tr style="border-bottom:1px solid #1e293b;"><td style="padding:0.5rem;">20:00</td><td>341ms</td><td>1,834ms</td><td class="green">OK</td></tr>
+<tr><td style="padding:0.5rem;">21:00</td><td>351ms</td><td>1,990ms</td><td class="green">OK</td></tr>
+</tbody></table>
+<p style="font-size:0.75rem; color:#64748b; margin-top:0.75rem;">Latencia máxima: 2.97s (18:00 COT). Promedio general: 315ms. Dentro de SLO &lt; 3s.</p>
+</div>
+
+<h2>8. Conclusiones</h2>
+<div class="card">
+<ol style="padding-left:1.5rem; font-size:0.9rem; line-height:2;">
+<li><strong>La autenticación silenciosa funciona correctamente.</strong> El servicio <code>automatic-auth-ms</code> procesa requests de la SuperApp sin errores. Los datos de perfilamiento (nombre, documento, teléfono, email) se obtienen y el tokenPM se genera exitosamente.</li>
+<li><strong>La capa intermediaria (Ecosistema Home) está estable.</strong> 0 errores en 48h, latencia dentro de SLOs, datos PGP-encrypted viajan correctamente entre cuentas.</li>
+<li><strong>Los microfrontends de inmuebles operan sin errores</strong> (compra usado, compra nuevo, arriendo, remates). Todos con 2 tasks activos y deployments completados.</li>
+<li><strong>Los problemas están concentrados en servicios backend de Ciencuadras</strong>, no en el flujo de integración con Davivienda:
+    <ul style="margin:0.5rem 0; padding-left:1rem;">
+        <li>auth-ms: reintentos agresivos de registro + habeas data fallando</li>
+        <li>publicaciones-ms: sincronización ES nocturna con fallos</li>
+        <li>resultados-ms: cache de sugeridos inutilizada por bug de serialización</li>
+    </ul>
+</li>
+</ol>
+</div>
+
+<h2>9. Recomendaciones Priorizadas</h2>
+<div class="card">
+<table style="width:100%; font-size:0.85rem; border-collapse:collapse;">
+<thead><tr style="border-bottom:1px solid #475569; text-align:left;">
+<th style="padding:0.75rem;">Prioridad</th><th style="padding:0.75rem;">Acción</th><th style="padding:0.75rem;">Impacto</th><th style="padding:0.75rem;">Esfuerzo</th>
+</tr></thead>
+<tbody>
+<tr style="border-bottom:1px solid #1e293b;"><td style="padding:0.75rem;" class="red">P1</td><td style="padding:0.75rem;">Investigar y corregir <code>/utilities/habeasData</code> retornando 400</td><td>Riesgo regulatorio Ley 1581</td><td>Medio</td></tr>
+<tr style="border-bottom:1px solid #1e293b;"><td style="padding:0.75rem;" class="orange">P2</td><td style="padding:0.75rem;">Fix bug serialización Redis en resultados-ms: <code>new ArrayList&lt;&gt;(subList)</code></td><td>Reducir latencia + carga ES</td><td>Bajo (1 línea)</td></tr>
+<tr style="border-bottom:1px solid #1e293b;"><td style="padding:0.75rem;" class="orange">P3</td><td style="padding:0.75rem;">Revisar retry policy del cliente que genera ráfagas RUS-401</td><td>Reducir carga innecesaria</td><td>Medio</td></tr>
+<tr style="border-bottom:1px solid #1e293b;"><td style="padding:0.75rem;" class="yellow">P4</td><td style="padding:0.75rem;">Mejorar logging en SyncService de publicaciones-ms (incluir exception message)</td><td>Diagnóstico más rápido</td><td>Bajo</td></tr>
+<tr><td style="padding:0.75rem;" class="yellow">P5</td><td style="padding:0.75rem;">Monitorear latencia p99 del ecosistema home en horario 18:00 (pico 2.97s)</td><td>Prevención proactiva</td><td>Bajo</td></tr>
+</tbody></table>
+</div>
+
+<h2>10. Datos Técnicos de Referencia</h2>
+<div class="card">
+<table style="width:100%; font-size:0.8rem; border-collapse:collapse;">
+<thead><tr style="border-bottom:1px solid #475569; text-align:left;">
+<th style="padding:0.5rem;">Componente</th><th style="padding:0.5rem;">Identificador</th>
+</tr></thead>
+<tbody>
+<tr style="border-bottom:1px solid #1e293b;"><td style="padding:0.5rem;">Cuenta Ciencuadras</td><td style="padding:0.5rem;">290296201161</td></tr>
+<tr style="border-bottom:1px solid #1e293b;"><td style="padding:0.5rem;">Cuenta Ecosistema Home (intermediaria)</td><td style="padding:0.5rem;">935071422812</td></tr>
+<tr style="border-bottom:1px solid #1e293b;"><td style="padding:0.5rem;">API Gateway CC Prod</td><td style="padding:0.5rem;">ym3uebm19k (ciencuadras-prod-api-gateway)</td></tr>
+<tr style="border-bottom:1px solid #1e293b;"><td style="padding:0.5rem;">API Gateway EcoHome (private)</td><td style="padding:0.5rem;">xi9y8am002 (ecohome-integration-prod-alb-ga)</td></tr>
+<tr style="border-bottom:1px solid #1e293b;"><td style="padding:0.5rem;">API Token Cache</td><td style="padding:0.5rem;">ntwfwpb108 (ciencuadras-prod-apiterra-ch)</td></tr>
+<tr style="border-bottom:1px solid #1e293b;"><td style="padding:0.5rem;">Cognito Pool CC</td><td style="padding:0.5rem;">us-east-1_V2XdAbbmn</td></tr>
+<tr style="border-bottom:1px solid #1e293b;"><td style="padding:0.5rem;">Cognito Pool EcoHome</td><td style="padding:0.5rem;">us-east-1_ttPKjn5Uo</td></tr>
+<tr style="border-bottom:1px solid #1e293b;"><td style="padding:0.5rem;">Client ID (Aliado/SuperApp)</td><td style="padding:0.5rem;">2lgmf7tr15b315rb26moqgd0v1</td></tr>
+<tr style="border-bottom:1px solid #1e293b;"><td style="padding:0.5rem;">Lambda Authorizer</td><td style="padding:0.5rem;">ciencuadras-authorizer-validate-token-prod</td></tr>
+<tr style="border-bottom:1px solid #1e293b;"><td style="padding:0.5rem;">ECS Cluster CC (internal)</td><td style="padding:0.5rem;">ms-internal-prod-ecs-cluster</td></tr>
+<tr style="border-bottom:1px solid #1e293b;"><td style="padding:0.5rem;">ECS Cluster CC (MFs)</td><td style="padding:0.5rem;">www-cluster-ciencuadras</td></tr>
+<tr><td style="padding:0.5rem;">ECS Cluster EcoHome</td><td style="padding:0.5rem;">ecohome-integration-prod-ecs-cluster</td></tr>
+</tbody></table>
+</div>
+
+<div style="margin-top:3rem; padding:1.5rem; background:#1e293b; border-radius:8px; border-left:4px solid #60a5fa; font-size:0.85rem; color:#94a3b8;">
+<strong>Nota:</strong> Este informe fue generado a partir de CloudWatch Logs, CloudWatch Metrics y configuración de infraestructura AWS.
+Los datos de PII mostrados en los logs (nombres, documentos, emails) corresponden a logs de producción y se incluyen aquí solo con propósito diagnóstico.
+Periodo de análisis: 17-18 julio 2026. Cuentas: 290296201161 (Ciencuadras), 935071422812 (Ecosistema Home Integración PROD).
+</div>
+
+</div>
+</body>
+</html>

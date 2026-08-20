@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Informe de Comportamiento - Agente Victoria</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0f1419; color: #e7e9ea; line-height: 1.6; padding: 2rem; }
+        .container { max-width: 1100px; margin: 0 auto; }
+        h1 { font-size: 1.8rem; color: #fff; margin-bottom: 0.5rem; }
+        h2 { font-size: 1.4rem; color: #1d9bf0; margin: 2rem 0 1rem; border-bottom: 1px solid #2f3336; padding-bottom: 0.5rem; }
+        h3 { font-size: 1.1rem; color: #e7e9ea; margin: 1.5rem 0 0.5rem; }
+        .subtitle { color: #71767b; font-size: 0.9rem; margin-bottom: 2rem; }
+        .metric-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin: 1.5rem 0; }
+        .metric-card { background: #1e2732; border-radius: 12px; padding: 1.2rem; border: 1px solid #2f3336; }
+        .metric-card .value { font-size: 2rem; font-weight: 700; color: #fff; }
+        .metric-card .label { font-size: 0.8rem; color: #71767b; text-transform: uppercase; letter-spacing: 0.5px; }
+        .metric-card.danger .value { color: #f4212e; }
+        .metric-card.warning .value { color: #ffd400; }
+        .metric-card.success .value { color: #00ba7c; }
+        .metric-card.info .value { color: #1d9bf0; }
+        table { width: 100%; border-collapse: collapse; margin: 1rem 0; background: #1e2732; border-radius: 8px; overflow: hidden; }
+        th { background: #2f3336; color: #71767b; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; padding: 0.8rem 1rem; text-align: left; }
+        td { padding: 0.8rem 1rem; border-bottom: 1px solid #2f3336; font-size: 0.9rem; }
+        tr:last-child td { border-bottom: none; }
+        .tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 600; }
+        .tag-danger { background: #f4212e22; color: #f4212e; }
+        .tag-success { background: #00ba7c22; color: #00ba7c; }
+        .tag-warning { background: #ffd40022; color: #ffd400; }
+        .bar-container { display: flex; align-items: center; gap: 0.5rem; margin: 0.3rem 0; }
+        .bar { height: 24px; border-radius: 4px; display: flex; align-items: center; padding: 0 8px; font-size: 0.75rem; font-weight: 600; }
+        .bar-escalation { background: linear-gradient(90deg, #f4212e, #ff6b35); color: #fff; }
+        .bar-resolved { background: linear-gradient(90deg, #00ba7c, #00d68f); color: #fff; }
+        .bar-close { background: linear-gradient(90deg, #ffd400, #ffeb3b); color: #000; }
+        .trend-chart { margin: 1rem 0; }
+        .trend-row { display: flex; align-items: center; gap: 1rem; margin: 0.5rem 0; }
+        .trend-label { width: 120px; font-size: 0.85rem; color: #71767b; }
+        .trend-bar { flex: 1; height: 32px; background: #2f3336; border-radius: 6px; overflow: hidden; display: flex; }
+        .trend-fill-esc { background: #f4212e; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 600; color: #fff; }
+        .trend-fill-res { background: #00ba7c; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 600; color: #fff; }
+        .section-box { background: #1e2732; border-radius: 12px; padding: 1.5rem; border: 1px solid #2f3336; margin: 1rem 0; }
+        .architecture-flow { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; margin: 1rem 0; }
+        .flow-node { background: #2f3336; border-radius: 8px; padding: 0.5rem 1rem; font-size: 0.85rem; border: 1px solid #3f4347; }
+        .flow-node.router { border-color: #1d9bf0; color: #1d9bf0; }
+        .flow-node.escalates { border-color: #f4212e; color: #f4212e; }
+        .flow-node.resolves { border-color: #00ba7c; color: #00ba7c; }
+        .flow-arrow { color: #71767b; font-size: 1.2rem; }
+        .recommendation { background: #1e2732; border-left: 4px solid #1d9bf0; border-radius: 0 8px 8px 0; padding: 1rem 1.5rem; margin: 0.8rem 0; }
+        .recommendation.high { border-left-color: #f4212e; }
+        .recommendation.medium { border-left-color: #ffd400; }
+        .recommendation .priority { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.5px; color: #71767b; }
+        .footer { margin-top: 3rem; padding-top: 1rem; border-top: 1px solid #2f3336; color: #71767b; font-size: 0.8rem; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Informe de Comportamiento del Agente Victoria</h1>
+        <p class="subtitle">Proyecto: Victoria | Org: El Libertador | Período: Mayo - Agosto 2026 | Fuente: Langfuse</p>
+
+        <h2>Resumen Ejecutivo</h2>
+        <div class="metric-grid">
+            <div class="metric-card info">
+                <div class="value">124,359</div>
+                <div class="label">Sesiones totales (histórico)</div>
+            </div>
+            <div class="metric-card warning">
+                <div class="value">30,205</div>
+                <div class="label">Sesiones May-Ago 2026</div>
+            </div>
+            <div class="metric-card danger">
+                <div class="value">~68%</div>
+                <div class="label">Tasa de escalación promedio</div>
+            </div>
+            <div class="metric-card success">
+                <div class="value">~32%</div>
+                <div class="label">Resolución autónoma IA</div>
+            </div>
+        </div>
+
+        <h2>Arquitectura del Agente</h2>
+        <div class="section-box">
+            <p style="margin-bottom: 1rem; color: #71767b;">Victoria es un sistema multi-agente construido con <strong style="color:#fff">Google ADK</strong> (Agent Development Kit) usando <strong style="color:#fff">Gemini 3.1 Flash Lite</strong>. El usuario interactúa por WhatsApp con una sola personalidad (Victoria), pero internamente el router distribuye a sub-agentes especializados.</p>
+            <div class="architecture-flow">
+                <div class="flow-node">👤 Usuario (WhatsApp)</div>
+                <span class="flow-arrow">→</span>
+                <div class="flow-node router">victoria_router</div>
+                <span class="flow-arrow">→</span>
+            </div>
+            <div class="architecture-flow" style="margin-left: 2rem; flex-direction: column; align-items: flex-start;">
+                <div style="display:flex; gap:0.5rem; align-items:center; margin: 0.3rem 0;">
+                    <span class="flow-arrow">├→</span>
+                    <div class="flow-node escalates">victoria_increment (44%)</div>
+                    <span style="color:#71767b; font-size:0.8rem;">Cambios contractuales → approve_increment → Humano</span>
+                </div>
+                <div style="display:flex; gap:0.5rem; align-items:center; margin: 0.3rem 0;">
+                    <span class="flow-arrow">├→</span>
+                    <div class="flow-node escalates">victoria_transfer (20%)</div>
+                    <span style="color:#71767b; font-size:0.8rem;">Traslados de estudio → approve_transfer → Humano</span>
+                </div>
+                <div style="display:flex; gap:0.5rem; align-items:center; margin: 0.3rem 0;">
+                    <span class="flow-arrow">├→</span>
+                    <div class="flow-node escalates">victoria_schedule (15%)</div>
+                    <span style="color:#71767b; font-size:0.8rem;">Agendamiento → transfer_to_human → Humano</span>
+                </div>
+                <div style="display:flex; gap:0.5rem; align-items:center; margin: 0.3rem 0;">
+                    <span class="flow-arrow">├→</span>
+                    <div class="flow-node resolves">victoria_consulting (11%)</div>
+                    <span style="color:#71767b; font-size:0.8rem;">Consulta estado de estudios → Resuelve solo</span>
+                </div>
+                <div style="display:flex; gap:0.5rem; align-items:center; margin: 0.3rem 0;">
+                    <span class="flow-arrow">└→</span>
+                    <div class="flow-node resolves">victoria_advisor (10%)</div>
+                    <span style="color:#71767b; font-size:0.8rem;">Orientación general → Resuelve solo (a veces escala)</span>
+                </div>
+            </div>
+        </div>
+
+        <h2>Evolución Mensual</h2>
+        
+        <table>
+            <thead>
+                <tr>
+                    <th>Mes</th>
+                    <th>Sesiones</th>
+                    <th>increment</th>
+                    <th>transfer</th>
+                    <th>schedule</th>
+                    <th>consulting</th>
+                    <th>advisor</th>
+                    <th>% Escalación</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>May 2026</td>
+                    <td>1,330</td>
+                    <td>—</td>
+                    <td>—</td>
+                    <td>—</td>
+                    <td>—</td>
+                    <td>2</td>
+                    <td><span class="tag tag-success">0%</span></td>
+                </tr>
+                <tr>
+                    <td>Jun 2026</td>
+                    <td>8,454</td>
+                    <td>294 (37%)</td>
+                    <td>310 (39%)</td>
+                    <td>—</td>
+                    <td>106 (13%)</td>
+                    <td>84 (11%)</td>
+                    <td><span class="tag tag-danger">76%</span></td>
+                </tr>
+                <tr>
+                    <td>Jul 2026</td>
+                    <td>16,406</td>
+                    <td>349 (42%)</td>
+                    <td>229 (27%)</td>
+                    <td>114 (14%)</td>
+                    <td>89 (11%)</td>
+                    <td>55 (7%)</td>
+                    <td><span class="tag tag-danger">83%</span></td>
+                </tr>
+                <tr>
+                    <td>Ago 2026*</td>
+                    <td>4,015</td>
+                    <td>365 (44%)</td>
+                    <td>147 (18%)</td>
+                    <td>131 (16%)</td>
+                    <td>90 (11%)</td>
+                    <td>96 (12%)</td>
+                    <td><span class="tag tag-danger">78%</span></td>
+                </tr>
+            </tbody>
+        </table>
+        <p style="color:#71767b; font-size:0.8rem;">* Agosto 2026: datos parciales hasta el 11 de agosto. Los porcentajes son sobre la muestra de agent runs (excl. router).</p>
+
+        <h3>Tendencia de Escalación vs Resolución IA</h3>
+        <div class="trend-chart">
+            <div class="trend-row">
+                <div class="trend-label">May 2026</div>
+                <div class="trend-bar">
+                    <div class="trend-fill-res" style="width: 100%">100% IA</div>
+                </div>
+            </div>
+            <div class="trend-row">
+                <div class="trend-label">Jun 2026</div>
+                <div class="trend-bar">
+                    <div class="trend-fill-esc" style="width: 76%">76% escala</div>
+                    <div class="trend-fill-res" style="width: 24%">24%</div>
+                </div>
+            </div>
+            <div class="trend-row">
+                <div class="trend-label">Jul 2026</div>
+                <div class="trend-bar">
+                    <div class="trend-fill-esc" style="width: 83%">83% escala</div>
+                    <div class="trend-fill-res" style="width: 17%">17%</div>
+                </div>
+            </div>
+            <div class="trend-row">
+                <div class="trend-label">Ago 2026</div>
+                <div class="trend-bar">
+                    <div class="trend-fill-esc" style="width: 78%">78% escala</div>
+                    <div class="trend-fill-res" style="width: 22%">22%</div>
+                </div>
+            </div>
+        </div>
+
+        <h2>Validación por Sesión (Muestra Real)</h2>
+        <div class="section-box">
+            <p style="margin-bottom: 1rem; color: #71767b;">Se analizaron sesiones individuales completas para validar las cifras de distribución de agentes. Los resultados confirman una tasa de escalación alta.</p>
+            <table>
+                <thead>
+                    <tr><th>Mes</th><th>Sesiones analizadas</th><th>Resueltas IA</th><th>Escaladas</th><th>Tasa escalación</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>Jul 2026</td><td>15</td><td>4 (27%)</td><td>11 (73%)</td><td><span class="tag tag-danger">73%</span></td></tr>
+                    <tr><td>Ago 2026</td><td>14</td><td>5 (36%)</td><td>9 (64%)</td><td><span class="tag tag-danger">64%</span></td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h2>Tipos de Escalación Identificados</h2>
+        <table>
+            <thead>
+                <tr><th>Acción</th><th>Agente origen</th><th>Motivo</th><th>Frecuencia</th><th>Evitable?</th></tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><code>approve_increment</code></td>
+                    <td>victoria_increment</td>
+                    <td>Incrementos de canon, cambios de rol en contrato, modificaciones contractuales</td>
+                    <td><strong>~45%</strong> de escalaciones</td>
+                    <td><span class="tag tag-warning">Parcialmente</span></td>
+                </tr>
+                <tr>
+                    <td><code>approve_transfer</code></td>
+                    <td>victoria_transfer</td>
+                    <td>Traslados de estudio de arrendamiento entre inmuebles</td>
+                    <td><strong>~25%</strong> de escalaciones</td>
+                    <td><span class="tag tag-warning">Parcialmente</span></td>
+                </tr>
+                <tr>
+                    <td><code>transfer_to_human</code></td>
+                    <td>victoria_schedule</td>
+                    <td>Agendamiento de citas, verificaciones que requieren sistema externo</td>
+                    <td><strong>~20%</strong> de escalaciones</td>
+                    <td><span class="tag tag-success">Sí</span></td>
+                </tr>
+                <tr>
+                    <td><code>close_session</code></td>
+                    <td>Varios</td>
+                    <td>Mensajes repetidos del usuario (loop protection), sesiones abandonadas</td>
+                    <td><strong>~10%</strong> de escalaciones</td>
+                    <td><span class="tag tag-warning">Parcialmente</span></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h2>Cómo Trabaja Victoria - Flujo Detallado</h2>
+        <div class="section-box">
+            <h3 style="color:#00ba7c; margin-top:0;">Caso: Resuelve Autónomamente (consulting)</h3>
+            <p style="color:#71767b; margin:0.5rem 0;">Usuario consulta estado de un estudio de arrendamiento.</p>
+            <ol style="margin: 0.5rem 0 0 1.5rem; color: #e7e9ea; font-size: 0.9rem;">
+                <li>Usuario: "Quiero saber el estado de mi estudio"</li>
+                <li>Router → victoria_consulting</li>
+                <li>Victoria pide radicado → usuario lo da</li>
+                <li>Victoria llama herramienta <code>consult_study_state</code></li>
+                <li>Victoria responde con el estado (ej: "Tu estudio está aprobado pendiente de biometría")</li>
+                <li><strong>Fin: Resuelto sin humano</strong></li>
+            </ol>
+        </div>
+        <div class="section-box">
+            <h3 style="color:#f4212e; margin-top:0;">Caso: Escala a Humano (increment)</h3>
+            <p style="color:#71767b; margin:0.5rem 0;">Usuario solicita un cambio contractual (incremento de canon, cambio de rol).</p>
+            <ol style="margin: 0.5rem 0 0 1.5rem; color: #e7e9ea; font-size: 0.9rem;">
+                <li>Usuario: "Necesito hacer un incremento"</li>
+                <li>Router → victoria_increment</li>
+                <li>Victoria recopila datos (7-10 turnos): radicado, documento, tipo cambio, email, teléfono...</li>
+                <li>Victoria muestra resumen de datos al usuario</li>
+                <li>Usuario confirma: "Sí"</li>
+                <li>Victoria emite JSON: <code>{"agent_action":"approve_increment", ...datos...}</code></li>
+                <li><strong>Plataforma intercepta → Transfiere a agente humano para aprobación</strong></li>
+            </ol>
+        </div>
+        <div class="section-box">
+            <h3 style="color:#f4212e; margin-top:0;">Caso: Escala a Humano (schedule)</h3>
+            <p style="color:#71767b; margin:0.5rem 0;">Usuario quiere agendar una cita o necesita verificación presencial.</p>
+            <ol style="margin: 0.5rem 0 0 1.5rem; color: #e7e9ea; font-size: 0.9rem;">
+                <li>Usuario: "Quiero agendar una cita para firmar"</li>
+                <li>Router → victoria_schedule</li>
+                <li>Victoria valida el estudio con <code>validate_study_for_schedule</code></li>
+                <li>Victoria NO tiene integración con sistema de citas</li>
+                <li>Victoria emite: <code>{"agent_action":"transfer_to_human"}</code></li>
+                <li><strong>Transfiere a humano porque no puede agendar directamente</strong></li>
+            </ol>
+        </div>
+
+        <h2>Hallazgos Clave</h2>
+        <div class="section-box">
+            <ol style="margin: 0 0 0 1.5rem; color: #e7e9ea;">
+                <li style="margin-bottom: 1rem;"><strong>Victoria hace el trabajo operativo pero no cierra.</strong> En incrementos y traslados, la IA recopila exitosamente todos los datos (7-10 interacciones) pero la aprobación final siempre requiere humano. La IA funciona como "recepcionista inteligente" más que como "resolutora".</li>
+                <li style="margin-bottom: 1rem;"><strong>victoria_schedule escala por limitación técnica, no de negocio.</strong> El agente de agendamiento no tiene herramientas para confirmar citas directamente. Esto es un gap de integración, no una política de negocio.</li>
+                <li style="margin-bottom: 1rem;"><strong>La tasa de escalación creció de Jun (76%) a Jul (83%) con la adición de victoria_schedule.</strong> En junio no existía el agente de agendamiento; en julio se agregó pero sin integración completa, generando más escalaciones.</li>
+                <li style="margin-bottom: 1rem;"><strong>Solo 2 agentes resuelven sin humano:</strong> victoria_consulting (consulta estado) y victoria_advisor (orientación general). Juntos representan solo ~21% de la actividad.</li>
+                <li style="margin-bottom: 1rem;"><strong>close_session aparece como patrón defensivo</strong> cuando usuarios envían el mismo mensaje 5+ veces, sugiriendo frustración o problemas de UX.</li>
+            </ol>
+        </div>
+
+        <h2>Recomendaciones</h2>
+
+        <div class="recommendation high">
+            <div class="priority">Impacto alto — Reducción estimada: 20% de escalaciones</div>
+            <h3 style="margin-top:0.5rem;">Integrar sistema de agendamiento en victoria_schedule</h3>
+            <p style="color:#71767b; margin-top:0.5rem;">Conectar victoria_schedule directamente con el sistema de citas para que pueda confirmar agendamientos sin transferir a humano. Actualmente el 100% de sus sesiones escalan por falta de integración.</p>
+        </div>
+
+        <div class="recommendation high">
+            <div class="priority">Impacto alto — Reducción estimada: 15-20% de escalaciones</div>
+            <h3 style="margin-top:0.5rem;">Auto-aprobación de incrementos estándar</h3>
+            <p style="color:#71767b; margin-top:0.5rem;">Evaluar si incrementos estándar (por IPC, sin cambio de condiciones especiales) pueden aprobarse automáticamente una vez que Victoria recopila los datos. Incrementos no estándar seguirían requiriendo humano.</p>
+        </div>
+
+        <div class="recommendation medium">
+            <div class="priority">Impacto medio — Reducción estimada: 10% de escalaciones</div>
+            <h3 style="margin-top:0.5rem;">Validación automática de traslados simples</h3>
+            <p style="color:#71767b; margin-top:0.5rem;">Para traslados donde el estudio ya está aprobado y todos los datos son válidos, evaluar un flujo de aprobación automática con verificaciones programáticas (validar radicado, estado del estudio, datos del nuevo inmueble).</p>
+        </div>
+
+        <div class="recommendation">
+            <div class="priority">Impacto bajo — Mejora de UX</div>
+            <h3 style="margin-top:0.5rem;">Reducir close_session por frustración</h3>
+            <p style="color:#71767b; margin-top:0.5rem;">Investigar por qué usuarios envían mensajes repetidos. Puede indicar que Victoria no entiende la solicitud o que el flujo es confuso. Mejorar los mensajes de orientación antes de cerrar la sesión.</p>
+        </div>
+
+        <h2>Datos Técnicos</h2>
+        <table>
+            <tbody>
+                <tr><td style="color:#71767b;">Modelo LLM</td><td>Gemini 3.1 Flash Lite (Google Vertex AI)</td></tr>
+                <tr><td style="color:#71767b;">Framework</td><td>Google ADK (Agent Development Kit) v2.4.0</td></tr>
+                <tr><td style="color:#71767b;">Telemetría</td><td>OpenTelemetry + OpenInference → Langfuse</td></tr>
+                <tr><td style="color:#71767b;">Canal</td><td>WhatsApp</td></tr>
+                <tr><td style="color:#71767b;">Langfuse Project ID</td><td>cm2kl5wij0vueqzz4t6zdsjdd</td></tr>
+                <tr><td style="color:#71767b;">Langfuse Org</td><td>El Libertador (cm2kl48wm0vypkr7gzgruattw)</td></tr>
+                <tr><td style="color:#71767b;">Región</td><td>US (us.cloud.langfuse.com)</td></tr>
+                <tr><td style="color:#71767b;">Período del informe</td><td>Mayo 2026 - 11 Agosto 2026</td></tr>
+                <tr><td style="color:#71767b;">Inicio del proyecto</td><td>Diciembre 2024</td></tr>
+            </tbody>
+        </table>
+
+        <div class="footer">
+            <p>Informe generado el 11 de agosto de 2026 | Datos obtenidos de Langfuse via API | Análisis basado en muestreo de observaciones y validación por sesión individual.</p>
+        </div>
+    </div>
+</body>
+</html>

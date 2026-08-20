@@ -1,0 +1,300 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>DAPTA vs. Arquitectura actual (MIA) — Informe de decisión</title>
+<style>
+:root{
+ --ground:#F3F7F9;--surface:#FFFFFF;--surface2:#E9F1F5;--ink:#29323A;--muted:#5C6E7B;--faint:#8598A6;
+ --border:#DBE6EC;--brand:#0A7AB2;--brand-ink:#075E8C;--gold:#E08A0C;
+ --mia:#0A7AB2;--mia-tint:#E4F1FA;--dapta:#7A3FB0;--dapta-tint:#EFE8F8;
+ --good:#4E9A2F;--warn:#C77A0A;--risk:#C0392B;--neutral:#8598A6;
+ --shadow:0 1px 2px rgba(20,40,55,.05),0 10px 30px rgba(20,40,55,.07);
+ --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,monospace;
+ --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root{
+ --ground:#0B1418;--surface:#101C22;--surface2:#16242B;--ink:#DCE8EE;--muted:#93A6B2;--faint:#6E828F;
+ --border:#1E2E36;--brand:#4BA8DA;--brand-ink:#7CC4E8;--gold:#F0A63C;
+ --mia:#4BA8DA;--mia-tint:#0F2731;--dapta:#A98BE0;--dapta-tint:#1E1730;
+ --good:#5FBE3E;--warn:#E6A23C;--risk:#EF6D5F;--neutral:#93A6B2;
+ --shadow:0 1px 2px rgba(0,0,0,.35),0 12px 34px rgba(0,0,0,.5);
+}}
+:root[data-theme="light"]{--ground:#F3F7F9;--surface:#FFFFFF;--surface2:#E9F1F5;--ink:#29323A;--muted:#5C6E7B;--faint:#8598A6;--border:#DBE6EC;--brand:#0A7AB2;--brand-ink:#075E8C;--gold:#E08A0C;--mia:#0A7AB2;--mia-tint:#E4F1FA;--dapta:#7A3FB0;--dapta-tint:#EFE8F8;--good:#4E9A2F;--warn:#C77A0A;--risk:#C0392B;}
+:root[data-theme="dark"]{--ground:#0B1418;--surface:#101C22;--surface2:#16242B;--ink:#DCE8EE;--muted:#93A6B2;--faint:#6E828F;--border:#1E2E36;--brand:#4BA8DA;--brand-ink:#7CC4E8;--gold:#F0A63C;--mia:#4BA8DA;--mia-tint:#0F2731;--dapta:#A98BE0;--dapta-tint:#1E1730;--good:#5FBE3E;--warn:#E6A23C;--risk:#EF6D5F;--neutral:#93A6B2;}
+*{box-sizing:border-box}body{margin:0}
+.wrap{background:var(--ground);color:var(--ink);font-family:var(--sans);line-height:1.6;-webkit-font-smoothing:antialiased}
+.inner{max-width:1000px;margin:0 auto;padding:clamp(16px,3.5vw,40px)}
+h1,h2,h3,h4{letter-spacing:-.01em;text-wrap:balance;line-height:1.15}
+h1{font-size:clamp(26px,4.4vw,40px);margin:.2em 0 .1em;font-weight:800}
+h2{font-size:clamp(19px,2.6vw,24px);margin:1.6em 0 .5em;padding-top:.3em;border-top:2px solid var(--border)}
+h2 .n{font-family:var(--mono);font-size:13px;color:var(--brand);font-weight:700;margin-right:8px}
+h3{font-size:16px;margin:1.2em 0 .4em}
+p{margin:.5em 0}
+.eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--brand-ink);font-weight:700}
+.lede{font-size:16px;color:var(--muted);max-width:70ch}
+a{color:var(--brand-ink)}
+.bar{display:flex;flex-wrap:wrap;gap:8px 18px;margin:16px 0;padding:11px 15px;background:var(--surface);border:1px solid var(--border);border-radius:12px;font-size:13px;box-shadow:var(--shadow)}
+.bar b{color:var(--brand-ink)} .bar span{color:var(--faint)}
+.verdict{background:var(--surface);border:1px solid var(--border);border-left:5px solid var(--gold);border-radius:14px;padding:18px 20px;box-shadow:var(--shadow);margin:20px 0}
+.verdict h3{margin:0 0 6px;font-size:17px;color:var(--gold)}
+.cols2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:720px){.cols2{grid-template-columns:1fr}}
+.pcard{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px 18px;box-shadow:var(--shadow);position:relative;overflow:hidden}
+.pcard::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px}
+.pcard.mia::before{background:var(--mia)} .pcard.dapta::before{background:var(--dapta)}
+.pcard h3{margin:0 0 2px;font-size:17px} .pcard .tag{font-family:var(--mono);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+.pcard.mia .tag{color:var(--mia)} .pcard.dapta .tag{color:var(--dapta)}
+.pcard ul{margin:8px 0 0;padding-left:18px} .pcard li{margin:3px 0;font-size:13.5px;color:var(--muted)}
+.tw{overflow-x:auto;border:1px solid var(--border);border-radius:12px;margin:12px 0;box-shadow:var(--shadow)}
+table{width:100%;border-collapse:collapse;font-size:13.5px;min-width:640px;background:var(--surface)}
+th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--faint);font-weight:700;padding:10px 12px;border-bottom:1px solid var(--border);background:var(--surface2);position:sticky;top:0}
+td{padding:9px 12px;border-top:1px solid var(--border);vertical-align:top}
+tr:hover td{background:color-mix(in srgb,var(--brand) 4%,transparent)}
+td.crit{font-weight:650;width:20%} .colmia{background:color-mix(in srgb,var(--mia) 5%,transparent)} .coldapta{background:color-mix(in srgb,var(--dapta) 5%,transparent)}
+.win{display:inline-block;font-family:var(--mono);font-size:10px;font-weight:700;padding:1px 6px;border-radius:5px;text-transform:uppercase;letter-spacing:.03em}
+.win.mia{color:var(--mia);border:1px solid var(--mia);background:var(--mia-tint)}
+.win.dapta{color:var(--dapta);border:1px solid var(--dapta);background:var(--dapta-tint)}
+.win.tie{color:var(--neutral);border:1px solid var(--neutral);background:color-mix(in srgb,var(--neutral) 12%,transparent)}
+.score{display:inline-flex;align-items:center;gap:6px;font-variant-numeric:tabular-nums;font-weight:700}
+.dots{display:inline-flex;gap:2px}.dot{width:8px;height:8px;border-radius:50%;background:var(--border)}
+.dot.on.mia{background:var(--mia)}.dot.on.dapta{background:var(--dapta)}
+.metric{display:grid;grid-template-columns:1fr auto;gap:2px 10px;align-items:center;margin:5px 0;font-size:13px}
+.track{grid-column:1/-1;height:8px;background:var(--surface2);border-radius:6px;overflow:hidden;position:relative}
+.fill{height:100%;border-radius:6px}
+.fill.mia{background:var(--mia)}.fill.dapta{background:var(--dapta)}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:18px 0}
+.kpi{background:var(--surface);border:1px solid var(--border);border-radius:13px;padding:14px 15px;box-shadow:var(--shadow);border-top:3px solid var(--brand)}
+.kpi.d{border-top-color:var(--dapta)} .kpi.g{border-top-color:var(--gold)}
+.kn{font-size:24px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.kl{font-size:12.5px;font-weight:650} .ks{font-size:11.5px;color:var(--faint)}
+.chip{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;font-family:var(--mono)}
+.c-good{color:var(--good);background:color-mix(in srgb,var(--good) 14%,transparent)}
+.c-warn{color:var(--warn);background:color-mix(in srgb,var(--warn) 15%,transparent)}
+.c-risk{color:var(--risk);background:color-mix(in srgb,var(--risk) 14%,transparent)}
+.note{font-size:13px;color:var(--muted);background:var(--surface2);border:1px solid var(--border);border-radius:11px;padding:12px 15px;margin:12px 0}
+.note.warn{border-color:color-mix(in srgb,var(--warn) 40%,var(--border));background:color-mix(in srgb,var(--warn) 8%,var(--surface2))}
+.note.key{border-left:4px solid var(--brand)}
+ul.clean{list-style:none;padding-left:0} ul.clean li{padding-left:22px;position:relative;margin:6px 0}
+ul.clean li::before{content:"›";position:absolute;left:6px;color:var(--brand);font-weight:800}
+.opt{background:var(--surface);border:1px solid var(--border);border-radius:13px;padding:14px 16px;margin:10px 0;box-shadow:var(--shadow)}
+.opt h4{margin:0 0 4px;font-size:15px;display:flex;align-items:center;gap:8px}
+.opt .rec{font-family:var(--mono);font-size:10px;font-weight:700;color:var(--gold);border:1px solid var(--gold);padding:1px 6px;border-radius:5px;text-transform:uppercase}
+.foot{margin-top:40px;padding-top:16px;border-top:1px solid var(--border);font-size:12px;color:var(--faint)}
+.foot a{color:var(--faint)}
+.tot{font-size:15px;font-weight:800}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap"><div class="inner">
+
+<div class="eyebrow">Seguros Bolívar · Ciencuadras · Arquitectura — Informe de decisión de plataforma</div>
+<h1>DAPTA vs. la arquitectura actual (MIA)</h1>
+<p class="lede">Análisis comparativo y objetivo entre <b>continuar con la arquitectura propia de MIA</b> (multi-agente, en AWS, acelerada con Kiro) y <b>migrar a DAPTA</b>, la plataforma no-code que negocio propone por su facilidad de operación y rapidez de ajustes. Se evalúan costos, ANS, escalabilidad, estabilidad, seguridad, riesgos, lock-in y sostenibilidad a largo plazo, variable por variable.</p>
+
+<div class="bar">
+ <div><span>Elaborado por&nbsp;</span><b>Arquitectura</b></div>
+ <div><span>Fecha&nbsp;</span><b>2026-07-11</b></div>
+ <div><span>Delta de costo operativo (dato de negocio)&nbsp;</span><b>DAPTA ≈ +COP $5M/mes</b></div>
+ <div><span>Experiencia con DAPTA&nbsp;</span><b>~5 meses</b></div>
+ <div><span>Naturaleza de Ciencuadras&nbsp;</span><b>Plataforma inmobiliaria (proptech) · Grupo Empresarial Bolívar</b></div>
+</div>
+
+<div class="verdict">
+ <h3>◆ Veredicto en una frase</h3>
+ <p style="margin:0"><b>No reemplazar el núcleo de MIA por DAPTA.</b> Ciencuadras es una <b>plataforma inmobiliaria (proptech)</b> del Grupo Empresarial Bolívar, un negocio donde la <b>agilidad pesa mucho</b>. Aun así, la arquitectura propia sigue ganando en <b>costo total, control, independencia de proveedor, escalabilidad y profundidad de capacidades</b>; DAPTA gana en <b>agilidad de negocio, tiempo de entrega y simplicidad de mantenimiento</b> —una ventaja que, no obstante, queda <b>condicionada a la velocidad con que los componentes internos estén disponibles en Conecta</b>, pues cada integración nueva depende del equipo de Comunes—. La palanca correcta es <b>resolver la caída del ANS sobre la arquitectura actual</b> apalancando Kiro y el harness — y, si negocio necesita autoservicio, usar DAPTA en <b>flujos acotados de bajo riesgo</b> mediante un piloto medido (los datos personales y de crédito exigen igualmente due diligence de Habeas Data).</p>
+</div>
+
+<div class="kpis">
+ <div class="kpi"><div class="kn">4.08</div><div class="kl">Puntaje MIA (ponderado)</div><div class="ks">/ 5 · ver scorecard</div></div>
+ <div class="kpi d"><div class="kn">3.46</div><div class="kl">Puntaje DAPTA (ponderado)</div><div class="ks">/ 5 · ver scorecard</div></div>
+ <div class="kpi g"><div class="kn">≈ $60M</div><div class="kl">Sobrecosto DAPTA / año</div><div class="ks">COP, solo operación (base +$5M/mes)</div></div>
+ <div class="kpi"><div class="kn">18</div><div class="kl">Variables comparadas</div><div class="ks">1 vs 1, con criterio ganador</div></div>
+ <div class="kpi g"><div class="kn">≈ $220k</div><div class="kl">Fix del ANS — línea dedicada</div><div class="ks">COP/mes · si se confirma la hipótesis · vs +$5M/mes DAPTA (~22×)</div></div>
+</div>
+
+<h2><span class="n">01</span>Contexto de la decisión</h2>
+<p><b>MIA</b> ("Mi Inmobiliaria Asistente") es el asistente de IA de Ciencuadras — la <b>plataforma inmobiliaria (proptech)</b> del Grupo Empresarial Bolívar — hoy en producción: un sistema <b>multi-agente</b> (LangGraph) construido en casa sobre AWS, con RAG (Pinecone), búsqueda del catálogo (Elasticsearch), CRM (Zoho), validación de crédito (Davivienda), memoria (MongoDB/Redis) y modelos LLM (Vertex/Azure) gobernados por la plataforma de IA transversal de Seguros Bolívar. Es un activo técnico maduro y profundo, pero <b>su ANS viene cayendo</b> y su mantenimiento requiere ingeniería especializada.</p>
+<p>Negocio propone migrar a <b>DAPTA</b> porque es <b>más sencilla de operar</b> por perfiles no técnicos y permite <b>ajustes mucho más rápidos</b>, con la expectativa de recuperar el ANS. El contrapunto es que DAPTA resulta, en promedio, <b>≈ COP $5 millones/mes más cara</b> solo en operación, y traslada capacidades críticas a un tercero.</p>
+<p class="note key">Este informe separa deliberadamente <b>dos preguntas que suelen mezclarse</b>: (1) <i>¿la arquitectura actual es la correcta?</i> y (2) <i>¿por qué está cayendo el ANS?</i> — porque cambiar de plataforma para resolver un problema de operación puede ser una solución cara a la pregunta equivocada.</p>
+
+<h2><span class="n">02</span>Las dos plataformas, sin adornos</h2>
+<div class="cols2">
+ <div class="pcard mia">
+  <div class="tag">Opción A · Estado actual</div>
+  <h3>Arquitectura propia — MIA</h3>
+  <ul>
+   <li><b>Qué es:</b> sistema multi-agente a medida (Python/LangGraph + Java/Spring) en las cuentas AWS de Seguros Bolívar.</li>
+   <li><b>Fortalezas:</b> control total, IP propia, seguridad/gobierno corporativo (VPC, Cognito, WAF), profundidad de dominio inmobiliario, RAG, integraciones profundas, escalabilidad AWS-native, sin lock-in.</li>
+   <li><b>Aceleradores:</b> Kiro + el harness de ingeniería reducen el costo/tiempo de desarrollo y mantenimiento.</li>
+   <li><b>Debilidades:</b> requiere talento especializado; los cambios pasan por ingeniería; <b>ANS en descenso</b>; complejidad operativa.</li>
+  </ul>
+ </div>
+ <div class="pcard dapta">
+  <div class="tag">Opción B · Propuesta de negocio</div>
+  <h3>DAPTA (plataforma SaaS no-code)</h3>
+  <ul>
+   <li><b>Qué es:</b> plataforma <b>no-code/low-code</b> para construir agentes de IA (voz y texto), workflows y APIs; orientada a <b>PYMES</b> (ventas/marketing/operaciones).</li>
+   <li><b>Fortalezas:</b> autoservicio para negocio, setup y cambios en horas, 300–1.000+ integraciones nativas, soporte gestionado, "Dapti" arma agentes desde un chat.</li>
+   <li><b>Debilidades declaradas:</b> <b>no está diseñada para lógica compleja ni gestión de procesos enterprise</b> ("roles de IA simples"); <b>solo cloud, sin on-premise</b>; costo por consumo (créditos/minutos) que <b>escala caro</b>; <b>sin evidencia pública de SOC 2 / GDPR / ISO</b>.</li>
+   <li><b>Planes:</b> Pro $99 · Scale Up $499 · Prime $1.499 /mes (por créditos) · Custom (enterprise, a cotizar, con SLA "a la medida").</li>
+  </ul>
+ </div>
+</div>
+<div class="note warn"><b>Hallazgo relevante de la investigación:</b> las propias reseñas y la documentación de DAPTA la posicionan para <b>PYMES y casos simples</b> ("no recomendada para grandes empresas que requieren gestión integral de procesos ni flujos altamente complejos"). MIA <b>es exactamente</b> un sistema multi-agente complejo y de dominio. Hay una <b>brecha de ajuste de propósito</b> que debe pesar en la decisión.</div>
+<div class="note warn"><b>El +$5M/mes es probablemente un piso, no el costo real.</b> Para operar, DAPTA (externo) debe <b>seguir consumiendo los servicios de Ciencuadras en AWS</b> (búsqueda del catálogo/Elasticsearch, modelos-ia, etc.). Eso genera <b>transferencia de datos saliente (egress) + costos de API Gateway/NAT</b> que hoy <b>no existen</b> (el tráfico es interno a la VPC) y que el estimado de negocio probablemente <b>no contempla</b>. El sobrecosto real de DAPTA sería <b>mayor</b> a los +$5M/mes — conviene cuantificar el egress al volumen de MIA antes de decidir. A esto se suma la <b>capa «Conecta»</b>: integrar Ciencuadras→Conecta y DAPTA→Conecta implica <b>esfuerzo de ingeniería y coordinación con el equipo de Comunes</b> (activación + plan de uso) y <b>latencia por el hop adicional</b> — costos de esfuerzo y operación que tampoco están contemplados en los +$5M/mes. Tampoco contempla que el <b>equipo técnico se mantiene</b> (Conecta + servicios internos) ni el <b>esfuerzo adicional de los Doers</b> — el talento no se ahorra, se reconfigura.</div>
+
+<h2><span class="n">03</span>Comparación variable por variable (1 vs 1)</h2>
+<p>Escala cualitativa por variable; la columna "Ventaja" indica qué opción es superior en ese criterio. El detalle numérico ponderado está en la sección 04.</p>
+<div class="tw"><table>
+ <thead><tr><th>Variable</th><th class="colmia">Arquitectura actual (MIA)</th><th class="coldapta">DAPTA</th><th>Ventaja</th></tr></thead>
+ <tbody>
+  <tr><td class="crit">Costo de operación (opex)</td><td class="colmia">Opex controlable (Fargate pequeño, Aurora, ES, Pinecone, tokens LLM). Optimizable.</td><td class="coldapta">≈ <b>+$5M/mes</b>. Modelo por créditos/minutos que <b>crece con el volumen</b>.</td><td><span class="win mia">MIA</span></td></tr>
+  <tr><td class="crit">Costo total (TCO)</td><td class="colmia">Opex bajo + costo de talento — <b>mitigado por Kiro/harness</b>. IP como activo.</td><td class="coldapta">Opex alto + migración + prima de lock-in. <b>Baja el tiempo de involucramiento</b> del equipo técnico (offload de la orquestación) y los <b>Doers son talento más barato</b> — pero el equipo técnico <b>sigue siendo necesario</b> (Conecta + servicios internos), cada ajuste al pass-through/plan de uso <b>requiere apoyo y aprobación del equipo de Conecta (≥1 día, mejor caso)</b> y los Doers <b>no son autónomos</b>: siguen necesitando ese respaldo.</td><td><span class="win mia">MIA</span></td></tr>
+  <tr><td class="crit">Costos ocultos (egress AWS + integración)</td><td class="colmia">El tráfico a los <b>componentes de persistencia (RDS/Aurora, Redis, S3, Elasticsearch)</b> es <b>intra-VPC → sin egress</b>. Servicios y datos conviven en AWS.</td><td class="coldapta">DAPTA (externo) sigue consumiendo servicios de Ciencuadras en AWS (catálogo/ES, modelos-ia) → <b>egress de datos + API GW/NAT no contemplados</b> en los +$5M/mes.</td><td><span class="win mia">MIA</span></td></tr>
+  <tr><td class="crit">Ruta de exposición de servicios (capa «Conecta»)</td><td class="colmia">Los microservicios y el MCP (<code>mcp-inmuebles-ia</code>) ya viven en la <b>misma cuenta/VPC</b> y acceden a los datos <b>directo, sin capa corporativa intermedia</b>.</td><td class="coldapta">Todo servicio expuesto a DAPTA <b>debe entrar por «Conecta»</b> (pass-through corporativo): <b>doble integración</b> (Ciencuadras→Conecta y DAPTA→Conecta), <b>dependencia del equipo de Comunes</b> (activación + configuración del plan de uso) y un <b>hop obligatorio</b> → punto de fallo y latencia adicionales.</td><td><span class="win mia">MIA</span></td></tr>
+  <tr><td class="crit">Agilidad de negocio (velocidad de cambios)</td><td class="colmia">Cambios vía ingeniería (más rápidos con Kiro, pero no autoservicio).</td><td class="coldapta"><b>Autoservicio para negocio</b>; ajustes en horas sin depender de ingeniería.</td><td><span class="win dapta">DAPTA</span></td></tr>
+  <tr><td class="crit">Time-to-value (nuevos casos)</td><td class="colmia">Días–semanas (spec → build → QA), acelerado por el harness.</td><td class="coldapta"><b>Horas–días</b>; plantillas e integraciones listas.</td><td><span class="win dapta">DAPTA</span></td></tr>
+  <tr><td class="crit">Facilidad de mantenimiento</td><td class="colmia">Requiere perfiles Python/LangGraph/Java; observabilidad propia (Datadog/Langfuse).</td><td class="coldapta"><b>Mantenimiento simple</b> por negocio; el proveedor opera la plataforma.</td><td><span class="win dapta">DAPTA</span></td></tr>
+  <tr><td class="crit">ANS / SLA / soporte</td><td class="colmia">ANS <b>hoy en descenso</b> — pero es propio y <b>corregible</b> (SRE, on-call, ya hay telemetría).</td><td class="coldapta">SLA gestionado, pero <b>solo en plan enterprise</b> y <b>sin verificar</b> por escrito.</td><td><span class="win tie">Empate*</span></td></tr>
+  <tr><td class="crit">Escalabilidad</td><td class="colmia"><b>AWS-native</b>: autoescalado, control de límites, multi-AZ, sin techo funcional.</td><td class="coldapta">Orientada a mid-market; el modelo por consumo <b>encarece</b> el alto volumen; techo poco claro.</td><td><span class="win mia">MIA</span></td></tr>
+  <tr><td class="crit">Estabilidad / confiabilidad</td><td class="colmia">Sistema maduro y observable (pese al ANS); control total de incidentes.</td><td class="coldapta">Gestionada por el proveedor; sin benchmarks públicos a escala/volumen empresarial.</td><td><span class="win mia">MIA</span></td></tr>
+  <tr><td class="crit">Seguridad y protección de datos</td><td class="colmia">Datos en las <b>cuentas AWS propias</b>; VPC, Cognito, WAF; alineado a <b>Habeas Data (Ley 1581)</b> y estándares del Grupo Bolívar.</td><td class="coldapta">SaaS de terceros; <b>PII sale de la organización</b>; sin SOC2/DPA/residencia públicos; sin on-prem.</td><td><span class="win mia">MIA</span></td></tr>
+  <tr><td class="crit">Vendor lock-in / portabilidad</td><td class="colmia">Código y modelos propios; <b>portable</b>; estrategia de salida clara.</td><td class="coldapta">Lógica de flujos y dependencia de modelo <b>atadas al proveedor</b>; sin export estándar.</td><td><span class="win mia">MIA</span></td></tr>
+  <tr><td class="crit">Conocimiento interno / IP / talento</td><td class="colmia"><b>Músculo de IA e ingeniería propios</b> (código, orquestación); el conocimiento —de negocio y técnico— queda dentro y es <b>portable</b>.</td><td class="coldapta">El <b>conocimiento de negocio NO se traslada al proveedor</b>: los agentes los construye el mismo equipo interno («Doer»). Lo que <b>no se desarrolla es músculo de ingeniería de IA propio</b> (orquestación, RAG, código), que vive en la plataforma del vendor.</td><td><span class="win mia">MIA</span></td></tr>
+  <tr><td class="crit">Control y ajuste al dominio</td><td class="colmia">Multi-agente, RAG, lógica de crédito y dominio inmobiliario <b>a medida</b>.</td><td class="coldapta">Configurable pero <b>genérico</b>; difícil replicar la profundidad actual.</td><td><span class="win mia">MIA</span></td></tr>
+  <tr><td class="crit">Cobertura funcional real (¿reemplaza a MIA?)</td><td class="colmia">Es el sistema completo (búsqueda, lead, crédito, agendamiento, RAG, canales).</td><td class="coldapta"><b>Solo cubre el subconjunto simple</b> de MIA (chat, lead, cita, voz); <b>no cubre la profundidad</b> —multi-agente, RAG, búsqueda profunda del catálogo, lógica de crédito—. Por eso <b>no reemplaza a MIA por completo</b>.</td><td><span class="win mia">MIA</span></td></tr>
+  <tr><td class="crit">Integraciones (Zoho, ES, Vertex, WhatsApp)</td><td class="colmia">Ya integradas y gobernadas dentro del ecosistema SB.</td><td class="coldapta">Amplio catálogo nativo (+1.000), pero re-integrar y re-gobernar todo.</td><td><span class="win tie">Empate</span></td></tr>
+  <tr><td class="crit">Riesgo de datos personales (Habeas Data)</td><td class="colmia">Datos bajo gobierno corporativo del Grupo Bolívar; Habeas Data cubierto.</td><td class="coldapta">Datos personales/de crédito procesados por tercero → <b>riesgo medio a validar</b> (Habeas Data).</td><td><span class="win mia">MIA</span></td></tr>
+  <tr><td class="crit">Crecimiento a largo plazo / roadmap</td><td class="colmia">Evoluciona con AWS/LLMs elegidos; no depende del roadmap de un vendor.</td><td class="coldapta">Atado al roadmap y salud financiera del proveedor (empresa joven).</td><td><span class="win mia">MIA</span></td></tr>
+  <tr><td class="crit">Riesgo de continuidad del proveedor</td><td class="colmia">N/A (in-house).</td><td class="coldapta">Dependencia de la continuidad de un proveedor SaaS relativamente nuevo.</td><td><span class="win mia">MIA</span></td></tr>
+ </tbody>
+</table></div>
+<p class="note">* <b>ANS = empate con asterisco:</b> la caída del ANS tiene una <b>hipótesis principal (a confirmar)</b> — el <b>canal de WhatsApp compartido</b> (un menú de Infobip enrutaría hacia avalúos, MIA y otros frentes antes de llegar a MIA). De confirmarse, sería un problema de <b>canal/operación, no de arquitectura</b>, que una <b>línea dedicada (~$220k/mes)</b> corrige. El SLA "gestionado" de DAPTA no está verificado y no resolvería el ANS si el menú de Infobip sigue delante. Ver sección 07.</p>
+
+<h2><span class="n">04</span>Matriz de decisión ponderada (scorecard)</h2>
+<p>Puntaje 1–5 por criterio × peso (suma 100). Los pesos reflejan un <b>grupo empresarial con estándares corporativos de datos</b>. Como Ciencuadras es un <b>proptech</b>, la seguridad sigue importando (Habeas Data + datos de crédito) pero se maneja como <b>buena práctica y cumplimiento, no como un bloqueo regulatorio duro</b> — por eso DAPTA sube a 3 en ese criterio. Los pesos son transparentes y ajustables: si negocio pondera más la agilidad, la brecha se acorta, pero MIA conserva ventaja en las dimensiones estructurales (costo, lock-in, escalabilidad, IP).</p>
+<div class="tw"><table>
+ <thead><tr><th>Criterio</th><th>Peso</th><th class="colmia">MIA (1–5)</th><th class="coldapta">DAPTA (1–5)</th><th>Ponderado MIA</th><th>Ponderado DAPTA</th></tr></thead>
+ <tbody>
+  <tr><td class="crit">Costo total (TCO)</td><td>12</td><td class="colmia">4</td><td class="coldapta">3</td><td>48</td><td>36</td></tr>
+  <tr><td class="crit">Agilidad de negocio</td><td>12</td><td class="colmia">3</td><td class="coldapta">5</td><td>36</td><td>60</td></tr>
+  <tr><td class="crit">Seguridad y protección de datos</td><td>12</td><td class="colmia">5</td><td class="coldapta">3</td><td>60</td><td>36</td></tr>
+  <tr><td class="crit">ANS / soporte</td><td>10</td><td class="colmia">3</td><td class="coldapta">4</td><td>30</td><td>40</td></tr>
+  <tr><td class="crit">Escalabilidad</td><td>8</td><td class="colmia">5</td><td class="coldapta">3</td><td>40</td><td>24</td></tr>
+  <tr><td class="crit">Estabilidad</td><td>8</td><td class="colmia">4</td><td class="coldapta">3</td><td>32</td><td>24</td></tr>
+  <tr><td class="crit">Mantenimiento</td><td>8</td><td class="colmia">3</td><td class="coldapta">4</td><td>24</td><td>32</td></tr>
+  <tr><td class="crit">Vendor lock-in / portabilidad</td><td>8</td><td class="colmia">5</td><td class="coldapta">2</td><td>40</td><td>16</td></tr>
+  <tr><td class="crit">Conocimiento / IP / talento</td><td>6</td><td class="colmia">5</td><td class="coldapta">3</td><td>30</td><td>18</td></tr>
+  <tr><td class="crit">Time-to-value</td><td>6</td><td class="colmia">3</td><td class="coldapta">5</td><td>18</td><td>30</td></tr>
+  <tr><td class="crit">Control / ajuste al dominio</td><td>6</td><td class="colmia">5</td><td class="coldapta">3</td><td>30</td><td>18</td></tr>
+  <tr><td class="crit">Cobertura funcional real</td><td>4</td><td class="colmia">5</td><td class="coldapta">3</td><td>20</td><td>12</td></tr>
+  <tr style="border-top:2px solid var(--border)"><td class="crit tot">TOTAL</td><td class="tot">100</td><td class="colmia"></td><td class="coldapta"></td><td class="tot">408</td><td class="tot">346</td></tr>
+  <tr><td class="crit tot">Puntaje /5</td><td></td><td class="colmia tot">4.08</td><td class="coldapta tot">3.46</td><td></td><td></td></tr>
+ </tbody>
+</table></div>
+<div class="metric"><span>MIA</span><span class="score">4.08</span><div class="track"><div class="fill mia" style="width:81.6%"></div></div></div>
+<div class="metric"><span>DAPTA</span><span class="score">3.46</span><div class="track"><div class="fill dapta" style="width:69.2%"></div></div></div>
+<p class="note"><b>Lectura de sensibilidad:</b> DAPTA lidera el clúster de <b>agilidad</b> (agilidad, TTV, mantenimiento, ANS-corto-plazo). MIA lidera el clúster <b>estructural</b> (costo, lock-in, escalabilidad, IP, control, seguridad). Como Ciencuadras es un proptech, la agilidad tiene <b>un peso alto</b> — aun así, las dimensiones estructurales (sobre todo <b>costo y lock-in</b>, que no dependen del marco regulatorio) mantienen el total a favor de MIA (4.08 vs 3.46). Si se ponderara la agilidad todavía más alto, la brecha se acorta pero no se invierte.</p>
+
+<h2><span class="n">05</span>Las «3 S»: Seguridad · Soporte · Sostenibilidad</h2>
+<p class="note">Interpretamos "las 3 SSS" como <b>Seguridad, Soporte y Sostenibilidad</b> (adicionales a escalabilidad/estabilidad, ya evaluadas). Si en el marco interno "3 SSS" refiere a otra tríada, se remapea sin cambiar el fondo.</p>
+<div class="tw"><table>
+ <thead><tr><th>Dimensión</th><th class="colmia">MIA</th><th class="coldapta">DAPTA</th></tr></thead>
+ <tbody>
+  <tr><td class="crit">Seguridad</td><td class="colmia"><span class="chip c-good">Alta</span> Datos en cuentas propias, VPC privada, Cognito, WAF, cifrado gobernable; alineado a Habeas Data + estándares Grupo Bolívar.</td><td class="coldapta"><span class="chip c-warn">A validar</span> PII a tercero; sin SOC2/DPA/residencia públicos; sin on-prem. Exigir due diligence (Habeas Data + datos de crédito).</td></tr>
+  <tr><td class="crit">Soporte</td><td class="colmia"><span class="chip c-warn">Interno</span> Depende del equipo y su capacidad on-call (hoy es el punto débil → ANS).</td><td class="coldapta"><span class="chip c-good">Gestionado</span> Soporte del proveedor (AM dedicado en tiers altos), pero fuera de control directo.</td></tr>
+  <tr><td class="crit">Sostenibilidad</td><td class="colmia"><span class="chip c-good">Alta</span> IP y conocimiento propios; evoluciona con el ecosistema; no depende de un vendor.</td><td class="coldapta"><span class="chip c-warn">Condicionada</span> Atada a la continuidad, precios y roadmap de un proveedor joven.</td></tr>
+ </tbody>
+</table></div>
+<div class="note warn"><b>◆ SOC 2 Type II y Habeas Data — precisión de cumplimiento.</b> No es que "sin SOC 2 = ilegal". Es que <b>sin SOC 2 (ni equivalente), Ciencuadras asume el riesgo y la carga de la prueba</b>, y llevar PII + datos de crédito a un tercero sin poder demostrar su seguridad <b>sí puede poner en riesgo el cumplimiento</b> — con la responsabilidad recayendo en <b>Ciencuadras, no en Dapta</b>. SOC 2 Type II no es un requisito legal, pero es la evidencia habitual de <b>responsabilidad demostrada</b> (Circular Externa 002/2015 SIC) y del <b>principio de seguridad</b> (Ley 1581/2012); en su ausencia debe sustituirse por equivalentes —ISO 27001, pentest independiente y contrato de transmisión de datos con anexo de seguridad (Decreto 1377/2013, Art. 25)—.</div>
+<div class="note"><b>¿Qué es un "dato personal"? (Ley 1581/2012, Art. 3):</b> cualquier información vinculada o que pueda asociarse a una persona natural determinada o determinable. <b>En Ciencuadras:</b> nombre, cédula, correo, teléfono, dirección, datos de crédito/financieros (semiprivados) y el historial de búsqueda asociado a una persona → <b>todos son datos personales</b>, y los de crédito <b>escalan el nivel de cuidado</b>.</div>
+
+<h2><span class="n">06</span>Matriz de riesgos</h2>
+<div class="cols2">
+ <div class="pcard dapta"><div class="tag">Riesgos de migrar a DAPTA</div><h3>&nbsp;</h3>
+  <ul class="clean">
+   <li><b>Costo creciente:</b> el modelo por consumo se dispara al volumen real de MIA (millones de interacciones/mes). <span class="chip c-warn">Medio-Alto</span></li>
+   <li><b>Costos ocultos (egress AWS):</b> DAPTA sigue consumiendo los servicios de Ciencuadras en AWS → egress + integración no contemplados; el delta real supera los +$5M/mes. <span class="chip c-warn">Medio-Alto</span></li>
+   <li><b>Capa pass-through «Conecta» obligatoria:</b> exponer servicios a DAPTA exige integrar Ciencuadras→Conecta y apuntar DAPTA→Conecta, con activación y plan de uso a cargo del <b>equipo de Comunes</b> → <b>hop extra, punto de fallo y latencia adicionales</b>, y dependencia de un equipo fuera del de IA. <span class="chip c-warn">Medio-Alto</span></li>
+   <li><b>Observabilidad fuera del estándar del área de Monitoreo:</b> DAPTA no integra Datadog/Langfuse nativamente (solo webhooks). Habría que <b>involucrar al equipo de Monitoreo</b> para diseñar una alternativa (forwarder por webhook o tablero propio) que les permita vigilar y tener <b>estadísticas del buen funcionamiento de los agentes</b> en DAPTA → dependencia de equipo + esfuerzo adicional + <b>punto ciego operativo</b> mientras no exista. <span class="chip c-warn">Medio</span></li>
+   <li><b>Brecha funcional:</b> DAPTA podría no replicar multi-agente + RAG + integraciones profundas. <span class="chip c-warn">Medio-Alto</span></li>
+   <li><b>Lock-in:</b> lógica y datos atados; salida costosa. <span class="chip c-warn">Medio</span></li>
+   <li><b>Migración:</b> reconstruir, revalidar y correr en paralelo; riesgo de regresión de experiencia. <span class="chip c-warn">Medio</span></li>
+   <li><b>Continuidad del proveedor:</b> empresa joven, roadmap externo. <span class="chip c-warn">Medio</span></li>
+   <li><b>Protección de datos (Habeas Data):</b> datos personales/de crédito en SaaS de terceros sin certificaciones verificadas. <span class="chip c-warn">Medio</span></li>
+  </ul>
+ </div>
+ <div class="pcard mia"><div class="tag">Riesgos de quedarse con MIA</div><h3>&nbsp;</h3>
+  <ul class="clean">
+   <li><b>ANS sostenido bajo</b> si no se invierte en operación/SRE. <span class="chip c-risk">Alto (hoy)</span></li>
+   <li><b>Dependencia de talento especializado</b> (rotación, bus factor). <span class="chip c-warn">Medio</span></li>
+   <li><b>Percepción de negocio:</b> lentitud para cambios si no se habilita autoservicio. <span class="chip c-warn">Medio</span></li>
+   <li><b>Deuda técnica</b> si no se prioriza el mantenimiento evolutivo. <span class="chip c-warn">Medio-Bajo</span></li>
+  </ul>
+ </div>
+</div>
+
+<h2><span class="n">07</span>El nudo real: ¿por qué cae el ANS?</h2>
+<p>Cambiar de plataforma para recuperar el ANS asume que <b>la arquitectura es la causa</b>. La evidencia sugiere lo contrario: MIA ya tiene <b>autoescalado, observabilidad (Datadog + Langfuse), memoria y cachés</b>. Y el equipo técnico de MIA ya tiene una <b>hipótesis concreta</b> de la causa — que conviene <b>confirmar</b> antes de invertir.</p>
+<div class="note warn"><b>◆ Hipótesis principal del equipo técnico de MIA (a confirmar) — el canal de WhatsApp estaría compartido.</b> Según el equipo, los mensajes <b>no entrarían directo a MIA</b>: llegarían primero a un <b>chatbot de Infobip</b> que despliega un menú con varios frentes de Ciencuadras (<b>avalúos, MIA y otros</b>). De ser así, el ANS de MIA se mediría y se degradaría por un <b>canal que MIA no controla</b>. <b>Es una hipótesis, no una afirmación:</b> debe confirmarse con datos (logs de enrutamiento de Infobip, medición del ANS por canal) antes de decidir. Si se confirma, la solución no es cambiar la plataforma de IA — es <b>una línea de WhatsApp dedicada</b> para MIA, que aísle su tráfico y permita medir y garantizar el ANS correctamente.</div>
+<div class="note key"><b>Si la hipótesis se confirma, la solución cuesta ~22× menos que migrar.</b> Línea WhatsApp dedicada ≈ <b>$160.000/mes (Meta · WhatsApp Business API) + $60.000/mes (plan postpago) ≈ $220.000/mes</b> (~$2,6M/año). Frente a <b>+$5.000.000/mes (~$60M/año)</b> de migrar a DAPTA — <b>para el mismo objetivo de recuperar el ANS</b>. La opción barata además aísla el problema en su origen; DAPTA no lo resolvería si el menú de Infobip sigue delante.</div>
+<div class="note warn"><b>◆ Paradoja: DAPTA se propone para <i>mejorar</i> el ANS, pero le añadiría un riesgo nuevo.</b> Exponer los servicios de Ciencuadras a DAPTA obliga a pasar por <b>«Conecta»</b>, la capa pass-through corporativa. Eso agrega un <b>hop obligatorio</b> en la ruta (Ciencuadras → Conecta → DAPTA), operado por el <b>equipo de Comunes</b> (activación + plan de uso), que introduce <b>un punto de fallo y latencia adicionales</b> y hereda las ventanas de mantenimiento y la disponibilidad de Conecta. En MIA, los microservicios y el MCP viven en la <b>misma VPC, sin capa intermedia</b>. Migrar para recuperar el ANS y, en el camino, <b>añadir un eslabón más que puede degradarlo</b>, va en contra del objetivo perseguido.</div>
+<p style="margin-top:14px">Otros factores operativos que conviene revisar en paralelo:</p>
+<ul class="clean">
+ <li><b>Capacidad de respuesta a incidentes</b> (¿hay on-call, runbooks, SLOs definidos?).</li>
+ <li><b>Cuellos de botella conocidos</b> (p. ej., <code>MAX=2 tasks</code> de MIA 2.0 es techo bajo; RDS/ES sin dimensionar al pico; sin alertas proactivas).</li>
+ <li><b>Deuda de mantenimiento evolutivo</b> (dependencias, reintentos, timeouts, colas).</li>
+ <li><b>Falta de autoservicio</b> para negocio → percepción de lentitud que se confunde con inestabilidad.</li>
+</ul>
+<p class="note key"><b>Recomendación de causa raíz:</b> antes de gastar ≈$60M/año en DAPTA, <b>confirmar la hipótesis</b> y <b>invertir una fracción</b> en: (a) <b>confirmar la causa</b> — medir el ANS por canal y revisar el enrutamiento de Infobip; (b) <b>línea de WhatsApp dedicada para MIA</b> (~$220k/mes) para aislar y medir bien el ANS; (c) subir el techo de autoescalado; (d) definir SLOs y on-call; (e) tablero de ANS con las métricas que ya se emiten; y (f) exponer a negocio unas pocas "palancas" seguras de autoservicio (prompts en Langfuse, parámetros en SSM). Esto ataca el ANS <b>y</b> la agilidad sin ceder control ni datos, por una fracción del costo.</p>
+
+<h2><span class="n">08</span>¿DAPTA puede reemplazar a MIA? — brecha de capacidades</h2>
+<div class="tw"><table>
+ <thead><tr><th>Capacidad de MIA</th><th>¿DAPTA lo cubre?</th><th>Comentario</th></tr></thead>
+ <tbody>
+  <tr><td>Chat conversacional (web/WhatsApp), captura de lead, agendamiento, agente de voz</td><td><span class="chip c-good">Sí</span></td><td>Es el terreno natural de DAPTA (su superficie SMB).</td></tr>
+  <tr><td>Orquestación multi-agente (router/supervisor/swarm)</td><td><span class="chip c-warn">Parcial</span></td><td>Flujos simples sí; la orquestación LangGraph a la medida, dudosa.</td></tr>
+  <tr><td>RAG sobre catálogo + FAQs (Pinecone) + ingesta</td><td><span class="chip c-warn">Parcial</span></td><td>RAG básico posible; pipeline de ingesta y control fino, limitado.</td></tr>
+  <tr><td>Búsqueda profunda del catálogo (Elasticsearch, 30+ filtros)</td><td><span class="chip c-risk">Difícil</span></td><td>Requiere integración a medida; no es su fuerte.</td></tr>
+  <tr><td>Validación de crédito / lógica de dominio (Davivienda, leasing/hipotecario)</td><td><span class="chip c-warn">Solo vía Conecta</span></td><td>La capacidad <b>se puede exponer</b> a DAPTA, pero <b>obligatoriamente a través de Conecta</b>; la lógica de dominio sigue viviendo en los servicios internos de Ciencuadras.</td></tr>
+  <tr><td>Gobierno LLM transversal SB + Langfuse + observabilidad</td><td><span class="chip c-warn">Solo vía webhook</span></td><td><b>No integra Datadog, Langfuse ni OpenTelemetry de forma nativa</b> (verificado en su documentación). Trae analítica básica propia (conteos, tasa de éxito, duración, créditos) + logs de depuración; llevar datos a Datadog/Langfuse exige construir un <b>forwarder por webhook a medida</b>, y aun así <b>sin la profundidad de trazas LLM de Langfuse</b>.</td></tr>
+  <tr><td>Datos en cuentas AWS propias / cumplimiento</td><td><span class="chip c-risk">No</span></td><td>Los datos pasan al SaaS del proveedor.</td></tr>
+ </tbody>
+</table></div>
+<p>Conclusión: DAPTA puede <b>igualar la parte simple</b> de MIA, pero <b>no su profundidad</b>. Un reemplazo total probablemente <b>degrade capacidades</b> hoy en producción.</p>
+
+<h2><span class="n">09</span>Escenarios de decisión</h2>
+<div class="opt"><h4>A · Consolidar MIA y arreglar el ANS <span class="rec">Recomendado</span></h4><p style="margin:0;font-size:13.5px;color:var(--muted)">Invertir en operación/SRE + autoescalado + autoservicio acotado (prompts/parámetros), apalancando Kiro y el harness. Mantiene costo bajo, control, IP y cumplimiento; ataca directamente el ANS y parte de la agilidad. <b>Menor costo, menor riesgo.</b></p></div>
+<div class="opt"><h4>B · Reemplazo total por DAPTA <span class="chip c-risk">No recomendado</span></h4><p style="margin:0;font-size:13.5px;color:var(--muted)">Máxima agilidad percibida, pero +$60M/año, riesgo de datos personales (Habeas Data), lock-in, brecha funcional y <b>pérdida de propiedad intelectual</b> (código, orquestación y know-how propios). Difícil de justificar para el core del negocio.</p></div>
+<div class="opt"><h4>C · Híbrido — DAPTA para flujos de borde, MIA para el core <span class="chip c-warn">Condicional</span></h4><p style="margin:0;font-size:13.5px;color:var(--muted)">Usar DAPTA solo en casos <b>simples, de bajo riesgo y sin PII sensible</b> (p. ej., campañas outbound, un recepcionista de voz, automatizaciones de marketing) donde el autoservicio de negocio aporte, manteniendo MIA como núcleo. Requiere due diligence de seguridad y control de costos.</p></div>
+<div class="opt"><h4>D · Piloto acotado y medido de DAPTA <span class="chip c-warn">Como paso previo</span></h4><p style="margin:0;font-size:13.5px;color:var(--muted)">Prueba de 60–90 días en <b>un</b> flujo no crítico, con criterios de éxito claros (ANS real, costo real al volumen, esfuerzo de negocio, seguridad) antes de cualquier decisión mayor. Convierte la discusión en datos.</p></div>
+
+<h2><span class="n">10</span>Recomendación</h2>
+<p><b>Desde arquitectura, y de forma objetiva:</b> la evidencia respalda <b>no reemplazar MIA por DAPTA</b>. La arquitectura actual — con Kiro y el harness — entrega valor <b>más económico, con más control, sin lock-in y con el conocimiento dentro de la organización</b>. Y aunque Ciencuadras sea un <b>proptech</b> (donde la agilidad pesa más), los argumentos que sostienen la decisión — <b>costo, independencia de proveedor, profundidad de capacidades y escalabilidad</b> — no dependen del marco regulatorio.</p>
+<p><b>La hipótesis más fuerte (a confirmar):</b> la causa del ANS sería el <b>canal de WhatsApp compartido</b> (menú de Infobip por delante de MIA). Conviene <b>confirmarla</b> con datos; de confirmarse, resolverla con una <b>línea dedicada cuesta ~$220k/mes</b>, ~22× menos que los +$5M/mes de DAPTA, y DAPTA <b>no la resolvería</b> si el enrutamiento de Infobip sigue delante. Migrar de plataforma para arreglar un problema de canal sería resolver la pregunta equivocada, caro.</p>
+<p><b>Honrando la posición de negocio:</b> su dolor es legítimo — el ANS ha caído y hoy es más fácil hacerle mantenimiento a DAPTA. Pero la causa probable del ANS es <b>operativa</b> (hipótesis a validar), y la "facilidad" de DAPTA se paga con costo recurrente, dependencia y pérdida de propiedad intelectual. La respuesta correcta no es cambiar de plataforma, sino <b>confirmar la causa, aislar el canal, operar mejor lo propio y habilitar autoservicio seguro</b>.</p>
+<h3>Camino propuesto</h3>
+<ul class="clean">
+ <li><b>Primero (días):</b> <b>confirmar la hipótesis del ANS</b> — medir el ANS de MIA por canal y revisar el enrutamiento del chatbot de Infobip. Barato y define el resto del plan.</li>
+ <li><b>Inmediato (semanas):</b> si se confirma, <b>habilitar una línea de WhatsApp dedicada para MIA</b> (~$220k/mes) que la separe del menú de Infobip — aísla el canal y permite medir/garantizar el ANS real.</li>
+ <li><b>Corto plazo (0–1 mes):</b> plan de recuperación de ANS (SLOs, on-call, tablero, subir techo de autoescalado). Cuantificar el ANS objetivo.</li>
+ <li><b>Corto plazo:</b> habilitar 2–3 "palancas" de autoservicio para negocio (edición de prompts en Langfuse, parámetros) — agilidad sin ceder el core.</li>
+ <li><b>Si negocio insiste en DAPTA:</b> exigir <b>due diligence</b> (DPA + contrato de transmisión de datos, residencia de datos, certificación de seguridad —SOC 2 Type II o ISO 27001—, SLA por escrito, garantías de exportación/salida) y una <b>estimación de costo real al volumen de MIA</b> — el modelo por consumo puede superar los $5M/mes.</li>
+ <li><b>Decidir con datos:</b> piloto acotado (escenario D) en un flujo no crítico; comparar ANS, costo y esfuerzo reales antes de cualquier reemplazo.</li>
+ <li><b>Nunca:</b> mover datos personales/de crédito a DAPTA sin aprobación de seguridad y cumplimiento.</li>
+</ul>
+
+<div class="note key"><b>◆ Nota final — propuesta alterna (recomendación del autor).</b> Sin alterar la conclusión comparativa, se propone explorar DAPTA <b>no como reemplazo</b> sino como <b>capa de apalancamiento</b> para flujos de negocio <b>acotados, de bajo riesgo y sin PII sensible</b>, manteniendo <b>MIA como motor</b>. Condicionada a: (a) exponer las capabilities internas por una <b>capa limpia (Conecta/MCP)</b> con buen <i>time-to-availability</i>; (b) <b>gobierno de costo y seguridad</b> (DPA, Habeas Data, topes de gasto); y (c) un <b>piloto medido</b> con criterios de éxito (ANS, costo real al volumen, esfuerzo). El motor da profundidad y control; el apalancador, agilidad de negocio.</div>
+
+<div class="foot">
+ <p><b>Supuestos y alcance:</b> el delta de costo (+$5M/mes) es dato aportado por negocio (solo operación); la comparación de capacidades de DAPTA se basa en información pública (sitio, reseñas independientes) y puede diferir de su oferta enterprise, no divulgada. Los puntajes son un instrumento de decisión ajustable, no un veredicto absoluto. Las cifras de MIA provienen del reverse-engineering + runtime AWS realizado por arquitectura.</p>
+ <p><b>Fuentes sobre DAPTA:</b> <a href="https://dapta.ai/">dapta.ai</a> · <a href="https://dapta.ai/pricing/">Pricing</a> · <a href="https://dapta.ai/blog-posts/what-is-dapta/">What is Dapta</a> · <a href="http://coldiq.com/tools/dapta">Reseña independiente (ColdIQ)</a> · <a href="https://nerdisa.com/dapta-ai/">Nerdisa</a> · <a href="https://www.trustpilot.com/review/dapta.ai">Trustpilot</a>. Protección de datos en Colombia: Ley 1581/2012 (Habeas Data) aplica a Ciencuadras como responsable de datos personales. <b>Ciencuadras opera como plataforma inmobiliaria (proptech) del Grupo Empresarial Bolívar</b> — este informe trata la seguridad como buena práctica y cumplimiento de Habeas Data.</p>
+ <p>Documento de arquitectura · Ciencuadras / Seguros Bolívar · 2026-07-11 · confidencial interno.</p>
+</div>
+
+</div></div>
+</body>
+</html>

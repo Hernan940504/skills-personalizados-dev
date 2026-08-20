@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Consumo de Gemini · Ciencuadras-IA-PROD</title>
+<style>
+  :root{
+    color-scheme: light;
+    --plane:#f4f6f9; --surface:#ffffff; --surface-2:#fbfcfd;
+    --ink:#101720; --ink-2:#4c5663; --muted:#828b98;
+    --line:#e6e9ee; --line-2:#d3d8e0; --baseline:#c6ccd6;
+    --series-1:#2a78d6; --series-1-soft:#cfe0f7;
+    --series-2:#1baf7a;
+    --err:#d03b3b; --err-soft:#f3cccc;
+    --warn:#c98500; --good:#0ca30c;
+    --ring:rgba(16,23,32,.08);
+    --shadow:0 1px 2px rgba(16,23,32,.04),0 8px 24px -12px rgba(16,23,32,.18);
+    --mono:ui-monospace,"SF Mono","Cascadia Code",Menlo,Consolas,monospace;
+    --sans:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  }
+  @media (prefers-color-scheme:dark){
+    :root:where(:not([data-theme="light"])){
+      color-scheme:dark;
+      --plane:#0c0f14; --surface:#161b22; --surface-2:#1b212a;
+      --ink:#e8ebf0; --ink-2:#a6b0bd; --muted:#7d8794;
+      --line:#252c36; --line-2:#2e3742; --baseline:#3a434f;
+      --series-1:#3987e5; --series-1-soft:#1d3350;
+      --series-2:#199e70;
+      --err:#e26060; --err-soft:#3d2323;
+      --warn:#e6a327; --good:#3bbf3b;
+      --ring:rgba(255,255,255,.10);
+      --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px -14px rgba(0,0,0,.6);
+    }
+  }
+  :root[data-theme="dark"]{
+    color-scheme:dark;
+    --plane:#0c0f14; --surface:#161b22; --surface-2:#1b212a;
+    --ink:#e8ebf0; --ink-2:#a6b0bd; --muted:#7d8794;
+    --line:#252c36; --line-2:#2e3742; --baseline:#3a434f;
+    --series-1:#3987e5; --series-1-soft:#1d3350;
+    --series-2:#199e70;
+    --err:#e26060; --err-soft:#3d2323;
+    --warn:#e6a327; --good:#3bbf3b;
+    --ring:rgba(255,255,255,.10);
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px -14px rgba(0,0,0,.6);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--plane);color:var(--ink);font-family:var(--sans);
+    line-height:1.55;-webkit-font-smoothing:antialiased;font-size:16px}
+  .wrap{max-width:1060px;margin:0 auto;padding:0 22px 96px}
+  a{color:var(--series-1)}
+  h1,h2,h3{text-wrap:balance;line-height:1.15;margin:0}
+  .tnum{font-variant-numeric:tabular-nums}
+
+  /* ---------- header ---------- */
+  header.top{padding:52px 0 26px;border-bottom:1px solid var(--line)}
+  .eyebrow{font-size:12.5px;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--series-1);font-weight:650;margin-bottom:14px}
+  h1{font-size:clamp(28px,4.4vw,42px);font-weight:720;letter-spacing:-.02em}
+  .lede{margin-top:14px;max-width:63ch;color:var(--ink-2);font-size:17px}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:22px}
+  .chip{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;
+    background:var(--surface);border:1px solid var(--line-2);border-radius:999px;
+    padding:5px 11px;color:var(--ink-2)}
+  .chip b{color:var(--ink);font-weight:600}
+  .chip.mono{font-family:var(--mono);font-size:11.5px}
+  .dot{width:7px;height:7px;border-radius:50%}
+
+  section{padding:44px 0;border-bottom:1px solid var(--line)}
+  .snum{font-family:var(--mono);font-size:12px;color:var(--series-1);font-weight:600}
+  h2{font-size:23px;font-weight:680;letter-spacing:-.01em;margin:8px 0 6px}
+  .sub{color:var(--ink-2);max-width:66ch;margin-bottom:8px}
+  p{margin:14px 0}
+  p.body{max-width:68ch;color:var(--ink-2)}
+  p.body strong{color:var(--ink);font-weight:640}
+
+  /* ---------- KPI tiles ---------- */
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:26px}
+  @media(max-width:760px){.kpis{grid-template-columns:repeat(2,1fr)}}
+  @media(max-width:720px){.split{grid-template-columns:1fr!important}}
+  .kpi{background:var(--surface);border:1px solid var(--line-2);border-radius:14px;
+    padding:18px 18px 16px;box-shadow:var(--shadow)}
+  .kpi .lab{font-size:12.5px;color:var(--muted);font-weight:560;display:flex;
+    align-items:center;gap:6px}
+  .kpi .val{font-size:31px;font-weight:720;letter-spacing:-.02em;margin-top:9px;
+    line-height:1}
+  .kpi .cap{font-size:12.5px;color:var(--ink-2);margin-top:8px}
+  .pill{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:600;
+    padding:2px 8px;border-radius:999px;vertical-align:middle}
+  .pill.up{background:color-mix(in srgb,var(--err) 14%,transparent);color:var(--err)}
+  .pill.warn{background:color-mix(in srgb,var(--warn) 16%,transparent);color:var(--warn)}
+  .pill.flat{background:color-mix(in srgb,var(--series-1) 14%,transparent);color:var(--series-1)}
+
+  /* ---------- cards / callouts ---------- */
+  .card{background:var(--surface);border:1px solid var(--line-2);border-radius:16px;
+    padding:22px;box-shadow:var(--shadow)}
+  figure{margin:24px 0 0}
+  figcaption{font-size:12.5px;color:var(--muted);margin-top:12px;max-width:70ch}
+  .legend{display:flex;flex-wrap:wrap;gap:16px;margin:2px 0 12px;font-size:13px;color:var(--ink-2)}
+  .legend span{display:inline-flex;align-items:center;gap:7px}
+  .swatch{width:11px;height:11px;border-radius:3px;flex:none}
+
+  .callout{display:grid;grid-template-columns:auto 1fr;gap:18px;align-items:start;
+    border-left:3px solid var(--warn);background:var(--surface-2);
+    border-radius:0 14px 14px 0;padding:18px 20px;margin-top:22px}
+  .callout.crit{border-left-color:var(--err)}
+  .callout.info{border-left-color:var(--series-1)}
+  .callout .ic{font-size:22px;line-height:1}
+  .callout h3{font-size:16px;font-weight:660;margin-bottom:2px}
+  .callout p{margin:6px 0 0;font-size:14.5px;color:var(--ink-2)}
+
+  /* ---------- tables ---------- */
+  .tbl-wrap{overflow-x:auto;margin-top:22px;border:1px solid var(--line-2);
+    border-radius:14px;background:var(--surface)}
+  table{border-collapse:collapse;width:100%;font-size:14px}
+  th,td{padding:11px 14px;text-align:right;white-space:nowrap}
+  th:first-child,td:first-child{text-align:left}
+  thead th{font-size:11.5px;letter-spacing:.04em;text-transform:uppercase;
+    color:var(--muted);font-weight:620;border-bottom:1px solid var(--line-2);background:var(--surface-2)}
+  tbody tr+tr td{border-top:1px solid var(--line)}
+  tbody td{color:var(--ink-2)}
+  tbody td:first-child{color:var(--ink);font-weight:520}
+  .bar-cell{position:relative;min-width:120px}
+  .microbar{height:7px;border-radius:4px;background:var(--series-1);display:inline-block;vertical-align:middle}
+  tr.hl td{background:color-mix(in srgb,var(--warn) 8%,transparent)}
+  .tag{font-family:var(--mono);font-size:11.5px;color:var(--ink-2)}
+  .up-txt{color:var(--err);font-weight:600}
+  .dn-txt{color:var(--good);font-weight:600}
+
+  /* recommendations */
+  .rec{display:grid;grid-template-columns:auto 1fr auto;gap:14px 16px;align-items:baseline;
+    padding:16px 0;border-top:1px solid var(--line)}
+  .rec:first-of-type{border-top:0}
+  .rec .prio{font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;
+    padding:3px 9px;border-radius:999px;white-space:nowrap}
+  .prio.p1{background:color-mix(in srgb,var(--err) 15%,transparent);color:var(--err)}
+  .prio.p2{background:color-mix(in srgb,var(--warn) 16%,transparent);color:var(--warn)}
+  .prio.p3{background:color-mix(in srgb,var(--series-1) 14%,transparent);color:var(--series-1)}
+  .rec h3{font-size:15.5px;font-weight:630}
+  .rec p{margin:4px 0 0;font-size:14px;color:var(--ink-2);max-width:70ch}
+  .rec .eff{font-size:12px;color:var(--muted);white-space:nowrap}
+
+  /* chart tooltip */
+  .tip{position:fixed;pointer-events:none;z-index:50;background:var(--surface);
+    border:1px solid var(--line-2);border-radius:10px;box-shadow:var(--shadow);
+    padding:9px 11px;font-size:12.5px;opacity:0;transition:opacity .1s;min-width:120px}
+  .tip .d{font-weight:640;color:var(--ink);margin-bottom:5px}
+  .tip .row{display:flex;justify-content:space-between;gap:16px;color:var(--ink-2)}
+  .tip .row b{color:var(--ink);font-variant-numeric:tabular-nums}
+  svg{display:block;width:100%;height:auto;overflow:visible}
+  .ax{font-size:11px;fill:var(--muted);font-variant-numeric:tabular-nums}
+  .gl{stroke:var(--line);stroke-width:1}
+  .note-txt{font-size:11px;fill:var(--warn);font-weight:600}
+  .foot{padding:34px 0 0;color:var(--muted);font-size:13px;max-width:74ch}
+  .foot code{font-family:var(--mono);font-size:12px;color:var(--ink-2)}
+  .kbd{font-family:var(--mono);font-size:11px;background:var(--surface-2);border:1px solid var(--line-2);
+    border-radius:5px;padding:1px 5px;color:var(--ink-2)}
+
+  /* cost estimator */
+  .est{margin-top:22px;padding:22px}
+  .est-head{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin-bottom:18px}
+  .est-head h3{font-size:16px;font-weight:660}
+  .presets{display:flex;gap:8px;flex-wrap:wrap}
+  .preset{font-size:12.5px;font-weight:600;padding:6px 12px;border-radius:999px;cursor:pointer;
+    background:var(--surface-2);border:1px solid var(--line-2);color:var(--ink-2)}
+  .preset:hover{border-color:var(--series-1);color:var(--series-1)}
+  .preset.active{background:color-mix(in srgb,var(--series-1) 14%,transparent);border-color:var(--series-1);color:var(--series-1)}
+  .est-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+  @media(max-width:760px){.est-grid{grid-template-columns:repeat(2,1fr)}}
+  .field label{display:block;font-size:12px;color:var(--muted);margin-bottom:6px;font-weight:560}
+  .field .inp{display:flex;align-items:center;gap:6px;background:var(--surface-2);
+    border:1px solid var(--line-2);border-radius:9px;padding:8px 10px}
+  .field .inp span{font-size:12px;color:var(--muted)}
+  .field input{border:0;background:transparent;color:var(--ink);font:inherit;font-size:15px;
+    font-variant-numeric:tabular-nums;width:100%;outline:none;font-weight:600}
+  .field .inp:focus-within{border-color:var(--series-1)}
+  .est-out{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:20px;
+    padding-top:20px;border-top:1px solid var(--line)}
+  @media(max-width:760px){.est-out{grid-template-columns:repeat(2,1fr)}}
+  .est-out .o-lab{font-size:12px;color:var(--muted)}
+  .est-out .o-val{font-size:26px;font-weight:720;letter-spacing:-.02em;margin-top:6px;line-height:1}
+  .est-out .o-cap{font-size:11.5px;color:var(--ink-2);margin-top:5px}
+  .est-note{font-size:12px;color:var(--muted);margin-top:16px;max-width:76ch}
+  /* theme toggle */
+  .theme-btn{position:fixed;top:14px;right:14px;z-index:60;width:40px;height:40px;border-radius:11px;
+    background:var(--surface);border:1px solid var(--line-2);color:var(--ink-2);cursor:pointer;
+    box-shadow:var(--shadow);font-size:17px;display:flex;align-items:center;justify-content:center}
+  .theme-btn:hover{color:var(--series-1);border-color:var(--series-1)}
+  .theme-btn:focus-visible{outline:2px solid var(--series-1);outline-offset:2px}
+</style>
+</head>
+<body>
+
+<button class="theme-btn" id="themeBtn" aria-label="Cambiar tema" title="Cambiar tema claro/oscuro">☾</button>
+<div class="wrap">
+  <header class="top">
+    <div class="eyebrow">Informe de consumo · Vertex AI / Gemini</div>
+    <h1>Aumento del consumo de Gemini en Ciencuadras-IA-PROD</h1>
+    <p class="lede">Análisis de 90 días del tráfico de Vertex AI en el proyecto de producción de IA.
+      El consumo de Gemini se ha más que duplicado desde abril, impulsado por un único consumidor.
+      La triangulación <b>GCP ↔ AWS ↔ Langfuse</b> confirma que el origen es <b>MIA</b>, con
+      <b>Gemini 2.5 Flash</b> y un costo real de <b>~$806 USD/mes</b>.</p>
+    <div class="chips">
+      <span class="chip"><span class="dot" style="background:var(--series-1)"></span>Proyecto <b>ciencuadras-ia-prod</b></span>
+      <span class="chip">Nº <b>803973284432</b></span>
+      <span class="chip">Región <b>us-central1</b></span>
+      <span class="chip">Ventana <b>17 abr – 15 jul 2026</b></span>
+      <span class="chip"><span class="dot" style="background:var(--good)"></span>Consumidor <b>MIA (confirmado)</b></span>
+      <span class="chip">Fuentes <b>Cloud Monitoring · CloudWatch · Langfuse</b></span>
+    </div>
+  </header>
+
+  <!-- ===================== RESUMEN ===================== -->
+  <section id="resumen">
+    <div class="snum">01 · Resumen ejecutivo</div>
+    <h2>Qué está pasando</h2>
+    <p class="sub">Cuatro cifras que sintetizan el trimestre. El consumo de Gemini equivale a las
+      llamadas <span class="tag">PredictionService.GenerateContent</span> de Vertex AI.</p>
+
+    <div class="kpis">
+      <div class="kpi">
+        <div class="lab">Llamadas Gemini · últimos 30 d</div>
+        <div class="val tnum">404.211</div>
+        <div class="cap">respuestas exitosas (HTTP&nbsp;200)</div>
+      </div>
+      <div class="kpi">
+        <div class="lab">Crecimiento vs. línea base abril</div>
+        <div class="val tnum" style="color:var(--err)">+121%</div>
+        <div class="cap">~51k → ~113k llamadas/semana <span class="pill up">▲ tendencia</span></div>
+      </div>
+      <div class="kpi">
+        <div class="lab">Consumidores distintos</div>
+        <div class="val tnum">1</div>
+        <div class="cap"><span class="tag">cc-ia-prod</span> · 100% del tráfico</div>
+      </div>
+      <div class="kpi">
+        <div class="lab">Tasa de error 4xx · 30 d</div>
+        <div class="val tnum" style="color:var(--warn)">10,6%</div>
+        <div class="cap">48.078 llamadas 404 <span class="pill warn">◆ anomalía jun</span></div>
+      </div>
+    </div>
+
+    <div class="callout info" style="border-left-color:var(--good);margin-top:24px">
+      <div class="ic">✅</div>
+      <div>
+        <h3>Triangulación cerrada — el consumidor es MIA, con Gemini 2.5 Flash</h3>
+        <p>Las trazas de <b>Langfuse</b> (proyecto <span class="tag">MIA_PROD</span>) registran
+          <b>410.471 generaciones Gemini</b> en 30 días frente a <b>404.211 llamadas</b> medidas en GCP:
+          <b>102% de cobertura</b>. Deja de ser inferencia — es el mismo flujo trazado en ambos lados.
+          El modelo es <b>Gemini 2.5 Flash</b> (familia económica), con un costo real de <b>$805,87/mes</b>.</p>
+      </div>
+    </div>
+
+    <div class="kpis" style="margin-top:14px">
+      <div class="kpi">
+        <div class="lab">Consumidor confirmado</div>
+        <div class="val" style="font-size:23px">MIA</div>
+        <div class="cap"><span class="tag">asistente-ia</span> en AWS ECS · SA <span class="tag">cc-ia-prod</span></div>
+      </div>
+      <div class="kpi">
+        <div class="lab">Modelo Gemini en uso</div>
+        <div class="val" style="font-size:20px">2.5 Flash</div>
+        <div class="cap">+ flash-lite · <b>no</b> Pro <span class="pill flat">económico</span></div>
+      </div>
+      <div class="kpi">
+        <div class="lab">Costo real · Langfuse · 30 d</div>
+        <div class="val tnum" style="color:var(--good)">$805,87</div>
+        <div class="cap">94% en <span class="tag">gemini-2.5-flash</span> ($758)</div>
+      </div>
+      <div class="kpi">
+        <div class="lab">Cobertura Langfuse / GCP</div>
+        <div class="val tnum">102%</div>
+        <div class="cap">410.471 vs 404.211 llamadas <span class="pill flat">◎ 1:1</span></div>
+      </div>
+    </div>
+
+    <p class="body" style="margin-top:26px">En el proyecto <strong>ciencuadras-ia-prod</strong> el 100% del
+      gasto asociado a Gemini proviene de Vertex AI, método <strong>GenerateContent</strong>, ejecutado
+      siempre en <strong>us-central1</strong>. El volumen pasó de una línea base de <strong>~50.000
+      llamadas por semana</strong> en abril–mayo a <strong>~110.000–113.000 por semana</strong> en julio: un
+      crecimiento sostenido de <strong>+121%</strong> con dos saltos escalonados (mediados de mayo y
+      finales de junio). Como el costo de Gemini escala de forma prácticamente lineal con el número de
+      llamadas —a igual modelo y tamaño de prompt— <strong>el gasto se habría más que duplicado</strong> en
+      el mismo periodo.</p>
+  </section>
+
+  <!-- ===================== TENDENCIA ===================== -->
+  <section id="tendencia">
+    <div class="snum">02 · Tendencia</div>
+    <h2>Evolución diaria del consumo (90 días)</h2>
+    <p class="sub">Llamadas exitosas apiladas con la banda de errores 4xx. Pasa el cursor para ver el
+      detalle de cada día.</p>
+
+    <div class="legend">
+      <span><span class="swatch" style="background:var(--series-1)"></span>Llamadas OK (2xx)</span>
+      <span><span class="swatch" style="background:var(--err)"></span>Errores 4xx (mayormente 404)</span>
+      <span><span class="swatch" style="background:var(--warn);border-radius:1px;width:3px;height:12px"></span>Inicio anomalía 404 (1 jun)</span>
+    </div>
+    <figure>
+      <div class="card" style="padding:18px 16px 10px"><div id="chart-trend"></div></div>
+      <figcaption>Cada barra-día muestra el total de llamadas a <span class="tag">GenerateContent</span>.
+        La banda roja superior (errores 4xx) es prácticamente inexistente hasta finales de mayo y se
+        dispara desde el 1 de junio. Picos notables: 16 jun (35.523), 30 jun (29.821) y 14 jul (31.008).</figcaption>
+    </figure>
+
+    <h3 style="font-size:16px;margin:34px 0 0">Consolidado semana a semana</h3>
+    <div class="tbl-wrap">
+      <table id="tbl-weekly">
+        <thead><tr>
+          <th>Semana (ISO)</th><th>Rango</th><th>OK (2xx)</th><th>4xx</th>
+          <th>% error</th><th>Total</th><th>Δ OK vs. semana previa</th><th></th>
+        </tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <figcaption style="margin-top:10px">La semana del 1–7 jun marca el inicio de la anomalía 404 (20% de
+      error). La semana del 29 jun–5 jul es cuando el volumen cruza de forma estable las 100k llamadas.
+      La última fila (13–15 jul) es parcial.</figcaption>
+  </section>
+
+  <!-- ===================== CONSUMIDOR ===================== -->
+  <section id="consumidor">
+    <div class="snum">03 · El consumidor</div>
+    <h2>Un único origen: la app externa <span class="tag" style="font-size:.82em">cc-ia-prod</span></h2>
+    <p class="sub">Todo el tráfico de Gemini se autentica con una sola cuenta de servicio, y no hay
+      cómputo dentro del proyecto que la ejecute.</p>
+
+    <div class="card" style="margin-top:22px">
+      <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:6px">
+        <span class="chip mono" style="background:var(--surface-2)">cc-ia-prod@ciencuadras-ia-prod.iam.gserviceaccount.com</span>
+        <span class="pill flat">100% de GenerateContent</span>
+      </div>
+      <div class="kpis" style="margin-top:16px;grid-template-columns:repeat(4,1fr)">
+        <div><div class="lab" style="color:var(--muted);font-size:12px">Llamadas (30 d)</div><div style="font-size:20px;font-weight:680" class="tnum">454.889</div></div>
+        <div><div class="lab" style="color:var(--muted);font-size:12px">Región</div><div style="font-size:20px;font-weight:680">us-central1</div></div>
+        <div><div class="lab" style="color:var(--muted);font-size:12px">Rol IAM</div><div style="font-size:20px;font-weight:680;color:var(--warn)">aiplatform.admin</div></div>
+        <div><div class="lab" style="color:var(--muted);font-size:12px">Llave descargada</div><div style="font-size:20px;font-weight:680">may 2024</div></div>
+      </div>
+    </div>
+
+    <div class="callout info">
+      <div class="ic">🛰️</div>
+      <div>
+        <h3>La aplicación corre fuera de GCP</h3>
+        <p>El proyecto <b>no tiene Cloud Run, GKE, Cloud Functions ni instancias de Compute</b> que
+          ejecuten esta carga. Sumado a que <span class="tag">cc-ia-prod</span> usa una llave
+          <b>USER_MANAGED descargada</b>, esto indica que el consumidor es una aplicación externa
+          (compatible con el stack de MIA sobre AWS ECS) que llama a Vertex AI mediante esa credencial.
+          El aumento proviene de esa única app, no de múltiples clientes.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== QUÉ SE LLAMA ===================== -->
+  <section id="metodos">
+    <div class="snum">04 · Composición del tráfico</div>
+    <h2>Qué APIs se están llamando</h2>
+    <p class="sub">Distribución de llamadas dentro de Vertex AI (30 días). GenerateContent domina; el
+      resto son llamadas de listado periódicas (paneles/monitoreo).</p>
+
+    <figure style="margin-top:20px">
+      <div class="card"><div id="chart-methods"></div></div>
+      <figcaption>Las seis filas <span class="tag">List…</span> tienen recuentos casi idénticos (~7.050):
+        es un poller que consulta el estado del proyecto cada pocos minutos, sin impacto de costo de LLM.</figcaption>
+    </figure>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-top:30px" class="split">
+      <div>
+        <h3 style="font-size:16px">Códigos de respuesta de Gemini (30 d)</h3>
+        <div class="tbl-wrap" style="margin-top:14px">
+          <table id="tbl-codes"><thead><tr><th>Código</th><th>Significado</th><th>Llamadas</th><th>%</th></tr></thead><tbody></tbody></table>
+        </div>
+      </div>
+      <div>
+        <h3 style="font-size:16px">Actividad de API por servicio (30 d)</h3>
+        <div class="tbl-wrap" style="margin-top:14px">
+          <table id="tbl-services"><thead><tr><th>Servicio</th><th># requests</th><th></th></tr></thead><tbody></tbody></table>
+        </div>
+        <figcaption style="margin-top:8px">Recuento de llamadas de API, <b>no</b> costo. El alto volumen de
+          <span class="tag">compute</span> es telemetría interna de autoescalado; solo
+          <span class="tag">aiplatform</span> es el driver de costo de LLM.</figcaption>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== ANOMALÍA 404 ===================== -->
+  <section id="anomalia">
+    <div class="snum">05 · Anomalía</div>
+    <h2>El brote de errores 404 desde el 1 de junio</h2>
+    <p class="sub">Hasta finales de mayo los errores eran ~1%. Desde el 1 de junio saltan a 12–20% del total.</p>
+
+    <figure style="margin-top:18px">
+      <div class="card" style="padding:18px 16px 10px"><div id="chart-err"></div></div>
+      <figcaption>Porcentaje diario de llamadas 4xx sobre el total. El cambio de régimen es abrupto y
+        coincide con un despliegue o cambio de configuración de la app hacia el 1 de junio.</figcaption>
+    </figure>
+
+    <div class="callout crit">
+      <div class="ic">⚠️</div>
+      <div>
+        <h3>~48.000 llamadas 404 en 30 días (10,6% del total)</h3>
+        <p>Un <b>404 en GenerateContent</b> significa que se solicita un <b>modelo o recurso que no
+          existe</b> — típicamente un nombre de modelo mal escrito, una versión deprecada, o una región
+          equivocada. No factura tokens, pero implica <b>reintentos, latencia y ruido</b> que degradan la
+          experiencia. El inicio limpio el 1 de junio apunta a un cambio de código puntual. Corregir el
+          nombre/endpoint del modelo debería eliminar el 100% de estos errores.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== PATRONES ===================== -->
+  <section id="patrones">
+    <div class="snum">06 · Patrones de uso</div>
+    <h2>Cuándo se consume Gemini</h2>
+    <p class="sub">Distribución por día de la semana y por hora del día (promedio, últimos 28 días,
+      horario Colombia UTC-5).</p>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-top:20px" class="split">
+      <figure style="margin:0">
+        <div class="card" style="padding:18px 16px 10px"><div id="chart-dow"></div></div>
+        <figcaption>El martes concentra el mayor volumen; el fin de semana cae ~70%. Carga claramente
+          laboral.</figcaption>
+      </figure>
+      <figure style="margin:0">
+        <div class="card" style="padding:18px 16px 10px"><div id="chart-hod"></div></div>
+        <figcaption>Fuerte pico a las <b>09:00 COT</b> (posible proceso programado/batch) y meseta durante
+          la jornada laboral.</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- ===================== VALIDACIÓN CRUZADA ===================== -->
+  <section id="triangulacion">
+    <div class="snum">07 · Validación cruzada</div>
+    <h2>AWS ↔ GCP ↔ Langfuse: quién consume y por qué sube</h2>
+    <p class="sub">Cruzamos el consumo medido en GCP con el tráfico real de MIA en AWS y con las trazas
+      de LLM en Langfuse. Las tres fuentes convergen.</p>
+
+    <h3 style="font-size:16px;margin:30px 0 0">El stack de MIA en AWS (cuenta 290296201161)</h3>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Servicio ECS (prod)</th><th>Rol</th><th>Tareas</th><th>Requests · 30 d</th></tr></thead>
+        <tbody>
+          <tr><td>python-asistente-2-0-ia</td><td style="text-align:left;color:var(--ink-2)">MIA 2.0 (activo)</td><td class="tnum">2</td><td class="tnum">259.862</td></tr>
+          <tr><td>python-asistente-ia</td><td style="text-align:left;color:var(--ink-2)">MIA v1 (residual)</td><td class="tnum">4</td><td class="tnum">8.355</td></tr>
+          <tr><td>java-modelos-ia</td><td style="text-align:left;color:var(--ink-2)">Gateway de modelos (→ GPT)</td><td class="tnum">4</td><td class="tnum">442.499</td></tr>
+          <tr><td>python-mcp-inmuebles-ia</td><td style="text-align:left;color:var(--ink-2)">Herramientas MCP</td><td class="tnum">1</td><td class="tnum">0*</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <figcaption style="margin-top:10px">Medido con CloudWatch <span class="tag">ApplicationELB/RequestCount</span>
+      sobre <span class="tag">ms-internal-prod-alb</span>. *el MCP se invoca por otra ruta, no por el ALB.
+      El proyecto GCP no tiene cómputo propio → MIA corre en AWS y llama a Gemini con la SA
+      <span class="tag">cc-ia-prod</span>.</figcaption>
+
+    <h3 style="font-size:16px;margin:34px 0 0">El hallazgo clave: el tráfico de MIA NO creció como Gemini</h3>
+    <p class="body">Comparando las 4 primeras vs. las 4 últimas semanas completas, el consumo de Gemini
+      creció mucho más rápido que el tráfico de usuarios de MIA. El gasto no sube por más usuarios, sino
+      por <strong>amplificación</strong>: más llamadas a Gemini por interacción.</p>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Serie</th><th>Inicio (4 sem)</th><th>Fin (4 sem)</th><th>Crecimiento</th></tr></thead>
+        <tbody>
+          <tr class="hl"><td>Gemini (GCP)</td><td class="tnum">219.607</td><td class="tnum">410.822</td><td class="tnum up-txt">+87%</td></tr>
+          <tr><td>MIA asistente (v1+v2)</td><td class="tnum">176.578</td><td class="tnum">246.373</td><td class="tnum">+40%</td></tr>
+          <tr><td>MIA modelos-ia (gateway)</td><td class="tnum">375.785</td><td class="tnum">397.352</td><td class="tnum" style="color:var(--muted)">+6%</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <figcaption style="margin-top:10px">La razón "llamadas Gemini / request del asistente" pasó de ~1,1
+      (abr–may) a ~2,0 (jun–jul). El salto coincide con la migración a flujo agéntico (MIA 2.0 + MCP) y con
+      la tormenta de 404 desde el 1 de junio.</figcaption>
+
+    <h3 style="font-size:16px;margin:34px 0 0">Confirmación 1:1 con Langfuse</h3>
+    <p class="body">Langfuse traza cada llamada LLM de MIA con su modelo y tokens. En 30 días registra
+      <strong>410.471 generaciones Gemini</strong> vs. <strong>404.211 llamadas</strong> en GCP:
+      <strong>102% de cobertura</strong> — la prueba definitiva de que MIA es el origen del consumo.
+      Además revela el <strong>modelo exacto</strong> y el <strong>costo real</strong>:</p>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Modelo</th><th>Generaciones</th><th>Costo USD · 30 d</th><th>% costo</th><th></th></tr></thead>
+        <tbody>
+          <tr><td>gemini-2.5-flash</td><td class="tnum">184.125</td><td class="tnum">$758,24</td><td class="tnum">94,1%</td>
+            <td class="bar-cell"><span class="microbar" style="width:180px;background:var(--good)"></span></td></tr>
+          <tr><td>gemini-2.5-flash-lite</td><td class="tnum">218.268</td><td class="tnum">$47,64</td><td class="tnum">5,9%</td>
+            <td class="bar-cell"><span class="microbar" style="width:11px;background:var(--good)"></span></td></tr>
+          <tr><td>gemini-2.0-flash-001</td><td class="tnum">8.078</td><td class="tnum">$0,00</td><td class="tnum" style="color:var(--muted)">—</td>
+            <td class="bar-cell"><span class="microbar" style="width:2px;background:var(--muted)"></span></td></tr>
+          <tr><td style="font-weight:640">Total Gemini</td><td class="tnum" style="font-weight:640">410.471</td><td class="tnum" style="font-weight:640">$805,87</td><td class="tnum">100%</td><td></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <figcaption style="margin-top:10px">Todo es <b>familia Flash</b> (económica), no Pro — por eso el gasto
+      es moderado pese al volumen. Costo $0 en <span class="tag">gemini-2.0-flash-001</span> = tarifa no
+      configurada en Langfuse para ese modelo.</figcaption>
+
+    <div class="callout">
+      <div class="ic">🔁</div>
+      <div>
+        <h3>Amplificación: ~5,8 generaciones LLM por conversación</h3>
+        <p>Langfuse registra <b>2,03M generaciones</b> sobre <b>353.810 trazas</b> (5,75 gen/traza),
+          estable en la ventana. De ellas, <b>1,62M no tienen modelo/costo</b> — probablemente llamadas a
+          GPT sin tarifa trazada o spans no-LLM: vale la pena revisarlas por si esconden otro consumidor de
+          LLM. El costo es la cifra fiable; el desglose fino de tokens conviene leerlo desde
+          <span class="tag">/observations</span>.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== COSTO / LÍMITES ===================== -->
+  <section id="costo">
+    <div class="snum">08 · Costo confirmado</div>
+    <h2>El costo real en dólares (y cómo modelarlo)</h2>
+    <p class="body">Con las trazas de Langfuse el costo ya no es una estimación: <strong>$805,87/mes</strong>
+      en Gemini, el <strong>94% en <span class="tag">gemini-2.5-flash</span></strong>. Como MIA usa la familia
+      <strong>Flash</strong> (no Pro), el gasto es moderado pese al alto volumen. El estimador de abajo queda
+      <strong>calibrado con los valores reales</strong> (precio Flash y tamaño medio de prompt observado) para
+      que puedas proyectar escenarios: qué pasa si sube el volumen, si migras parte a <span class="tag">flash-lite</span>,
+      o si crece el tamaño de contexto.</p>
+
+    <div class="est card">
+      <div class="est-head">
+        <h3>💵 Estimador de costo mensual en USD</h3>
+        <div class="presets">
+          <button class="preset" data-preset="flash">Modelo tipo Flash</button>
+          <button class="preset" data-preset="pro">Modelo tipo Pro</button>
+          <button class="preset" data-preset="custom">Personalizado</button>
+        </div>
+      </div>
+      <div class="est-grid">
+        <div class="field"><label>Precio entrada · USD / 1M tokens</label>
+          <div class="inp"><span>$</span><input id="p-in" type="number" step="0.01" min="0" value="0.30"></div></div>
+        <div class="field"><label>Precio salida · USD / 1M tokens</label>
+          <div class="inp"><span>$</span><input id="p-out" type="number" step="0.01" min="0" value="2.50"></div></div>
+        <div class="field"><label>Tokens de entrada por llamada</label>
+          <div class="inp"><input id="t-in" type="number" step="50" min="0" value="5945"></div></div>
+        <div class="field"><label>Tokens de salida por llamada</label>
+          <div class="inp"><input id="t-out" type="number" step="10" min="0" value="72"></div></div>
+      </div>
+      <div class="est-out">
+        <div><div class="o-lab">Costo mensual actual</div><div class="o-val" id="r-now">&mdash;</div>
+          <div class="o-cap">a ~404k llamadas/mes</div></div>
+        <div><div class="o-lab">A volumen de abril</div><div class="o-val" id="r-base" style="color:var(--ink-2)">&mdash;</div>
+          <div class="o-cap">línea base ~219k/mes</div></div>
+        <div><div class="o-lab">Incremento por el alza</div><div class="o-val" id="r-delta" style="color:var(--err)">&mdash;</div>
+          <div class="o-cap">costo adicional/mes por +volumen</div></div>
+        <div><div class="o-lab">Costo por llamada</div><div class="o-val" id="r-per">&mdash;</div>
+          <div class="o-cap">entrada + salida</div></div>
+      </div>
+      <p class="est-note">✅ <b>Calibrado con datos reales.</b> Valores por defecto = tarifa de
+        <span class="tag">gemini-2.5-flash</span> ($0,30 in / $2,50 out por 1M tok) y tamaño medio de prompt
+        observado en Langfuse (~5.945 tok in / ~72 out). Con 404k llamadas/mes reproduce ≈$790–806/mes, en
+        línea con el costo real. Ajusta los campos para proyectar escenarios (más volumen, migrar a
+        flash-lite, contexto más grande). El nº de llamadas (404k actual · 219k en abril) es de Cloud Monitoring.</p>
+    </div>
+
+    <h3 style="font-size:16px;margin:34px 0 8px">Estado de las fuentes de dato</h3>
+    <div class="tbl-wrap" style="margin-top:6px">
+      <table>
+        <thead><tr><th>Fuente</th><th>Estado</th><th>Qué aporta</th></tr></thead>
+        <tbody>
+          <tr><td>Langfuse (trazas de MIA)</td><td><span class="pill flat" style="background:color-mix(in srgb,var(--good) 16%,transparent);color:var(--good)">✓ resuelto</span></td><td>Modelo exacto, tokens y costo real ($805,87/mes)</td></tr>
+          <tr><td>Cloud Monitoring + CloudWatch</td><td><span class="pill flat" style="background:color-mix(in srgb,var(--good) 16%,transparent);color:var(--good)">✓ resuelto</span></td><td>Volumen, tendencia, consumidor y correlación AWS↔GCP</td></tr>
+          <tr><td>Export de facturación (BigQuery)</td><td><span class="tag">pendiente</span></td><td>Cifra <b>auditada</b> en la factura de GCP (validar vs. Langfuse)</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout info">
+      <div class="ic">🔎</div>
+      <div>
+        <h3>Único paso restante: validar contra la factura</h3>
+        <p>El costo de Langfuse ($805,87/mes) es la <b>medición del lado de la app</b>. Para conciliarlo con
+          lo <b>facturado</b> por Google, localizar el export de facturación de la cuenta
+          <span class="tag">018479-97ADE8-F861D9</span> y comparar el SKU de Gemini contra esta cifra.
+          Deberían coincidir dentro de un margen pequeño.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== RECOMENDACIONES ===================== -->
+  <section id="reco" style="border-bottom:0">
+    <div class="snum">09 · Recomendaciones</div>
+    <h2>Acciones priorizadas</h2>
+    <div style="margin-top:18px">
+      <div class="rec">
+        <span class="prio p1">P1</span>
+        <div><h3>Corregir el modelo/endpoint que genera los 404</h3>
+          <p>Revisar el cambio desplegado ~1 jun en la app <span class="tag">cc-ia-prod</span>. Eliminar
+            ~48k llamadas fallidas/mes reduce latencia y ruido de inmediato.</p></div>
+        <span class="eff">Esfuerzo: bajo</span>
+      </div>
+      <div class="rec">
+        <span class="prio p1">P1</span>
+        <div><h3>Atacar la amplificación (el verdadero driver del costo)</h3>
+          <p>El gasto sube porque MIA hace ~2× llamadas Gemini por interacción, no por más usuarios. Revisar
+            el flujo agéntico de MIA 2.0 + MCP: reducir pasos/reintentos y evaluar mover casos simples a
+            <span class="tag">gemini-2.5-flash-lite</span> (16× más barato) bajaría el costo sin perder volumen.</p></div>
+        <span class="eff">Esfuerzo: medio</span>
+      </div>
+      <div class="rec">
+        <span class="prio p2">P2</span>
+        <div><h3>Reducir privilegios de la cuenta de servicio</h3>
+          <p><span class="tag">cc-ia-prod</span> tiene <b>aiplatform.admin</b> cuando solo necesita invocar
+            modelos. Bajar a <b>roles/aiplatform.user</b> (principio de mínimo privilegio).</p></div>
+        <span class="eff">Esfuerzo: bajo</span>
+      </div>
+      <div class="rec">
+        <span class="prio p2">P2</span>
+        <div><h3>Instrumentar control de costo en la app</h3>
+          <p>Registrar modelo, tokens de entrada/salida y caso de uso por request. Habilita atribución de
+            costo por funcionalidad y detección temprana de picos.</p></div>
+        <span class="eff">Esfuerzo: medio</span>
+      </div>
+      <div class="rec">
+        <span class="prio p2">P2</span>
+        <div><h3>Investigar las 1,62M generaciones "sin modelo" en Langfuse</h3>
+          <p>Tienen costo $0 y no reportan modelo: podrían ser llamadas a GPT sin tarifa trazada, spans
+            no-LLM, o un consumidor de LLM adicional oculto. Confirmar qué son cierra el mapa completo de gasto de IA.</p></div>
+        <span class="eff">Esfuerzo: bajo</span>
+      </div>
+      <div class="rec">
+        <span class="prio p3">P3</span>
+        <div><h3>Alertas de presupuesto y de tasa de error</h3>
+          <p>Budget alert sobre el SKU de Gemini y una alerta de Monitoring cuando la tasa 4xx de
+            <span class="tag">GenerateContent</span> supere el 5%. Habría detectado la anomalía el mismo 1 de junio.</p></div>
+        <span class="eff">Esfuerzo: bajo</span>
+      </div>
+    </div>
+
+    <p class="foot">
+      <b>Metodología.</b> Datos extraídos de Cloud Monitoring (<code>serviceruntime.googleapis.com/api/request_count</code>)
+      para el servicio <code>aiplatform.googleapis.com</code>, agregados por método, <code>credential_id</code>,
+      región y clase de código de respuesta, sobre la ventana 17 abr – 15 jul 2026. El tráfico de MIA en AWS
+      se midió con CloudWatch (<code>AWS/ApplicationELB/RequestCount</code>) sobre <code>ms-internal-prod-alb</code>,
+      cuenta 290296201161. El modelo, los tokens y el costo provienen de <b>Langfuse</b> (proyecto
+      <code>MIA_PROD</code>, endpoint <code>/api/public/metrics/daily</code>), que traza cada generación LLM de
+      MIA — la cobertura del 102% frente a GCP confirma la correspondencia 1:1. Horas convertidas a Colombia
+      (UTC-5). Generado el 15 jul 2026.
+      Consejo: usa <span class="kbd">tab</span> para navegar y el toggle de tema del visor para claro/oscuro.
+    </p>
+  </section>
+</div>
+
+<div class="tip" id="tip"></div>
+
+<script>
+const DATA = {"daily":[{"date":"2026-04-17","ok":9336.0,"e4xx":46.0,"e5xx":0},{"date":"2026-04-18","ok":4659.0,"e4xx":42.0,"e5xx":0},{"date":"2026-04-19","ok":3429.0,"e4xx":0,"e5xx":0},{"date":"2026-04-20","ok":5033.0,"e4xx":37.0,"e5xx":0},{"date":"2026-04-21","ok":13108.0,"e4xx":89.0,"e5xx":0},{"date":"2026-04-22","ok":8928.0,"e4xx":154.0,"e5xx":2.0},{"date":"2026-04-23","ok":8402.0,"e4xx":70.0,"e5xx":0},{"date":"2026-04-24","ok":7946.0,"e4xx":42.0,"e5xx":0},{"date":"2026-04-25","ok":4666.0,"e4xx":48.0,"e5xx":0},{"date":"2026-04-26","ok":3090.0,"e4xx":66.0,"e5xx":0},{"date":"2026-04-27","ok":10491.0,"e4xx":147.0,"e5xx":0},{"date":"2026-04-28","ok":8379.0,"e4xx":64.0,"e5xx":0},{"date":"2026-04-29","ok":11870.0,"e4xx":115.0,"e5xx":0},{"date":"2026-04-30","ok":8313.0,"e4xx":108.0,"e5xx":0},{"date":"2026-05-01","ok":3851.0,"e4xx":82.0,"e5xx":0},{"date":"2026-05-02","ok":2919.0,"e4xx":12.0,"e5xx":0},{"date":"2026-05-03","ok":2021.0,"e4xx":18.0,"e5xx":0},{"date":"2026-05-04","ok":6952.0,"e4xx":13.0,"e5xx":0},{"date":"2026-05-05","ok":10490.0,"e4xx":96.0,"e5xx":0},{"date":"2026-05-06","ok":10422.0,"e4xx":128.0,"e5xx":0},{"date":"2026-05-07","ok":7743.0,"e4xx":186.0,"e5xx":0},{"date":"2026-05-08","ok":7487.0,"e4xx":105.0,"e5xx":0},{"date":"2026-05-09","ok":3720.0,"e4xx":12.0,"e5xx":0},{"date":"2026-05-10","ok":2352.0,"e4xx":30.0,"e5xx":0},{"date":"2026-05-11","ok":9398.0,"e4xx":33.0,"e5xx":0},{"date":"2026-05-12","ok":9227.0,"e4xx":79.0,"e5xx":0},{"date":"2026-05-13","ok":15457.0,"e4xx":31.0,"e5xx":0},{"date":"2026-05-14","ok":11549.0,"e4xx":143.0,"e5xx":0},{"date":"2026-05-15","ok":10539.0,"e4xx":138.0,"e5xx":0},{"date":"2026-05-16","ok":6941.0,"e4xx":18.0,"e5xx":0},{"date":"2026-05-17","ok":6249.0,"e4xx":0,"e5xx":0},{"date":"2026-05-18","ok":6278.0,"e4xx":36.0,"e5xx":0},{"date":"2026-05-19","ok":15896.0,"e4xx":128.0,"e5xx":0},{"date":"2026-05-20","ok":12551.0,"e4xx":237.0,"e5xx":0},{"date":"2026-05-21","ok":11235.0,"e4xx":94.0,"e5xx":0},{"date":"2026-05-22","ok":9993.0,"e4xx":111.0,"e5xx":0},{"date":"2026-05-23","ok":7572.0,"e4xx":6.0,"e5xx":0},{"date":"2026-05-24","ok":6531.0,"e4xx":1.0,"e5xx":0},{"date":"2026-05-25","ok":14043.0,"e4xx":27.0,"e5xx":0},{"date":"2026-05-26","ok":16306.0,"e4xx":330.0,"e5xx":2.0},{"date":"2026-05-27","ok":16468.0,"e4xx":73.0,"e5xx":0},{"date":"2026-05-28","ok":3816.0,"e4xx":2.0,"e5xx":0},{"date":"2026-05-29","ok":1294.0,"e4xx":0,"e5xx":0},{"date":"2026-05-30","ok":1174.0,"e4xx":74.0,"e5xx":0},{"date":"2026-05-31","ok":429.0,"e4xx":0,"e5xx":0},{"date":"2026-06-01","ok":1225.0,"e4xx":343.0,"e5xx":0},{"date":"2026-06-02","ok":6493.0,"e4xx":591.0,"e5xx":0},{"date":"2026-06-03","ok":10168.0,"e4xx":2583.0,"e5xx":0},{"date":"2026-06-04","ok":9924.0,"e4xx":3871.0,"e5xx":1.0},{"date":"2026-06-05","ok":9282.0,"e4xx":2302.0,"e5xx":0},{"date":"2026-06-06","ok":6873.0,"e4xx":1188.0,"e5xx":0},{"date":"2026-06-07","ok":6128.0,"e4xx":1752.0,"e5xx":0},{"date":"2026-06-08","ok":5794.0,"e4xx":906.0,"e5xx":0},{"date":"2026-06-09","ok":15895.0,"e4xx":2714.0,"e5xx":0},{"date":"2026-06-10","ok":9418.0,"e4xx":2367.0,"e5xx":0},{"date":"2026-06-11","ok":14325.0,"e4xx":2248.0,"e5xx":0},{"date":"2026-06-12","ok":18128.0,"e4xx":1473.0,"e5xx":0},{"date":"2026-06-13","ok":8964.0,"e4xx":1610.0,"e5xx":0},{"date":"2026-06-14","ok":6769.0,"e4xx":809.0,"e5xx":0},{"date":"2026-06-15","ok":7474.0,"e4xx":778.0,"e5xx":0},{"date":"2026-06-16","ok":30537.0,"e4xx":4986.0,"e5xx":0},{"date":"2026-06-17","ok":15868.0,"e4xx":1428.0,"e5xx":0},{"date":"2026-06-18","ok":9452.0,"e4xx":671.0,"e5xx":0},{"date":"2026-06-19","ok":2509.0,"e4xx":384.0,"e5xx":0},{"date":"2026-06-20","ok":2431.0,"e4xx":270.0,"e5xx":0},{"date":"2026-06-21","ok":554.0,"e4xx":600.0,"e5xx":0},{"date":"2026-06-22","ok":4152.0,"e4xx":1461.0,"e5xx":0},{"date":"2026-06-23","ok":16076.0,"e4xx":2572.0,"e5xx":0},{"date":"2026-06-24","ok":16007.0,"e4xx":1441.0,"e5xx":0},{"date":"2026-06-25","ok":13564.0,"e4xx":2830.0,"e5xx":0},{"date":"2026-06-26","ok":14798.0,"e4xx":2257.0,"e5xx":0},{"date":"2026-06-27","ok":7727.0,"e4xx":508.0,"e5xx":0},{"date":"2026-06-28","ok":5471.0,"e4xx":144.0,"e5xx":0},{"date":"2026-06-29","ok":6540.0,"e4xx":260.0,"e5xx":0},{"date":"2026-06-30","ok":27770.0,"e4xx":2050.0,"e5xx":1.0},{"date":"2026-07-01","ok":21650.0,"e4xx":3273.0,"e5xx":0},{"date":"2026-07-02","ok":16900.0,"e4xx":2176.0,"e5xx":0},{"date":"2026-07-03","ok":16007.0,"e4xx":3321.0,"e5xx":0},{"date":"2026-07-04","ok":8212.0,"e4xx":2124.0,"e5xx":0},{"date":"2026-07-05","ok":7958.0,"e4xx":1716.0,"e5xx":0},{"date":"2026-07-06","ok":23560.0,"e4xx":2591.0,"e5xx":0},{"date":"2026-07-07","ok":14724.0,"e4xx":918.0,"e5xx":0},{"date":"2026-07-08","ok":17091.0,"e4xx":1380.0,"e5xx":0},{"date":"2026-07-09","ok":22176.0,"e4xx":2917.0,"e5xx":0},{"date":"2026-07-10","ok":19053.0,"e4xx":2103.0,"e5xx":0},{"date":"2026-07-11","ok":9493.0,"e4xx":902.0,"e5xx":0},{"date":"2026-07-12","ok":6718.0,"e4xx":289.0,"e5xx":0},{"date":"2026-07-13","ok":7544.0,"e4xx":1641.0,"e5xx":0},{"date":"2026-07-14","ok":28845.0,"e4xx":2163.0,"e5xx":0},{"date":"2026-07-15","ok":10824.0,"e4xx":1301.0,"e5xx":0}],"methods":[{"method":"google.cloud.aiplatform.v1beta1.PredictionService.GenerateContent","count":454889.0},{"method":"google.cloud.aiplatform.v1.DatasetService.ListDatasets","count":7052.0},{"method":"google.cloud.aiplatform.v1.NotebookService.ListNotebookExecutionJobs","count":7052.0},{"method":"google.cloud.aiplatform.v1.PipelineService.ListPipelineJobs","count":7052.0},{"method":"google.cloud.aiplatform.v1.MetadataService.ListMetadataStores","count":7051.0},{"method":"google.cloud.aiplatform.v1.NotebookService.ListNotebookRuntimes","count":7051.0},{"method":"google.cloud.aiplatform.v1.NotebookService.ListNotebookRuntimeTemplates","count":7043.0},{"method":"google.cloud.location.Locations.ListLocations","count":984.0},{"method":"google.cloud.aiplatform.v1.PredictionService.Predict","count":957.0},{"method":"google.cloud.aiplatform.v1.ModelGardenService.GetPublisherModel","count":882.0},{"method":"google.cloud.aiplatform.v1.EndpointService.ListEndpoints","count":1.0},{"method":"google.cloud.aiplatform.v1.JobService.ListCustomJobs","count":1.0},{"method":"google.cloud.aiplatform.v1.ModelService.ListModels","count":1.0}],"services":[{"service":"compute.googleapis.com","count":3731201.0},{"service":"aiplatform.googleapis.com","count":500016.0},{"service":"sheets.googleapis.com","count":158892.0},{"service":"alloydb.googleapis.com","count":329.0},{"service":"drive.googleapis.com","count":255.0},{"service":"dataplex.googleapis.com","count":164.0},{"service":"artifactregistry.googleapis.com","count":47.0},{"service":"cloudfunctions.googleapis.com","count":8.0},{"service":"container.googleapis.com","count":1.0},{"service":"notebooks.googleapis.com","count":1.0},{"service":"redis.googleapis.com","count":1.0}],"respcodes":[{"code":"200","count":404211.0},{"code":"404","count":48078.0},{"code":"400","count":2058.0},{"code":"429","count":541.0},{"code":"503","count":1.0}],"dow":[{"d":0,"total":41796.0},{"d":1,"total":87415.0},{"d":2,"total":65572.0},{"d":3,"total":62092.0},{"d":4,"total":52367.0},{"d":5,"total":27863.0},{"d":6,"total":20701.0}],"hod":[{"h":0,"avg":860.4642857142857},{"h":1,"avg":790.75},{"h":2,"avg":711.6785714285714},{"h":3,"avg":682.1428571428571},{"h":4,"avg":716.6071428571429},{"h":5,"avg":62.55555555555556},{"h":6,"avg":28.444444444444443},{"h":7,"avg":19.32},{"h":8,"avg":16.291666666666668},{"h":9,"avg":23.608695652173914},{"h":10,"avg":35.04},{"h":11,"avg":95.5},{"h":12,"avg":165.03571428571428},{"h":13,"avg":348.9642857142857},{"h":14,"avg":2319.8571428571427},{"h":15,"avg":1018.3928571428571},{"h":16,"avg":887.2142857142857},{"h":17,"avg":738.0},{"h":18,"avg":571.7407407407408},{"h":19,"avg":544.3703703703703},{"h":20,"avg":529.925925925926},{"h":21,"avg":780.2222222222222},{"h":22,"avg":570.1851851851852},{"h":23,"avg":426.7037037037037}],"meta":{"project":"ciencuadras-ia-prod","project_number":"803973284432","consumer":"cc-ia-prod@ciencuadras-ia-prod.iam.gserviceaccount.com","region":"us-central1","generated":"2026-07-15","window_days":90}};
+const fmt = n => Math.round(n).toLocaleString('es-CO');
+const SVGNS="http://www.w3.org/2000/svg";
+function el(tag,attrs){const e=document.createElementNS(SVGNS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);return e;}
+const tip=document.getElementById('tip');
+function showTip(html,x,y){tip.innerHTML=html;tip.style.opacity=1;
+  const r=tip.getBoundingClientRect();let tx=x+14,ty=y-r.height-10;
+  if(tx+r.width>window.innerWidth-8)tx=x-r.width-14; if(ty<8)ty=y+16;
+  tip.style.left=tx+'px';tip.style.top=ty+'px';}
+function hideTip(){tip.style.opacity=0;}
+
+/* ---------- ISO week helper ---------- */
+function isoWeek(d){const dt=new Date(Date.UTC(+d.slice(0,4),+d.slice(5,7)-1,+d.slice(8,10)));
+  const day=(dt.getUTCDay()+6)%7; dt.setUTCDate(dt.getUTCDate()-day+3);
+  const first=new Date(Date.UTC(dt.getUTCFullYear(),0,4));
+  const wk=1+Math.round(((dt-first)/86400000-3+((first.getUTCDay()+6)%7))/7);
+  return dt.getUTCFullYear()+'-W'+String(wk).padStart(2,'0');}
+
+/* ===================== TREND (stacked area) ===================== */
+function trendChart(){
+  const box=document.getElementById('chart-trend');
+  const W=920,H=340,mL=54,mR=14,mT=16,mB=42;
+  const d=DATA.daily, n=d.length;
+  const maxTot=Math.max(...d.map(x=>x.ok+x.e4xx));
+  const yMax=Math.ceil(maxTot/10000)*10000;
+  const x=i=>mL+(i/(n-1))*(W-mL-mR);
+  const y=v=>mT+(1-v/yMax)*(H-mT-mB);
+  const svg=el('svg',{viewBox:`0 0 ${W} ${H}`,role:'img','aria-label':'Tendencia diaria de llamadas a Gemini'});
+  // gridlines + y labels
+  for(let g=0;g<=yMax;g+=10000){
+    svg.appendChild(el('line',{x1:mL,x2:W-mR,y1:y(g),y2:y(g),class:'gl'}));
+    const t=el('text',{x:mL-8,y:y(g)+3,class:'ax','text-anchor':'end'});t.textContent=(g/1000)+'k';svg.appendChild(t);
+  }
+  // stacked areas: ok (bottom), e4xx on top
+  const areaOk=[],areaErrTop=[],areaErrBot=[];
+  d.forEach((p,i)=>{areaOk.push(`${x(i)},${y(p.ok)}`);
+    areaErrBot.push(`${x(i)},${y(p.ok)}`); areaErrTop.push(`${x(i)},${y(p.ok+p.e4xx)}`);});
+  const okPath=`M${mL},${y(0)} L`+areaOk.join(' L')+` L${x(n-1)},${y(0)} Z`;
+  svg.appendChild(el('path',{d:okPath,fill:'var(--series-1)','fill-opacity':.16}));
+  const errPath=`M`+areaErrBot.join(' L')+' L'+areaErrTop.slice().reverse().join(' L')+' Z';
+  svg.appendChild(el('path',{d:errPath,fill:'var(--err)','fill-opacity':.32}));
+  // top line of ok
+  svg.appendChild(el('path',{d:'M'+areaOk.join(' L'),fill:'none',stroke:'var(--series-1)','stroke-width':2}));
+  // total line
+  svg.appendChild(el('path',{d:'M'+areaErrTop.join(' L'),fill:'none',stroke:'var(--err)','stroke-width':1.25,'stroke-opacity':.7}));
+  // x labels (month starts)
+  const months={};d.forEach((p,i)=>{const m=p.date.slice(0,7);if(!(m in months))months[m]=i;});
+  const mnames={'2026-04':'Abr','2026-05':'May','2026-06':'Jun','2026-07':'Jul'};
+  Object.entries(months).forEach(([m,i])=>{
+    svg.appendChild(el('line',{x1:x(i),x2:x(i),y1:mT,y2:H-mB,stroke:'var(--line-2)','stroke-width':1,'stroke-dasharray':'2 3'}));
+    const t=el('text',{x:x(i),y:H-mB+18,class:'ax','text-anchor':'start'});t.textContent=mnames[m]||m;svg.appendChild(t);
+  });
+  // anomaly annotation at 2026-06-01
+  const ai=d.findIndex(p=>p.date==='2026-06-01');
+  if(ai>=0){svg.appendChild(el('line',{x1:x(ai),x2:x(ai),y1:mT,y2:H-mB,stroke:'var(--warn)','stroke-width':1.5}));
+    const t=el('text',{x:x(ai)+5,y:mT+12,class:'note-txt'});t.textContent='◆ 1 jun';svg.appendChild(t);}
+  // hover
+  const hoverLine=el('line',{x1:0,x2:0,y1:mT,y2:H-mB,stroke:'var(--baseline)','stroke-width':1,opacity:0});
+  const hoverDot=el('circle',{r:4,fill:'var(--series-1)',stroke:'var(--surface)','stroke-width':2,opacity:0});
+  svg.appendChild(hoverLine);svg.appendChild(hoverDot);
+  const rect=el('rect',{x:mL,y:mT,width:W-mL-mR,height:H-mT-mB,fill:'transparent'});
+  svg.appendChild(rect);
+  svg.addEventListener('mousemove',ev=>{
+    const b=svg.getBoundingClientRect();const px=(ev.clientX-b.left)/b.width*W;
+    let i=Math.round((px-mL)/(W-mL-mR)*(n-1));i=Math.max(0,Math.min(n-1,i));const p=d[i];
+    hoverLine.setAttribute('x1',x(i));hoverLine.setAttribute('x2',x(i));hoverLine.setAttribute('opacity',1);
+    hoverDot.setAttribute('cx',x(i));hoverDot.setAttribute('cy',y(p.ok+p.e4xx));hoverDot.setAttribute('opacity',1);
+    const err=p.ok+p.e4xx>0?(100*p.e4xx/(p.ok+p.e4xx)):0;
+    showTip(`<div class="d">${p.date}</div>
+      <div class="row"><span>OK (2xx)</span><b>${fmt(p.ok)}</b></div>
+      <div class="row"><span>Errores 4xx</span><b style="color:var(--err)">${fmt(p.e4xx)}</b></div>
+      <div class="row"><span>Total</span><b>${fmt(p.ok+p.e4xx)}</b></div>
+      <div class="row"><span>% error</span><b>${err.toFixed(1)}%</b></div>`,ev.clientX,ev.clientY);
+  });
+  svg.addEventListener('mouseleave',()=>{hideTip();hoverLine.setAttribute('opacity',0);hoverDot.setAttribute('opacity',0);});
+  box.appendChild(svg);
+}
+
+/* ===================== WEEKLY TABLE ===================== */
+function weeklyTable(){
+  const map={};
+  DATA.daily.forEach(p=>{const w=isoWeek(p.date);(map[w]=map[w]||{ok:0,e:0,dates:[]});
+    map[w].ok+=p.ok;map[w].e+=p.e4xx;map[w].dates.push(p.date);});
+  const weeks=Object.keys(map).sort();
+  const tb=document.querySelector('#tbl-weekly tbody');
+  let prev=null;
+  const short=s=>{const m=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+    return (+s.slice(8,10))+' '+m[+s.slice(5,7)-1];};
+  weeks.forEach((w,idx)=>{
+    const r=map[w];const tot=r.ok+r.e;const err=tot?100*r.e/tot:0;
+    const dates=r.dates;const rng=short(dates[0])+'–'+short(dates[dates.length-1]);
+    let delta='—',dcls='';
+    if(prev!==null&&prev>0){const dv=100*(r.ok-prev)/prev;delta=(dv>=0?'+':'')+dv.toFixed(0)+'%';dcls=dv>=0?'up-txt':'dn-txt';}
+    const partial=idx===weeks.length-1&&dates.length<7;
+    const tr=document.createElement('tr');
+    if(err>=10)tr.className='hl';
+    tr.innerHTML=`<td>${w}${partial?' <span class="tag">(parcial)</span>':''}</td>
+      <td class="tnum" style="color:var(--muted)">${rng}</td>
+      <td class="tnum">${fmt(r.ok)}</td>
+      <td class="tnum">${fmt(r.e)}</td>
+      <td class="tnum" style="${err>=10?'color:var(--warn);font-weight:600':''}">${err.toFixed(0)}%</td>
+      <td class="tnum">${fmt(tot)}</td>
+      <td class="tnum ${dcls}">${delta}</td>
+      <td class="bar-cell"><span class="microbar" style="width:${Math.round(tot/1300)}px"></span></td>`;
+    tb.appendChild(tr);prev=r.ok;
+  });
+}
+
+/* ===================== METHODS (horizontal bars) ===================== */
+function methodsChart(){
+  const box=document.getElementById('chart-methods');
+  const items=DATA.methods.filter(m=>m.count>=800).map(m=>({
+    name:m.method.replace('google.cloud.aiplatform.v1beta1.','').replace('google.cloud.aiplatform.v1.','').replace('google.cloud.location.',''),
+    count:m.count}));
+  const max=Math.max(...items.map(i=>i.count));
+  const rowH=30,W=900,mL=270,mR=70,H=items.length*rowH+10;
+  const svg=el('svg',{viewBox:`0 0 ${W} ${H}`,role:'img','aria-label':'Llamadas por método'});
+  items.forEach((it,i)=>{
+    const y=i*rowH+6,bw=(it.count/max)*(W-mL-mR);
+    const isGen=it.name.indexOf('GenerateContent')>=0;
+    const t=el('text',{x:mL-10,y:y+rowH/2,class:'ax','text-anchor':'end','dominant-baseline':'middle'});
+    t.setAttribute('style','fill:'+(isGen?'var(--ink)':'var(--ink-2)')+';font-family:var(--mono);font-size:11px');
+    t.textContent=it.name;svg.appendChild(t);
+    svg.appendChild(el('rect',{x:mL,y:y+3,width:Math.max(bw,2),height:rowH-12,rx:4,
+      fill:isGen?'var(--series-1)':'var(--series-2)','fill-opacity':isGen?1:.55}));
+    const v=el('text',{x:mL+Math.max(bw,2)+8,y:y+rowH/2,class:'ax','dominant-baseline':'middle'});
+    v.setAttribute('style','fill:var(--ink-2);font-size:11px');v.textContent=fmt(it.count);svg.appendChild(v);
+  });
+  box.appendChild(svg);
+}
+
+/* ===================== ERROR RATE ===================== */
+function errChart(){
+  const box=document.getElementById('chart-err');
+  const W=920,H=250,mL=44,mR=14,mT=14,mB=40;
+  const d=DATA.daily,n=d.length;
+  const rate=d.map(p=>{const t=p.ok+p.e4xx;return t?100*p.e4xx/t:0;});
+  const yMax=25;
+  const x=i=>mL+(i/(n-1))*(W-mL-mR);
+  const y=v=>mT+(1-v/yMax)*(H-mT-mB);
+  const svg=el('svg',{viewBox:`0 0 ${W} ${H}`,role:'img','aria-label':'Tasa de error diaria'});
+  for(let g=0;g<=yMax;g+=5){svg.appendChild(el('line',{x1:mL,x2:W-mR,y1:y(g),y2:y(g),class:'gl'}));
+    const t=el('text',{x:mL-8,y:y(g)+3,class:'ax','text-anchor':'end'});t.textContent=g+'%';svg.appendChild(t);}
+  // 5% threshold
+  svg.appendChild(el('line',{x1:mL,x2:W-mR,y1:y(5),y2:y(5),stroke:'var(--warn)','stroke-width':1,'stroke-dasharray':'4 3'}));
+  const th=el('text',{x:W-mR,y:y(5)-5,class:'note-txt','text-anchor':'end'});th.textContent='umbral 5%';svg.appendChild(th);
+  const pts=rate.map((v,i)=>`${x(i)},${y(v)}`);
+  svg.appendChild(el('path',{d:`M${mL},${y(0)} L`+pts.join(' L')+` L${x(n-1)},${y(0)} Z`,fill:'var(--err)','fill-opacity':.14}));
+  svg.appendChild(el('path',{d:'M'+pts.join(' L'),fill:'none',stroke:'var(--err)','stroke-width':2}));
+  const months={};d.forEach((p,i)=>{const m=p.date.slice(0,7);if(!(m in months))months[m]=i;});
+  const mnames={'2026-04':'Abr','2026-05':'May','2026-06':'Jun','2026-07':'Jul'};
+  Object.entries(months).forEach(([m,i])=>{const t=el('text',{x:x(i),y:H-mB+18,class:'ax'});t.textContent=mnames[m]||m;svg.appendChild(t);});
+  const ai=d.findIndex(p=>p.date==='2026-06-01');
+  if(ai>=0){svg.appendChild(el('line',{x1:x(ai),x2:x(ai),y1:mT,y2:H-mB,stroke:'var(--warn)','stroke-width':1.5}));
+    const t=el('text',{x:x(ai)+5,y:mT+11,class:'note-txt'});t.textContent='◆ 1 jun';svg.appendChild(t);}
+  const hoverDot=el('circle',{r:4,fill:'var(--err)',stroke:'var(--surface)','stroke-width':2,opacity:0});svg.appendChild(hoverDot);
+  const rect=el('rect',{x:mL,y:mT,width:W-mL-mR,height:H-mT-mB,fill:'transparent'});svg.appendChild(rect);
+  svg.addEventListener('mousemove',ev=>{const b=svg.getBoundingClientRect();const px=(ev.clientX-b.left)/b.width*W;
+    let i=Math.round((px-mL)/(W-mL-mR)*(n-1));i=Math.max(0,Math.min(n-1,i));
+    hoverDot.setAttribute('cx',x(i));hoverDot.setAttribute('cy',y(rate[i]));hoverDot.setAttribute('opacity',1);
+    showTip(`<div class="d">${d[i].date}</div><div class="row"><span>Tasa 4xx</span><b style="color:var(--err)">${rate[i].toFixed(1)}%</b></div><div class="row"><span>404s</span><b>${fmt(d[i].e4xx)}</b></div>`,ev.clientX,ev.clientY);});
+  svg.addEventListener('mouseleave',()=>{hideTip();hoverDot.setAttribute('opacity',0);});
+  box.appendChild(svg);
+}
+
+/* ===================== DOW & HOD ===================== */
+function barChart(id,labels,vals,color,fmtLab,unit){
+  const box=document.getElementById(id);
+  const W=460,H=250,mL=44,mR=10,mT=14,mB=34;
+  const n=vals.length,max=Math.max(...vals),yMax=Math.ceil(max/(id==='chart-dow'?20000:500))*(id==='chart-dow'?20000:500);
+  const bw=(W-mL-mR)/n;
+  const y=v=>mT+(1-v/yMax)*(H-mT-mB);
+  const svg=el('svg',{viewBox:`0 0 ${W} ${H}`,role:'img'});
+  const steps=id==='chart-dow'?4:4;
+  for(let s=0;s<=steps;s++){const g=yMax*s/steps;svg.appendChild(el('line',{x1:mL,x2:W-mR,y1:y(g),y2:y(g),class:'gl'}));
+    const t=el('text',{x:mL-7,y:y(g)+3,class:'ax','text-anchor':'end'});t.textContent=g>=1000?(g/1000)+'k':g;svg.appendChild(t);}
+  vals.forEach((v,i)=>{
+    const bx=mL+i*bw+bw*0.16,w=bw*0.68;
+    const peak=v===max;
+    svg.appendChild(el('rect',{x:bx,y:y(v),width:w,height:y(0)-y(v),rx:4,fill:color,'fill-opacity':peak?1:.5}));
+    const t=el('text',{x:mL+i*bw+bw/2,y:H-mB+16,class:'ax','text-anchor':'middle'});t.textContent=labels[i];svg.appendChild(t);
+    const g=svg.appendChild(el('rect',{x:mL+i*bw,y:mT,width:bw,height:H-mT-mB,fill:'transparent'}));
+    g.addEventListener('mousemove',ev=>showTip(`<div class="d">${fmtLab(i)}</div><div class="row"><span>${unit}</span><b>${fmt(v)}</b></div>`,ev.clientX,ev.clientY));
+    g.addEventListener('mouseleave',hideTip);
+  });
+  box.appendChild(svg);
+}
+
+/* ===================== SIMPLE TABLES ===================== */
+function codesTable(){
+  const meaning={'200':'Éxito','404':'Modelo/recurso no encontrado','400':'Solicitud inválida','429':'Límite de cuota','503':'Servicio no disponible'};
+  const cls={'404':'color:var(--warn);font-weight:600','429':'color:var(--warn)'};
+  const total=DATA.respcodes.reduce((a,b)=>a+b.count,0);
+  const tb=document.querySelector('#tbl-codes tbody');
+  DATA.respcodes.forEach(c=>{const tr=document.createElement('tr');
+    tr.innerHTML=`<td class="tag">${c.code}</td><td style="text-align:left;color:var(--ink-2)">${meaning[c.code]||''}</td>
+      <td class="tnum" style="${cls[c.code]||''}">${fmt(c.count)}</td>
+      <td class="tnum" style="color:var(--muted)">${(100*c.count/total).toFixed(1)}%</td>`;tb.appendChild(tr);});
+}
+function servicesTable(){
+  const svc=DATA.services.filter(s=>s.count>=40);
+  const max=Math.max(...svc.map(s=>s.count));
+  const tb=document.querySelector('#tbl-services tbody');
+  const isAI=s=>s==='aiplatform.googleapis.com';
+  svc.forEach(s=>{const tr=document.createElement('tr');
+    const nm=s.service.replace('.googleapis.com','');
+    tr.innerHTML=`<td class="tag" style="${isAI(s.service)?'color:var(--series-1);font-weight:600':''}">${nm}</td>
+      <td class="tnum">${fmt(s.count)}</td>
+      <td class="bar-cell"><span class="microbar" style="width:${Math.max(4,Math.round(120*s.count/max))}px;background:${isAI(s.service)?'var(--series-1)':'var(--series-2)'};opacity:${isAI(s.service)?1:.5}"></span></td>`;
+    tb.appendChild(tr);});
+}
+
+/* ===================== USD ESTIMATOR ===================== */
+const usd=(v,d=0)=>new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',minimumFractionDigits:d,maximumFractionDigits:d}).format(v);
+const CALLS_NOW=(DATA.respcodes.find(c=>c.code==='200')||{count:404211}).count;
+const CALLS_BASE=Math.round(51173*30/7);
+const EST_PRESETS={flash:{pin:0.30,pout:2.50},pro:{pin:1.25,pout:5.00}};
+function estCalc(){
+  const g=id=>parseFloat(document.getElementById(id).value)||0;
+  const per=g('t-in')*g('p-in')/1e6+g('t-out')*g('p-out')/1e6;
+  document.getElementById('r-now').textContent=usd(per*CALLS_NOW);
+  document.getElementById('r-base').textContent=usd(per*CALLS_BASE);
+  document.getElementById('r-delta').textContent='+'+usd(per*(CALLS_NOW-CALLS_BASE));
+  document.getElementById('r-per').textContent=usd(per,4);
+}
+['p-in','p-out','t-in','t-out'].forEach(id=>document.getElementById(id).addEventListener('input',()=>{
+  document.querySelectorAll('.preset').forEach(b=>b.classList.remove('active'));
+  document.querySelector('.preset[data-preset="custom"]').classList.add('active');estCalc();}));
+document.querySelectorAll('.preset').forEach(b=>b.addEventListener('click',()=>{
+  document.querySelectorAll('.preset').forEach(x=>x.classList.remove('active'));b.classList.add('active');
+  const p=EST_PRESETS[b.dataset.preset];
+  if(p){document.getElementById('p-in').value=p.pin;document.getElementById('p-out').value=p.pout;}
+  estCalc();}));
+document.querySelector('.preset[data-preset="flash"]').classList.add('active');
+estCalc();
+
+/* ===================== THEME TOGGLE ===================== */
+(function(){const btn=document.getElementById('themeBtn');if(!btn)return;
+  const cur=()=>document.documentElement.getAttribute('data-theme')||
+    (matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light');
+  const set=t=>{document.documentElement.setAttribute('data-theme',t);btn.textContent=t==='dark'?'☀':'☾';};
+  set(cur());
+  btn.addEventListener('click',()=>set(cur()==='dark'?'light':'dark'));
+})();
+
+/* ---------- init ---------- */
+trendChart();weeklyTable();methodsChart();errChart();codesTable();servicesTable();
+const dowLab=['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'];
+const dowFull=['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'];
+barChart('chart-dow',dowLab,DATA.dow.map(x=>x.total),'var(--series-1)',i=>dowFull[i],'Llamadas OK (28 d)');
+// hour: convert UTC->COT (-5)
+const hodC=new Array(24).fill(0);DATA.hod.forEach(x=>{hodC[(x.h+24-5)%24]=x.avg;});
+const hLab=Array.from({length:24},(_,h)=>h%6===0?h+'h':'');
+barChart('chart-hod',hLab,hodC,'var(--series-2)',i=>String(i).padStart(2,'0')+':00 COT','Prom. llamadas/h');
+</script>
+
+</body>
+</html>
