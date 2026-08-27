@@ -1,0 +1,1578 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proceso de Actualización Certificados de Davivienda en Grupo Bolívar</title>
+    <style>
+        :root {
+            --primary: #1a237e;
+            --primary-light: #3949ab;
+            --secondary: #c62828;
+            --accent: #ff6f00;
+            --success: #2e7d32;
+            --info: #0277bd;
+            --warning: #f9a825;
+            --bg: #f5f5f5;
+            --card-bg: #ffffff;
+            --text: #212121;
+            --text-light: #616161;
+            --border: #e0e0e0;
+            --shadow: 0 2px 12px rgba(0,0,0,0.08);
+            --radius: 12px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: white;
+            padding: 40px 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.05) 0%, transparent 70%);
+            animation: pulse 8s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header p {
+            font-size: 1rem;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header .badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.2);
+            padding: 4px 16px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            margin-top: 12px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Navigation */
+        .nav {
+            background: var(--card-bg);
+            border-bottom: 1px solid var(--border);
+            padding: 0 20px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        }
+
+        .nav-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            gap: 0;
+            overflow-x: auto;
+        }
+
+        .nav-btn {
+            padding: 14px 20px;
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text-light);
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+            white-space: nowrap;
+        }
+
+        .nav-btn:hover {
+            color: var(--primary);
+            background: rgba(26,35,126,0.04);
+        }
+
+        .nav-btn.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+
+        /* Content */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 30px 20px;
+        }
+
+        .section {
+            display: none;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Cards */
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            padding: 28px;
+            margin-bottom: 24px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+        }
+
+        .card h2 {
+            color: var(--primary);
+            margin-bottom: 16px;
+            font-size: 1.4rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card h3 {
+            color: var(--primary-light);
+            margin: 20px 0 12px;
+            font-size: 1.1rem;
+        }
+
+        .card p {
+            color: var(--text-light);
+            margin-bottom: 12px;
+        }
+
+        /* Info box */
+        .info-box {
+            background: #e3f2fd;
+            border-left: 4px solid var(--info);
+            padding: 16px 20px;
+            border-radius: 0 8px 8px 0;
+            margin: 16px 0;
+        }
+
+        .info-box.warning {
+            background: #fff3e0;
+            border-left-color: var(--accent);
+        }
+
+        .info-box.danger {
+            background: #ffebee;
+            border-left-color: var(--secondary);
+        }
+
+        .info-box.success {
+            background: #e8f5e9;
+            border-left-color: var(--success);
+        }
+
+        .info-box strong {
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        /* RACI Table */
+        .raci-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            border-radius: 8px;
+            overflow: hidden;
+            font-size: 0.9rem;
+        }
+
+        .raci-table thead th {
+            background: var(--primary);
+            color: white;
+            padding: 14px 12px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 0.8rem;
+        }
+
+        .raci-table thead th:first-child {
+            text-align: left;
+            min-width: 220px;
+        }
+
+        .raci-table tbody tr {
+            transition: background 0.2s;
+        }
+
+        .raci-table tbody tr:hover {
+            background: #f5f5f5;
+        }
+
+        .raci-table tbody td {
+            padding: 12px;
+            border-bottom: 1px solid var(--border);
+            text-align: center;
+            vertical-align: middle;
+        }
+
+        .raci-table tbody td:first-child {
+            text-align: left;
+            font-weight: 500;
+        }
+
+        .raci-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            font-weight: 700;
+            font-size: 0.85rem;
+        }
+
+        .raci-R { background: #ef5350; color: white; }
+        .raci-A { background: #ff9800; color: white; }
+        .raci-C { background: #42a5f5; color: white; }
+        .raci-I { background: #78909c; color: white; }
+
+        .raci-legend {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border);
+        }
+
+        .raci-legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+        }
+
+        /* Timeline */
+        .timeline {
+            position: relative;
+            padding: 20px 0;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 30px;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: linear-gradient(to bottom, var(--primary), var(--success));
+            border-radius: 2px;
+        }
+
+        .timeline-item {
+            position: relative;
+            padding-left: 70px;
+            margin-bottom: 32px;
+            animation: slideIn 0.5s ease forwards;
+            opacity: 0;
+        }
+
+        .timeline-item:nth-child(1) { animation-delay: 0.1s; }
+        .timeline-item:nth-child(2) { animation-delay: 0.2s; }
+        .timeline-item:nth-child(3) { animation-delay: 0.3s; }
+        .timeline-item:nth-child(4) { animation-delay: 0.4s; }
+        .timeline-item:nth-child(5) { animation-delay: 0.5s; }
+        .timeline-item:nth-child(6) { animation-delay: 0.6s; }
+        .timeline-item:nth-child(7) { animation-delay: 0.7s; }
+        .timeline-item:nth-child(8) { animation-delay: 0.8s; }
+        .timeline-item:nth-child(9) { animation-delay: 0.9s; }
+        .timeline-item:nth-child(10) { animation-delay: 1.0s; }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .timeline-dot {
+            position: absolute;
+            left: 20px;
+            top: 5px;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: var(--primary);
+            border: 3px solid white;
+            box-shadow: 0 0 0 3px var(--primary);
+            z-index: 1;
+        }
+
+        .timeline-dot.active {
+            background: var(--success);
+            box-shadow: 0 0 0 3px var(--success);
+            animation: pulseGreen 2s infinite;
+        }
+
+        @keyframes pulseGreen {
+            0%, 100% { box-shadow: 0 0 0 3px var(--success); }
+            50% { box-shadow: 0 0 0 6px rgba(46,125,50,0.3); }
+        }
+
+        .timeline-content {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            padding: 18px 22px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .timeline-content:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+        }
+
+        .timeline-step {
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: var(--primary);
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+
+        .timeline-title {
+            font-size: 1.05rem;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .timeline-desc {
+            font-size: 0.9rem;
+            color: var(--text-light);
+        }
+
+        .timeline-area {
+            display: inline-block;
+            background: #e8eaf6;
+            color: var(--primary);
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-top: 8px;
+        }
+
+        /* Flow Diagram */
+        .flow-container {
+            overflow-x: auto;
+            padding: 20px 0;
+        }
+
+        .flow {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0;
+            min-width: 600px;
+        }
+
+        .flow-node {
+            background: var(--card-bg);
+            border: 2px solid var(--primary);
+            border-radius: 10px;
+            padding: 14px 28px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 0.9rem;
+            position: relative;
+            min-width: 260px;
+            transition: all 0.3s;
+            cursor: default;
+        }
+
+        .flow-node:hover {
+            transform: scale(1.03);
+            box-shadow: 0 4px 16px rgba(26,35,126,0.15);
+        }
+
+        .flow-node.bank { border-color: var(--secondary); background: #ffebee; }
+        .flow-node.security { border-color: #7b1fa2; background: #f3e5f5; }
+        .flow-node.disponibilidad { border-color: var(--info); background: #e3f2fd; }
+        .flow-node.infra { border-color: var(--success); background: #e8f5e9; }
+        .flow-node.dev { border-color: var(--accent); background: #fff3e0; }
+        .flow-node.arq { border-color: #455a64; background: #eceff1; }
+
+        .flow-node small {
+            display: block;
+            font-weight: 400;
+            color: var(--text-light);
+            font-size: 0.8rem;
+            margin-top: 4px;
+        }
+
+        .flow-arrow {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 4px 0;
+        }
+
+        .flow-arrow .line {
+            width: 2px;
+            height: 24px;
+            background: var(--text-light);
+        }
+
+        .flow-arrow .arrow-head {
+            width: 0;
+            height: 0;
+            border-left: 6px solid transparent;
+            border-right: 6px solid transparent;
+            border-top: 8px solid var(--text-light);
+        }
+
+        .flow-arrow .label {
+            font-size: 0.75rem;
+            color: var(--text-light);
+            margin: 4px 0;
+            font-style: italic;
+        }
+
+        /* Technical Details */
+        .tech-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .tech-card {
+            background: #fafafa;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 20px;
+            transition: transform 0.2s;
+        }
+
+        .tech-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow);
+        }
+
+        .tech-card h4 {
+            color: var(--primary);
+            margin-bottom: 10px;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .tech-card code {
+            background: #263238;
+            color: #80cbc4;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            display: inline-block;
+            margin: 2px 0;
+            word-break: break-all;
+        }
+
+        .tech-card ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .tech-card ul li {
+            padding: 4px 0;
+            font-size: 0.9rem;
+            color: var(--text-light);
+            padding-left: 18px;
+            position: relative;
+        }
+
+        .tech-card ul li::before {
+            content: '▸';
+            position: absolute;
+            left: 0;
+            color: var(--primary);
+        }
+
+        /* Checklist */
+        .checklist {
+            list-style: none;
+            padding: 0;
+        }
+
+        .checklist li {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .checklist li:hover {
+            background: #fafafa;
+        }
+
+        .checklist li:last-child {
+            border-bottom: none;
+        }
+
+        .check-icon {
+            width: 22px;
+            height: 22px;
+            border: 2px solid var(--border);
+            border-radius: 4px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 1px;
+            transition: all 0.2s;
+        }
+
+        .checklist li.checked .check-icon {
+            background: var(--success);
+            border-color: var(--success);
+        }
+
+        .checklist li.checked .check-icon::after {
+            content: '✓';
+            color: white;
+            font-size: 0.8rem;
+            font-weight: 700;
+        }
+
+        .checklist li.checked span {
+            text-decoration: line-through;
+            color: var(--text-light);
+        }
+
+        /* Considerations */
+        .consideration-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .consideration-list li {
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border);
+            padding-left: 28px;
+            position: relative;
+            font-size: 0.95rem;
+        }
+
+        .consideration-list li:last-child {
+            border-bottom: none;
+        }
+
+        .consideration-list li::before {
+            content: '⚠';
+            position: absolute;
+            left: 0;
+            top: 12px;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 30px 20px;
+            color: var(--text-light);
+            font-size: 0.85rem;
+            border-top: 1px solid var(--border);
+            margin-top: 40px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header h1 { font-size: 1.4rem; }
+            .nav-btn { padding: 12px 14px; font-size: 0.8rem; }
+            .card { padding: 20px; }
+            .raci-table { font-size: 0.75rem; }
+            .raci-table thead th { padding: 10px 6px; }
+            .raci-table tbody td { padding: 8px 6px; }
+            .raci-badge { width: 26px; height: 26px; font-size: 0.75rem; }
+            .timeline::before { left: 20px; }
+            .timeline-item { padding-left: 50px; }
+            .timeline-dot { left: 10px; }
+        }
+
+        /* Print styles */
+        @media print {
+            .nav { display: none; }
+            .section { display: block !important; page-break-inside: avoid; }
+            .header { padding: 20px; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <h1>Proceso de Actualización de Certificados de Davivienda</h1>
+        <p>Grupo Bolívar — Seguros Bolívar S.A. / Ciencuadras</p>
+        <span class="badge">Mutual TLS — apis.davivienda.com</span>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="nav">
+        <div class="nav-inner">
+            <button class="nav-btn active" onclick="showSection('overview')">Resumen</button>
+            <button class="nav-btn" onclick="showSection('flow')">Flujo de Trabajo</button>
+            <button class="nav-btn" onclick="showSection('timeline')">Línea de Tiempo</button>
+            <button class="nav-btn" onclick="showSection('raci')">Matriz RACI</button>
+            <button class="nav-btn" onclick="showSection('technical')">Detalles Técnicos</button>
+            <button class="nav-btn" onclick="showSection('checklist')">Checklist</button>
+            <button class="nav-btn" onclick="showSection('considerations')">Consideraciones</button>
+        </div>
+    </nav>
+
+    <!-- Content -->
+    <div class="container">
+
+        <!-- SECTION: Overview -->
+        <div id="overview" class="section active">
+            <div class="card">
+                <h2>📋 Descripción General del Proceso</h2>
+                <p>
+                    Este documento detalla el proceso completo de renovación del certificado digital utilizado para el consumo de APIs 
+                    disponibilizadas por Davivienda a través del dominio <strong>apis.davivienda.com</strong>, cuyo CNAME es 
+                    <strong>MassiveCienCuadrasApp.ciencuadras.com</strong>.
+                </p>
+                <p>
+                    El certificado es necesario para establecer la conexión <strong>Mutual TLS (mTLS)</strong> con las APIs del banco. 
+                    Sin un certificado vigente, la plataforma de Ciencuadras no puede consumir los servicios de Open Banking de Davivienda.
+                </p>
+
+                <div class="info-box">
+                    <strong>🔐 ¿Qué es Mutual TLS?</strong>
+                    Es un mecanismo de autenticación bidireccional donde tanto el cliente (Ciencuadras) como el servidor (Davivienda) 
+                    presentan certificados digitales para verificar mutuamente su identidad. La aplicación debe presentar tanto la 
+                    <strong>llave privada</strong> como el <strong>certificado digital (.CRT)</strong> emitido por el banco.
+                </div>
+
+                <h3>Datos Clave del Certificado</h3>
+                <div class="tech-grid">
+                    <div class="tech-card">
+                        <h4>🌐 Dominio de APIs</h4>
+                        <code>apis.davivienda.com</code>
+                        <ul>
+                            <li>Ambiente: Producción</li>
+                            <li>Protocolo: HTTPS con mTLS</li>
+                        </ul>
+                    </div>
+                    <div class="tech-card">
+                        <h4>📛 CNAME</h4>
+                        <code>MassiveCienCuadrasApp.ciencuadras.com</code>
+                        <ul>
+                            <li>Aplicación: Ciencuadras</li>
+                            <li>Línea de negocio: Inmobiliaria</li>
+                        </ul>
+                    </div>
+                    <div class="tech-card">
+                        <h4>📅 Vigencia</h4>
+                        <p style="font-size: 1.2rem; font-weight: 700; color: var(--secondary); margin: 8px 0;">1 año</p>
+                        <ul>
+                            <li>Sin costo para Seguros Bolívar</li>
+                            <li>Emitido por Davivienda</li>
+                        </ul>
+                    </div>
+                    <div class="tech-card">
+                        <h4>🔗 Developer Portal</h4>
+                        <code>developers.davivienda.com</code>
+                        <ul>
+                            <li>Consultar: Nombre de aplicación</li>
+                            <li>Consultar: Consumer Key</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>👥 Áreas Involucradas</h2>
+                <div class="tech-grid">
+                    <div class="tech-card">
+                        <h4>🎯 Disponibilidad</h4>
+                        <p style="color: var(--text-light); font-size: 0.9rem;">Orquestador de la solicitud. Habilita canales de comunicación, contacta personas correspondientes y genera el plan de ajuste y despliegue del certificado.</p>
+                    </div>
+                    <div class="tech-card">
+                        <h4>🔒 Seguridad TI</h4>
+                        <p style="color: var(--text-light); font-size: 0.9rem;">Genera el archivo CSR. Posterior a la entrega del CRT y llave privada, genera el archivo .P12 / .PFX.</p>
+                    </div>
+                    <div class="tech-card">
+                        <h4>🏦 Davivienda (Open Banking)</h4>
+                        <p style="color: var(--text-light); font-size: 0.9rem;">Informa del vencimiento del certificado. Posterior a la entrega del CSR, firma, emite y genera el .CRT.</p>
+                    </div>
+                    <div class="tech-card">
+                        <h4>🏗️ Arquitectura</h4>
+                        <p style="color: var(--text-light); font-size: 0.9rem;">Frente que debe ser informado del cambio para mantener visibilidad sobre la infraestructura y seguridad.</p>
+                    </div>
+                    <div class="tech-card">
+                        <h4>💻 Tecnología / Desarrollo</h4>
+                        <p style="color: var(--text-light); font-size: 0.9rem;">Equipo encargado de realizar pruebas del certificado desde Postman para garantizar que funciona en el mTLS.</p>
+                    </div>
+                    <div class="tech-card">
+                        <h4>☁️ Infraestructura</h4>
+                        <p style="color: var(--text-light); font-size: 0.9rem;">Equipo encargado de subir el archivo .P12 al bucket de S3 y actualizar las llaves del parámetro SSM.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION: Flow -->
+        <div id="flow" class="section">
+            <div class="card">
+                <h2>🔄 Flujo de Trabajo — Diagrama de Proceso</h2>
+                <p>Diagrama secuencial que muestra el flujo completo desde la notificación de vencimiento hasta la oficialización del nuevo certificado.</p>
+                
+                <div class="flow-container">
+                    <div class="flow">
+                        <!-- Step 1 -->
+                        <div class="flow-node bank">
+                            🏦 DAVIVIENDA (Open Banking)
+                            <small>Notifica vencimiento del certificado a Seguros Bolívar</small>
+                        </div>
+                        <div class="flow-arrow">
+                            <div class="line"></div>
+                            <span class="label">Comunicación por correo</span>
+                            <div class="arrow-head"></div>
+                        </div>
+
+                        <!-- Step 2 -->
+                        <div class="flow-node disponibilidad">
+                            🎯 DISPONIBILIDAD
+                            <small>Recibe solicitud y activa equipo de Seguridad TI vía ticket</small>
+                        </div>
+                        <div class="flow-arrow">
+                            <div class="line"></div>
+                            <span class="label">Ticket de solicitud CSR</span>
+                            <div class="arrow-head"></div>
+                        </div>
+
+                        <!-- Step 3 -->
+                        <div class="flow-node security">
+                            🔒 SEGURIDAD TI
+                            <small>Genera LLAVE PRIVADA + CSR (.txt y .pdf firmado digitalmente)</small>
+                        </div>
+                        <div class="flow-arrow">
+                            <div class="line"></div>
+                            <span class="label">CSR en PDF firmado</span>
+                            <div class="arrow-head"></div>
+                        </div>
+
+                        <!-- Step 4 -->
+                        <div class="flow-node disponibilidad">
+                            🎯 DISPONIBILIDAD
+                            <small>Envía CSR firmado al banco por correo electrónico</small>
+                        </div>
+                        <div class="flow-arrow">
+                            <div class="line"></div>
+                            <span class="label">Envío por correo al banco</span>
+                            <div class="arrow-head"></div>
+                        </div>
+
+                        <!-- Step 5 -->
+                        <div class="flow-node bank">
+                            🏦 DAVIVIENDA
+                            <small>Firma, emite y genera el certificado .CRT</small>
+                        </div>
+                        <div class="flow-arrow">
+                            <div class="line"></div>
+                            <span class="label">Entrega del .CRT</span>
+                            <div class="arrow-head"></div>
+                        </div>
+
+                        <!-- Step 6 -->
+                        <div class="flow-node disponibilidad">
+                            🎯 DISPONIBILIDAD
+                            <small>Recibe .CRT y lo entrega a Seguridad TI</small>
+                        </div>
+                        <div class="flow-arrow">
+                            <div class="line"></div>
+                            <span class="label">.CRT recibido</span>
+                            <div class="arrow-head"></div>
+                        </div>
+
+                        <!-- Step 7 -->
+                        <div class="flow-node security">
+                            🔒 SEGURIDAD TI
+                            <small>Combina .CRT + Llave Privada → Genera .P12 / .PFX</small>
+                        </div>
+                        <div class="flow-arrow">
+                            <div class="line"></div>
+                            <span class="label">Archivo .P12 generado</span>
+                            <div class="arrow-head"></div>
+                        </div>
+
+                        <!-- Step 8 -->
+                        <div class="flow-node dev">
+                            💻 TECNOLOGÍA / DESARROLLO
+                            <small>Pruebas con Postman — Validación de mTLS funcional</small>
+                        </div>
+                        <div class="flow-arrow">
+                            <div class="line"></div>
+                            <span class="label">Certificado validado ✓</span>
+                            <div class="arrow-head"></div>
+                        </div>
+
+                        <!-- Step 9 -->
+                        <div class="flow-node disponibilidad">
+                            🎯 DISPONIBILIDAD
+                            <small>Genera cambio e involucra a Infraestructura para despliegue</small>
+                        </div>
+                        <div class="flow-arrow">
+                            <div class="line"></div>
+                            <span class="label">Orden de cambio</span>
+                            <div class="arrow-head"></div>
+                        </div>
+
+                        <!-- Step 10 -->
+                        <div class="flow-node infra">
+                            ☁️ INFRAESTRUCTURA
+                            <small>Sube .P12 a S3, marca antiguo como _old, actualiza SSM</small>
+                        </div>
+                        <div class="flow-arrow">
+                            <div class="line"></div>
+                            <span class="label">Despliegue + verificación SSM</span>
+                            <div class="arrow-head"></div>
+                        </div>
+
+                        <!-- Step 11 -->
+                        <div class="flow-node" style="border-color: var(--success); background: #e8f5e9;">
+                            ✅ VALIDACIÓN FINAL
+                            <small>Pruebas con acompañamiento de Open Banking + PO Ciencuadras</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>📦 Artefactos Generados en el Proceso</h2>
+                <div class="tech-grid">
+                    <div class="tech-card">
+                        <h4>🔑 Llave Privada</h4>
+                        <ul>
+                            <li>Generada por Seguridad TI</li>
+                            <li>Custodiada internamente</li>
+                            <li><strong>NUNCA se entrega a Davivienda</strong></li>
+                        </ul>
+                    </div>
+                    <div class="tech-card">
+                        <h4>📄 CSR (Certificate Signing Request)</h4>
+                        <ul>
+                            <li>Formato .TXT (contenido técnico)</li>
+                            <li>Formato .PDF (firmado digitalmente)</li>
+                            <li>Se envía al banco para emisión</li>
+                        </ul>
+                    </div>
+                    <div class="tech-card">
+                        <h4>📜 .CRT (Certificado)</h4>
+                        <ul>
+                            <li>Emitido por Davivienda</li>
+                            <li>Vigencia: 1 año</li>
+                            <li>Sin costo</li>
+                        </ul>
+                    </div>
+                    <div class="tech-card">
+                        <h4>🗂️ .P12 / .PFX</h4>
+                        <ul>
+                            <li>Combina CRT + Llave Privada</li>
+                            <li>Formato usado por la aplicación</li>
+                            <li>Se sube al bucket S3</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION: Timeline -->
+        <div id="timeline" class="section">
+            <div class="card">
+                <h2>⏱️ Línea de Tiempo del Proceso</h2>
+                <p>Secuencia ordenada de actividades con el responsable de cada paso.</p>
+
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-content">
+                            <div class="timeline-step">Paso 1 — Notificación</div>
+                            <div class="timeline-title">Davivienda notifica vencimiento del certificado</div>
+                            <div class="timeline-desc">
+                                El equipo de Open Banking de Davivienda envía un correo a Seguros Bolívar S.A. informando que 
+                                el certificado digital del CNAME <code>MassiveCienCuadrasApp.ciencuadras.com</code> está próximo a vencer. 
+                                Se incluyen las consideraciones para la renovación.
+                            </div>
+                            <span class="timeline-area">🏦 Davivienda</span>
+                        </div>
+                    </div>
+
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-content">
+                            <div class="timeline-step">Paso 2 — Activación interna</div>
+                            <div class="timeline-title">Disponibilidad orquesta la solicitud</div>
+                            <div class="timeline-desc">
+                                El área de Disponibilidad recibe la solicitud, habilita los canales de comunicación y genera un 
+                                <strong>ticket interno</strong> dirigido al equipo de Seguridad TI solicitando la generación del CSR. 
+                                Se informa al área de Arquitectura del cambio.
+                            </div>
+                            <span class="timeline-area">🎯 Disponibilidad</span>
+                        </div>
+                    </div>
+
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-content">
+                            <div class="timeline-step">Paso 3 — Generación CSR</div>
+                            <div class="timeline-title">Seguridad TI genera la Llave Privada y el CSR</div>
+                            <div class="timeline-desc">
+                                Seguridad TI genera la <strong>llave privada</strong> (que será custodiada internamente) y crea el 
+                                <strong>CSR (Certificate Signing Request)</strong> utilizando los datos del Developer Portal de Davivienda 
+                                (nombre de aplicación + Consumer Key). El CSR se entrega en formato .TXT y en PDF firmado digitalmente.
+                            </div>
+                            <span class="timeline-area">🔒 Seguridad TI</span>
+                        </div>
+                    </div>
+
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-content">
+                            <div class="timeline-step">Paso 4 — Envío al banco</div>
+                            <div class="timeline-title">Disponibilidad envía CSR firmado a Davivienda</div>
+                            <div class="timeline-desc">
+                                El área de Disponibilidad envía el CSR en PDF firmado digital o electrónicamente al equipo de 
+                                Open Banking de Davivienda por correo electrónico para que procedan con la emisión del certificado.
+                            </div>
+                            <span class="timeline-area">🎯 Disponibilidad</span>
+                        </div>
+                    </div>
+
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-content">
+                            <div class="timeline-step">Paso 5 — Emisión del certificado</div>
+                            <div class="timeline-title">Davivienda firma y emite el .CRT</div>
+                            <div class="timeline-desc">
+                                El banco toma el CSR, lo firma, emite el certificado digital y genera el archivo <strong>.CRT</strong>. 
+                                Este certificado tendrá vigencia de 1 año y no tiene costo para Seguros Bolívar.
+                            </div>
+                            <span class="timeline-area">🏦 Davivienda</span>
+                        </div>
+                    </div>
+
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-content">
+                            <div class="timeline-step">Paso 6 — Generación .P12</div>
+                            <div class="timeline-title">Seguridad TI genera el archivo .P12 / .PFX</div>
+                            <div class="timeline-desc">
+                                Seguridad TI combina el <strong>.CRT</strong> recibido del banco con la <strong>llave privada</strong> 
+                                custodiada internamente para generar el archivo <strong>.P12 (o .PFX)</strong> que será utilizado por 
+                                la aplicación para la autenticación mTLS.
+                            </div>
+                            <span class="timeline-area">🔒 Seguridad TI</span>
+                        </div>
+                    </div>
+
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-content">
+                            <div class="timeline-step">Paso 7 — Pruebas técnicas</div>
+                            <div class="timeline-title">Desarrollo valida el certificado con Postman</div>
+                            <div class="timeline-desc">
+                                El equipo de Tecnología/Desarrollo recibe el .P12 y realiza pruebas desde <strong>Postman</strong> 
+                                contra las APIs de Davivienda en producción para garantizar que el certificado funciona correctamente 
+                                en la conexión Mutual TLS. Se valida antes de subirlo a la infraestructura productiva.
+                            </div>
+                            <span class="timeline-area">💻 Tecnología</span>
+                        </div>
+                    </div>
+
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-content">
+                            <div class="timeline-step">Paso 8 — Despliegue</div>
+                            <div class="timeline-title">Infraestructura sube el .P12 a S3 y actualiza SSM</div>
+                            <div class="timeline-desc">
+                                Disponibilidad genera la orden de cambio. El equipo de Infraestructura sube el archivo .P12 al bucket 
+                                <code>tramites-juridicos-prod-documents</code> en la cuenta 
+                                <strong>Seguros Bolivar - Bitacora Avaluos - PROD (130448862935)</strong>. El certificado anterior se 
+                                renombra con sufijo <code>_old</code> como referencia. Se verifica que el parámetro SSM 
+                                <code>/tramites-juridicos/prod/listas/restrictivas/p12/filename</code> apunte correctamente al nuevo archivo.
+                            </div>
+                            <span class="timeline-area">☁️ Infraestructura</span>
+                        </div>
+                    </div>
+
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-content">
+                            <div class="timeline-step">Paso 9 — Validación final</div>
+                            <div class="timeline-title">Pruebas con acompañamiento del banco y área usuaria</div>
+                            <div class="timeline-desc">
+                                Se realizan pruebas en la plataforma de Ciencuadras con acompañamiento del equipo de 
+                                <strong>Open Banking de Davivienda</strong> y del <strong>PO del área usuaria de Ciencuadras</strong>, 
+                                quien agenda la sesión. Se valida que todos los flujos de negocio operen correctamente con el nuevo certificado.
+                            </div>
+                            <span class="timeline-area">🎯 Disponibilidad + 🏦 Davivienda + Ciencuadras</span>
+                        </div>
+                    </div>
+
+                    <div class="timeline-item">
+                        <div class="timeline-dot active"></div>
+                        <div class="timeline-content">
+                            <div class="timeline-step">Paso 10 — Oficialización</div>
+                            <div class="timeline-title">Certificado oficializado en producción</div>
+                            <div class="timeline-desc">
+                                Una vez validado el correcto funcionamiento, el certificado queda oficializado en producción. 
+                                Se cierra la orden de cambio y se documenta la fecha de vencimiento del nuevo certificado para 
+                                programar la próxima renovación (1 año).
+                            </div>
+                            <span class="timeline-area">✅ Proceso completado</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION: RACI -->
+        <div id="raci" class="section">
+            <div class="card">
+                <h2>📊 Matriz RACI</h2>
+                <p>Definición de responsabilidades por actividad y área involucrada en el proceso de renovación del certificado.</p>
+
+                <div style="overflow-x: auto; margin-top: 20px;">
+                    <table class="raci-table">
+                        <thead>
+                            <tr>
+                                <th>Actividad</th>
+                                <th>Disponibilidad</th>
+                                <th>Seguridad TI</th>
+                                <th>Davivienda</th>
+                                <th>Arquitectura</th>
+                                <th>Tecnología</th>
+                                <th>Infraestructura</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Notificación de vencimiento</td>
+                                <td><span class="raci-badge raci-I">I</span></td>
+                                <td><span class="raci-badge raci-I">I</span></td>
+                                <td><span class="raci-badge raci-R">R</span></td>
+                                <td><span class="raci-badge raci-I">I</span></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td>Orquestación y activación del proceso</td>
+                                <td><span class="raci-badge raci-R">R</span></td>
+                                <td><span class="raci-badge raci-I">I</span></td>
+                                <td></td>
+                                <td><span class="raci-badge raci-I">I</span></td>
+                                <td><span class="raci-badge raci-I">I</span></td>
+                                <td><span class="raci-badge raci-I">I</span></td>
+                            </tr>
+                            <tr>
+                                <td>Generación de llave privada</td>
+                                <td><span class="raci-badge raci-A">A</span></td>
+                                <td><span class="raci-badge raci-R">R</span></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td>Generación del CSR</td>
+                                <td><span class="raci-badge raci-A">A</span></td>
+                                <td><span class="raci-badge raci-R">R</span></td>
+                                <td><span class="raci-badge raci-I">I</span></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td>Envío del CSR al banco</td>
+                                <td><span class="raci-badge raci-R">R</span></td>
+                                <td></td>
+                                <td><span class="raci-badge raci-I">I</span></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td>Firma y emisión del .CRT</td>
+                                <td><span class="raci-badge raci-I">I</span></td>
+                                <td></td>
+                                <td><span class="raci-badge raci-R">R</span></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td>Generación del archivo .P12 / .PFX</td>
+                                <td><span class="raci-badge raci-A">A</span></td>
+                                <td><span class="raci-badge raci-R">R</span></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td>Pruebas con Postman (validación mTLS)</td>
+                                <td><span class="raci-badge raci-A">A</span></td>
+                                <td></td>
+                                <td><span class="raci-badge raci-C">C</span></td>
+                                <td><span class="raci-badge raci-I">I</span></td>
+                                <td><span class="raci-badge raci-R">R</span></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td>Subir .P12 a S3 y actualizar SSM</td>
+                                <td><span class="raci-badge raci-A">A</span></td>
+                                <td></td>
+                                <td></td>
+                                <td><span class="raci-badge raci-I">I</span></td>
+                                <td><span class="raci-badge raci-C">C</span></td>
+                                <td><span class="raci-badge raci-R">R</span></td>
+                            </tr>
+                            <tr>
+                                <td>Pruebas finales con Open Banking + PO</td>
+                                <td><span class="raci-badge raci-R">R</span></td>
+                                <td></td>
+                                <td><span class="raci-badge raci-C">C</span></td>
+                                <td><span class="raci-badge raci-I">I</span></td>
+                                <td><span class="raci-badge raci-C">C</span></td>
+                                <td><span class="raci-badge raci-C">C</span></td>
+                            </tr>
+                            <tr>
+                                <td>Oficialización y cierre del cambio</td>
+                                <td><span class="raci-badge raci-R">R</span></td>
+                                <td><span class="raci-badge raci-I">I</span></td>
+                                <td><span class="raci-badge raci-I">I</span></td>
+                                <td><span class="raci-badge raci-I">I</span></td>
+                                <td><span class="raci-badge raci-I">I</span></td>
+                                <td><span class="raci-badge raci-I">I</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="raci-legend">
+                    <div class="raci-legend-item">
+                        <span class="raci-badge raci-R">R</span>
+                        <span><strong>Responsible</strong> — Ejecuta la actividad</span>
+                    </div>
+                    <div class="raci-legend-item">
+                        <span class="raci-badge raci-A">A</span>
+                        <span><strong>Accountable</strong> — Rinde cuentas / aprueba</span>
+                    </div>
+                    <div class="raci-legend-item">
+                        <span class="raci-badge raci-C">C</span>
+                        <span><strong>Consulted</strong> — Se consulta antes de actuar</span>
+                    </div>
+                    <div class="raci-legend-item">
+                        <span class="raci-badge raci-I">I</span>
+                        <span><strong>Informed</strong> — Se informa del resultado</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION: Technical -->
+        <div id="technical" class="section">
+            <div class="card">
+                <h2>⚙️ Detalles Técnicos — Infraestructura AWS</h2>
+                <p>Información técnica sobre la ubicación y configuración del certificado en la infraestructura productiva.</p>
+
+                <div class="tech-grid">
+                    <div class="tech-card">
+                        <h4>☁️ Cuenta AWS</h4>
+                        <p style="font-weight: 600; margin: 8px 0;">Seguros Bolivar - Bitacora Avaluos - PROD</p>
+                        <code>130448862935</code>
+                    </div>
+                    <div class="tech-card">
+                        <h4>🪣 Bucket S3</h4>
+                        <code>tramites-juridicos-prod-documents</code>
+                        <ul>
+                            <li>Archivo: <code>certificado.p12</code></li>
+                            <li>Backup: <code>certificado_old.p12</code></li>
+                        </ul>
+                    </div>
+                    <div class="tech-card">
+                        <h4>🔧 Parámetro SSM</h4>
+                        <code>/tramites-juridicos/prod/listas/restrictivas/p12/filename</code>
+                        <ul>
+                            <li>Debe apuntar al nuevo certificado</li>
+                            <li>Verificar tras el despliegue</li>
+                        </ul>
+                    </div>
+                    <div class="tech-card">
+                        <h4>🌐 Endpoint de APIs</h4>
+                        <code>https://apis.davivienda.com</code>
+                        <ul>
+                            <li>Autenticación: Mutual TLS</li>
+                            <li>Requiere: .P12 + passphrase</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <h3>Procedimiento de despliegue en S3</h3>
+                <div class="info-box">
+                    <strong>Pasos del equipo de Infraestructura:</strong>
+                    <ol style="margin-top: 8px; padding-left: 20px; color: var(--text-light);">
+                        <li>Renombrar el certificado actual agregando sufijo <code>_old</code> como respaldo/referencia</li>
+                        <li>Subir el nuevo archivo <code>certificado.p12</code> al bucket</li>
+                        <li>Verificar que el parámetro SSM <code>/tramites-juridicos/prod/listas/restrictivas/p12/filename</code> apunte al nombre correcto del nuevo archivo</li>
+                        <li>Confirmar acceso y permisos del archivo en S3</li>
+                    </ol>
+                </div>
+
+                <h3>Configuración en Postman para pruebas mTLS</h3>
+                <div class="info-box success">
+                    <strong>Para validar el certificado antes del despliegue:</strong>
+                    <ol style="margin-top: 8px; padding-left: 20px; color: var(--text-light);">
+                        <li>Abrir Postman → Settings → Certificates</li>
+                        <li>Agregar certificado de cliente para el host <code>apis.davivienda.com</code></li>
+                        <li>Seleccionar el archivo .P12 y proporcionar la passphrase</li>
+                        <li>Ejecutar un request de prueba a una API conocida</li>
+                        <li>Verificar respuesta exitosa (200 OK) confirmando que el mTLS funciona</li>
+                    </ol>
+                </div>
+
+                <h3>Portal de desarrolladores</h3>
+                <div class="info-box warning">
+                    <strong>Datos requeridos para generar el CSR:</strong>
+                    <p style="margin-top: 8px;">
+                        Los datos del <strong>nombre de la aplicación</strong> y el <strong>Consumer Key</strong> necesarios para 
+                        generar el CSR se encuentran en el Developer Portal de Davivienda en ambiente de producción: 
+                        <code>https://developers.davivienda.com</code>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION: Checklist -->
+        <div id="checklist" class="section">
+            <div class="card">
+                <h2>✅ Checklist de Ejecución</h2>
+                <p>Lista de verificación interactiva para seguimiento del proceso. Haz clic en cada actividad al completarla.</p>
+
+                <h3>Fase 1 — Inicio y Solicitud</h3>
+                <ul class="checklist" id="checklist-1">
+                    <li onclick="toggleCheck(this)">
+                        <span class="check-icon"></span>
+                        <span>Recepción del correo de Davivienda notificando vencimiento del certificado</span>
+                    </li>
+                    <li onclick="toggleCheck(this)">
+                        <span class="check-icon"></span>
+                        <span>Disponibilidad informa a las áreas involucradas (Arquitectura, Seguridad TI, Tecnología)</span>
+                    </li>
+                    <li onclick="toggleCheck(this)">
+                        <span class="check-icon"></span>
+                        <span>Disponibilidad genera ticket a Seguridad TI para solicitud de CSR</span>
+                    </li>
+                </ul>
+
+                <h3>Fase 2 — Generación del CSR</h3>
+                <ul class="checklist" id="checklist-2">
+                    <li onclick="toggleCheck(this)">
+                        <span class="check-icon"></span>
+                        <span>Seguridad TI consulta datos en developers.davivienda.com (nombre app + Consumer Key)</span>
+                    </li>
+                    <li onclick="toggleCheck(this)">
+                        <span class="check-icon"></span>
+                        <span>Seguridad TI genera la llave privada y la custodia</span>
+                    </li>
+                    <li onclick="toggleCheck(this)">
+                        <span class="check-icon"></span>
+                        <span>Seguridad TI genera el CSR en formato .TXT</span>
+                    </li>
+                    <li onclick="toggleCheck(this)">
+                        <span class="check-icon"></span>
+                        <span>Seguridad TI firma digitalmente el CSR y genera PDF</span>
+                    </li>
+                    <li onclick="toggleCheck(this)">
+                        <span class="check-icon"></span>
+                        <span>Disponibilidad envía CSR en PDF firmado a Davivienda por correo</span>
+                    </li>
+                </ul>
+
+                <h3>Fase 3 — Emisión y Generación .P12</h3>
+                <ul class="checklist" id="checklist-3">
+                    <li onclick="toggleCheck(this)">
+                        <span class="check-icon"></span>
+                        <span>Davivienda firma, emite y entrega el archivo .CRT</span>
+                    </li>
+                    <li onclick="toggleCheck(this)">
+                        <span class="check-icon"></span>
+                        <span>Disponibilidad recibe .CRT y lo transfiere a Seguridad TI</span>
+                    </li>
+                    <li onclick="toggleCheck(this)">
+                        <span class="check-icon"></span>
+                        <span>Seguridad TI genera el .P12 combinando .CRT + llave privada</span>
+                    </li>
+                </ul>
+
+                <h3>Fase 4 — Pruebas y Validación</h3>
+                <ul class="checklist" id="checklist-4">
+                    <li onclick="toggleCheck(this)">
+                        <span class="check-icon"></span>
+                        <span>Tecnología recibe el .P12 para pruebas</span>
+                    </li>
+                    <li onclick="toggleCheck(this)">
+                        <span class="check-icon"></span>
+                        <span>Pruebas exitosas desde Postman contra apis.davivienda.com (mTLS validado)</span>
+                    </li>
+                </ul>
+
+                <h3>Fase 5 — Despliegue en Producción</h3>
+                <ul class="checklist" id="checklist-5">
+                    <li onclick="toggleCheck(this)">
+                        <span class="check-icon"></span>
+                        <span>Disponibilidad genera orden de cambio para Infraestructura</span>
+                    </li>
+                    <li onclick="toggleCheck(this)">
+                        <span class="check-icon"></span>
+                        <span>Infraestructura renombra certificado actual con sufijo _old en S3</span>
+                    </li>
+                    <li onclick="toggleCheck(this)">
+                        <span class="check-icon"></span>
+                        <span>Infraestructura sube nuevo .P12 al bucket tramites-juridicos-prod-documents</span>
+                    </li>
+                    <li onclick="toggleCheck(this)">
+                        <span class="check-icon"></span>
+                        <span>Verificación del parámetro SSM apuntando al archivo correcto</span>
+                    </li>
+                </ul>
+
+                <h3>Fase 6 — Validación Final y Cierre</h3>
+                <ul class="checklist" id="checklist-6">
+                    <li onclick="toggleCheck(this)">
+                        <span class="check-icon"></span>
+                        <span>PO de Ciencuadras agenda sesión de pruebas en plataforma</span>
+                    </li>
+                    <li onclick="toggleCheck(this)">
+                        <span class="check-icon"></span>
+                        <span>Pruebas con acompañamiento de Open Banking de Davivienda</span>
+                    </li>
+                    <li onclick="toggleCheck(this)">
+                        <span class="check-icon"></span>
+                        <span>Validación de flujos de negocio en Ciencuadras operando correctamente</span>
+                    </li>
+                    <li onclick="toggleCheck(this)">
+                        <span class="check-icon"></span>
+                        <span>Oficialización del certificado y cierre de la orden de cambio</span>
+                    </li>
+                    <li onclick="toggleCheck(this)">
+                        <span class="check-icon"></span>
+                        <span>Documentar fecha de vencimiento del nuevo certificado para próxima renovación</span>
+                    </li>
+                </ul>
+
+                <div class="info-box" style="margin-top: 20px;">
+                    <strong>Progreso:</strong>
+                    <span id="progress-text">0 de 20 actividades completadas</span>
+                    <div style="background: #e0e0e0; height: 8px; border-radius: 4px; margin-top: 8px; overflow: hidden;">
+                        <div id="progress-bar" style="background: var(--success); height: 100%; width: 0%; border-radius: 4px; transition: width 0.3s;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION: Considerations -->
+        <div id="considerations" class="section">
+            <div class="card">
+                <h2>⚠️ Consideraciones Importantes</h2>
+                <p>Puntos críticos que deben tenerse en cuenta durante todo el proceso de renovación.</p>
+
+                <ul class="consideration-list">
+                    <li>
+                        <strong>Uso exclusivo del certificado:</strong> El certificado digital emitido solo debe ser utilizado para 
+                        el consumo de las APIs disponibilizadas por Davivienda en el dominio <code>apis.davivienda.com</code> 
+                        (ambiente producción). No debe usarse para ningún otro propósito.
+                    </li>
+                    <li>
+                        <strong>Custodia de la llave privada:</strong> La llave privada debe ser custodiada exclusivamente por 
+                        Seguros Bolívar y <strong>NUNCA debe ser entregada a Davivienda</strong>. La aplicación requiere tanto la 
+                        llave privada como el certificado digital para consumir las APIs.
+                    </li>
+                    <li>
+                        <strong>Pruebas antes del despliegue:</strong> Una vez se reciba el certificado digital por parte del banco, 
+                        se deben hacer pruebas (a través de Postman u otra herramienta) <strong>antes</strong> de configurar el 
+                        certificado en la aplicación que consume las APIs en producción.
+                    </li>
+                    <li>
+                        <strong>Sin costo:</strong> El certificado digital emitido por el banco no tiene costo y debe ser utilizado 
+                        de ahora en adelante para el consumo de las APIs. Tiene vigencia de <strong>1 año</strong>.
+                    </li>
+                    <li>
+                        <strong>Datos del Developer Portal:</strong> El nombre de la aplicación y el Consumer Key requeridos para 
+                        generar el CSR se encuentran en el Developer Portal de producción: 
+                        <code>https://developers.davivienda.com</code>.
+                    </li>
+                    <li>
+                        <strong>Formato del CSR:</strong> El CSR debe ser firmado de manera digital o electrónica y puede ser 
+                        entregado en formato <strong>.PDF</strong> por correo al banco.
+                    </li>
+                    <li>
+                        <strong>Respaldo del certificado anterior:</strong> Al desplegar el nuevo certificado en S3, el anterior 
+                        se renombra con sufijo <code>_old</code> como referencia y plan de rollback.
+                    </li>
+                    <li>
+                        <strong>Acompañamiento en pruebas finales:</strong> Las pruebas finales en la plataforma de Ciencuadras 
+                        deben realizarse con acompañamiento del equipo de Open Banking de Davivienda y del PO del área usuaria.
+                    </li>
+                </ul>
+            </div>
+
+            <div class="card">
+                <h2>🚨 Riesgos y Mitigaciones</h2>
+                
+                <div class="tech-grid">
+                    <div class="tech-card">
+                        <h4 style="color: var(--secondary);">⏰ Vencimiento sin renovación</h4>
+                        <p style="font-size: 0.9rem; color: var(--text-light);">
+                            <strong>Riesgo:</strong> Si el certificado vence sin renovación, se interrumpe el consumo de APIs de Davivienda, 
+                            afectando directamente los servicios de Ciencuadras que dependen de Open Banking.
+                        </p>
+                        <p style="font-size: 0.9rem; color: var(--success); margin-top: 8px;">
+                            <strong>Mitigación:</strong> Iniciar el proceso al menos 30 días antes del vencimiento. Documentar fecha 
+                            de expiración y configurar alertas.
+                        </p>
+                    </div>
+                    <div class="tech-card">
+                        <h4 style="color: var(--secondary);">🔑 Pérdida de llave privada</h4>
+                        <p style="font-size: 0.9rem; color: var(--text-light);">
+                            <strong>Riesgo:</strong> Si se pierde la llave privada, el certificado queda inutilizable y se debe 
+                            generar un nuevo par completo (CSR + CRT + P12).
+                        </p>
+                        <p style="font-size: 0.9rem; color: var(--success); margin-top: 8px;">
+                            <strong>Mitigación:</strong> Seguridad TI custodia la llave con controles de acceso. Respaldar 
+                            en almacenamiento seguro con acceso controlado.
+                        </p>
+                    </div>
+                    <div class="tech-card">
+                        <h4 style="color: var(--secondary);">❌ Certificado no funcional</h4>
+                        <p style="font-size: 0.9rem; color: var(--text-light);">
+                            <strong>Riesgo:</strong> El nuevo certificado podría tener errores en la cadena de confianza o en la 
+                            generación del .P12.
+                        </p>
+                        <p style="font-size: 0.9rem; color: var(--success); margin-top: 8px;">
+                            <strong>Mitigación:</strong> Validar con Postman antes del despliegue. Mantener certificado _old en S3 
+                            para rollback inmediato si es necesario.
+                        </p>
+                    </div>
+                    <div class="tech-card">
+                        <h4 style="color: var(--secondary);">📡 Fallo en despliegue SSM</h4>
+                        <p style="font-size: 0.9rem; color: var(--text-light);">
+                            <strong>Riesgo:</strong> El parámetro SSM podría no actualizarse correctamente, dejando la aplicación 
+                            apuntando al certificado antiguo.
+                        </p>
+                        <p style="font-size: 0.9rem; color: var(--success); margin-top: 8px;">
+                            <strong>Mitigación:</strong> Verificar explícitamente el valor del parámetro SSM tras el cambio. 
+                            Incluir en el checklist de despliegue.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+        <p><strong>Grupo Bolívar</strong> — Seguros Bolívar S.A.</p>
+        <p>Proceso de Actualización de Certificados Digitales — Open Banking Davivienda</p>
+        <p style="margin-top: 8px;">Documento generado para uso interno. Última actualización: Agosto 2026</p>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        // Navigation
+        function showSection(sectionId) {
+            // Hide all sections
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            // Remove active from all nav buttons
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            
+            // Show selected section
+            document.getElementById(sectionId).classList.add('active');
+            // Activate corresponding button
+            event.target.classList.add('active');
+
+            // Re-trigger timeline animations
+            if (sectionId === 'timeline') {
+                document.querySelectorAll('.timeline-item').forEach(item => {
+                    item.style.animation = 'none';
+                    item.offsetHeight; // force reflow
+                    item.style.animation = '';
+                });
+            }
+        }
+
+        // Checklist
+        function toggleCheck(li) {
+            li.classList.toggle('checked');
+            updateProgress();
+        }
+
+        function updateProgress() {
+            const total = document.querySelectorAll('.checklist li').length;
+            const checked = document.querySelectorAll('.checklist li.checked').length;
+            const percent = Math.round((checked / total) * 100);
+            
+            document.getElementById('progress-text').textContent = `${checked} de ${total} actividades completadas`;
+            document.getElementById('progress-bar').style.width = `${percent}%`;
+        }
+
+        // Initialize progress
+        updateProgress();
+
+        // Smooth scroll for nav on mobile
+        document.querySelectorAll('.nav-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+        });
+    </script>
+</body>
+</html>
