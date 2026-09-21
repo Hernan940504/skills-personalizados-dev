@@ -15,10 +15,15 @@
 2. Recorre 9 secciones sin omitir ninguna: problema, sponsor/stakeholders,
    estado actual, estado futuro, criterios de éxito, restricciones, enfoque de
    IA, riesgos y límites de alcance.
-3. Aplica los **guardrails de Seguros Bolívar** (stack aprobado, JFrog,
+3. Exige **dos deep research** antes de cerrar el planteamiento: uno de
+   **validación/contexto** (cómo lo resolvieron otros, tecnologías, resultados)
+   y uno de **crítica/riesgos** (por qué fallan estas soluciones en contextos
+   corporativos). Genera los prompts aplicados al caso con
+   `references/deep-research-guide.md`.
+4. Aplica los **guardrails de Seguros Bolívar** (stack aprobado, JFrog,
    PostgreSQL/PgVector/Pinecone, gateway de IA interno, aprobación dual, Habeas
    Data, redacción de PII, retención ≤ 90 días).
-4. Cierra con el bloque **"Insumo para AI-DLC"**: el `intent` propuesto y el
+5. Cierra con el bloque **"Insumo para AI-DLC"**: el `intent` propuesto y el
    mapeo sección → fase (Ideation / Inception / gates).
 
 Salida: `lineas_negocio/<linea-negocio>/prd-<nombre-producto>.md`.
@@ -66,9 +71,10 @@ docs-prd-aidlc/
 ├── scripts/
 │   └── new-prd.sh                        # scaffold del PRD por línea de negocio
 ├── templates/
-│   └── prd-aidlc.md                      # plantilla del PRD (9 secciones + AI-DLC)
+│   └── prd-aidlc.md                      # plantilla del PRD (9 secciones + deep research + AI-DLC)
 └── references/
     ├── prd-fill-guide.md                 # qué preguntar por sección, errores comunes
+    ├── deep-research-guide.md            # plantillas de los 2 deep research obligatorios
     ├── aidlc-mapping.md                  # mapeo PRD → fases de AI-DLC (AWS)
     ├── seguros-bolivar-guardrails.md     # restricciones de stack, datos, compliance
     └── prd-checklist.md                  # checklist de calidad antes de entregar
@@ -125,4 +131,5 @@ Luego se completa el contenido siguiendo el workflow del `SKILL.md`.
 |---|---|
 | No inventa datos: si no hay número, marca `⚠️ POR VALIDAR` | El sponsor cierra los pendientes antes de `/aidlc` |
 | No decide el alcance del MVP por ti | Se define en entrevista (Paso 2) |
+| No ejecuta los deep research — genera los prompts | El usuario los corre (p. ej. en Gemini) y trae los hallazgos (Paso 2.5) |
 | No ejecuta AI-DLC — solo prepara su insumo | Correr `/aidlc <intent>` en el harness correspondiente |

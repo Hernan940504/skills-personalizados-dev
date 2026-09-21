@@ -25,11 +25,19 @@ echo "Conectando a AWS SSO ($SSO_START_URL)..."
 CLIENT=$(aws sso-oidc register-client \
   --client-name "aws-refresh-$(hostname -s)" \
   --client-type "public" \
+  --scopes "sso:account:access" \
   --region "$SSO_REGION" \
+  --no-cli-pager \
+  --no-cli-auto-prompt \
   --output json)
 
 CLIENT_ID=$(echo "$CLIENT"     | python3 -c "import sys,json; print(json.load(sys.stdin)['clientId'])")
 CLIENT_SECRET=$(echo "$CLIENT" | python3 -c "import sys,json; print(json.load(sys.stdin)['clientSecret'])")
+
+if [ -z "$CLIENT_ID" ] || [ -z "$CLIENT_SECRET" ]; then
+  echo "Error: IAM Identity Center no devolvió identificadores válidos para el cliente OIDC."
+  exit 1
+fi
 
 # ── Paso 2: Iniciar autorización de dispositivo ──────────────────────────────
 DEVICE=$(aws sso-oidc start-device-authorization \

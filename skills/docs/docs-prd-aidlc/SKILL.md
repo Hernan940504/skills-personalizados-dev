@@ -2,11 +2,11 @@
 name: docs-prd-aidlc
 description: Crea el PRD (Product Requirements Document) de un producto o
   iniciativa de Seguros Bolívar como insumo del framework AI-DLC de AWS. Conduce
-  una entrevista guiada de 9 secciones (problema, sponsor, estado actual/futuro,
-  criterios de éxito, restricciones, IA, riesgos, alcance), cuantifica cada
-  afirmación y produce un PRD en Markdown con un intent listo para `/aidlc`.
-  Úsalo cuando pidan "definir un PRD", "internal solution brief", "product
-  vision board" o "insumo para AI-DLC".
+  una entrevista guiada de 9 secciones, exige dos deep research obligatorios
+  (validación/contexto y crítica/riesgos) antes de cerrar el planteamiento,
+  cuantifica cada afirmación y produce un PRD en Markdown con un intent listo
+  para `/aidlc`. Úsalo cuando pidan "definir un PRD", "internal solution brief",
+  "product vision board" o "insumo para AI-DLC".
 version: 0.1.0
 author: Hernan940504
 category: docs
@@ -66,6 +66,14 @@ documento decorativo: cada sección alimenta una etapa concreta del `/aidlc`.
    entra. Sin límites, no hay PRD.
 7. **El PRD termina en un `intent` para AI-DLC.** Debe incluir la línea
    `/aidlc <intent>` propuesta y el mapeo sección→fase.
+8. **Dos deep research son obligatorios antes de cerrar el planteamiento.** No se
+   entrega un PRD "listo" sin (a) un **deep research de validación/contexto**
+   —cómo otras organizaciones resolvieron un problema similar, qué tecnologías
+   aplicaron y qué resultados obtuvieron— y (b) un **deep research de
+   crítica/riesgos** —por qué este tipo de soluciones falla en contextos
+   corporativos—. Ambos alimentan Ideation (validación) e Inception (riesgos) del
+   AI-DLC. Sin ellos el PRD queda en estado `BORRADOR — investigación pendiente`.
+   Genera los prompts con `references/deep-research-guide.md`.
 
 Si el usuario mezcla "producto propio/startup" con "problema interno de la
 empresa", pregunta cuál es antes de escribir: eso decide la plantilla base
@@ -105,6 +113,35 @@ usuario no aporta dato duro, registra `⚠️ POR VALIDAR`:
 Apóyate en `references/prd-fill-guide.md` para las preguntas correctas por sección
 y los errores comunes a evitar.
 
+### Paso 2.5 — Deep research obligatorio (validación + crítica)
+
+Antes de redactar el PRD como "listo", genera **dos** prompts de deep research y
+entrégaselos al usuario para que los ejecute (p. ej. en Gemini/Claude) y traiga
+los hallazgos. Este paso no es opcional: es lo que separa un planteamiento
+fundamentado de una opinión.
+
+1. **Deep research de validación / contexto** — ¿la idea tiene fundamento real?
+   ¿cómo han resuelto otras organizaciones un problema similar? ¿qué tecnologías,
+   patrones y arquitecturas aplicaron? ¿qué resultados/beneficios obtuvieron?
+   Alimenta §1, §4 y §5 (Ideation).
+2. **Deep research de crítica / riesgos** — ¿por qué fallan este tipo de
+   soluciones en contextos corporativos? Antipatrones, causas de baja adopción,
+   deuda técnica, riesgos de datos/compliance, costos ocultos. Alimenta §6, §7 y
+   §8 (Inception y gates).
+
+Reglas para generar los prompts:
+- Usa las plantillas de `references/deep-research-guide.md` y **rellénalas con el
+  caso concreto** (dominio, restricciones de Seguros Bolívar, stack, marcas).
+- Cada prompt debe pedir **fuentes citadas** y ser **honesto sobre limitaciones**
+  (no vender la solución como resuelta).
+- Nunca incluyas PII ni datos reales de clientes/pólizas en los prompts.
+- Los hallazgos se documentan en Markdown junto al PRD (p. ej.
+  `deep-research-validacion.md` y `deep-research-riesgos.md`) y se citan en el PRD.
+
+Si el usuario aún no puede ejecutar los deep research, deja el PRD marcado como
+`BORRADOR — investigación pendiente` y lista los dos prompts en la sección de
+deep research del documento.
+
 ### Paso 3 — Redactar el PRD
 
 Genera el documento a partir de `templates/prd-aidlc.md` (o del scaffold, ver
@@ -138,8 +175,11 @@ plantilla. Luego edítalo con el contenido de los pasos 2-4.
 ### Paso 6 — Verificar y cerrar
 
 - Recorre la checklist de `references/prd-checklist.md`.
+- Confirma que los **dos deep research** estén generados (y, si el usuario los
+  ejecutó, que sus hallazgos estén documentados y citados en el PRD).
 - Confirma que no queden `⚠️ POR VALIDAR` sin nota de quién los cierra.
-- Entrega: ruta del PRD, la línea `/aidlc` propuesta y los pendientes de validación.
+- Entrega: ruta del PRD, los dos prompts de deep research, la línea `/aidlc`
+  propuesta y los pendientes de validación.
 
 ---
 
@@ -151,6 +191,8 @@ plantilla. Luego edítalo con el contenido de los pasos 2-4.
 - Meter PII o datos reales de clientes/pólizas en el PRD o en ejemplos.
 - Omitir la sección de "Fuera de alcance" — un PRD sin límites no es un PRD.
 - Escribir un PRD que no termine en un `intent` accionable para AI-DLC.
+- Dar el planteamiento por cerrado sin los **dos deep research** (validación y
+  crítica/riesgos), o generarlos genéricos en vez de aplicados al caso.
 - Convertir el PRD en diseño técnico detallado: eso es fase Inception/Construction
   de AI-DLC, no del PRD.
 
@@ -159,8 +201,9 @@ plantilla. Luego edítalo con el contenido de los pasos 2-4.
 ## Recursos
 
 - `scripts/new-prd.sh` — scaffold: crea el PRD nombrado y ubicado por línea de negocio.
-- `templates/prd-aidlc.md` — plantilla del PRD (9 secciones + bloque AI-DLC).
+- `templates/prd-aidlc.md` — plantilla del PRD (9 secciones + deep research + bloque AI-DLC).
 - `references/prd-fill-guide.md` — qué preguntar por sección, errores comunes.
+- `references/deep-research-guide.md` — plantillas de los dos deep research obligatorios.
 - `references/aidlc-mapping.md` — mapeo PRD → fases de AI-DLC (AWS).
 - `references/seguros-bolivar-guardrails.md` — restricciones de stack, datos y compliance.
 - `references/prd-checklist.md` — checklist de calidad antes de entregar.

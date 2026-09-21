@@ -1,0 +1,9 @@
+# Nunca versionar credenciales de service account
+*.json
+credentials/
+# Config de proyectos reales (solo se versiona _ejemplo)
+proyectos/*/config.env
+!proyectos/_ejemplo/config.env
+# venv local del skill (si se crea dentro)
+.venv/
+__pycache__/

@@ -148,7 +148,33 @@ Seguros Bolívar — Grupo Bolívar
 
 ---
 
-## 10. INSUMO PARA AI-DLC (AWS)
+## 10. DEEP RESEARCH (validación + crítica) — obligatorio
+
+> Dos deep research fundamentan el planteamiento antes de pasar a `/aidlc`. Ver
+> `references/deep-research-guide.md`. Documenta los hallazgos en Markdown junto
+> a este PRD y cítalos aquí.
+
+**Deep research de validación / contexto** (¿tiene fundamento?, cómo lo resolvieron otros, tecnologías, resultados):
+- Estado: {{TODO: PENDIENTE | EJECUTADO}}
+- Hallazgos clave: {{TODO}}
+- Documento: {{TODO: ruta al .md de hallazgos}}
+- Prompt usado:
+```
+{{TODO: pegar el prompt de validación aplicado al caso}}
+```
+
+**Deep research de crítica / riesgos** (por qué fallan estas soluciones en contextos corporativos):
+- Estado: {{TODO: PENDIENTE | EJECUTADO}}
+- Riesgos clave detectados: {{TODO}}
+- Documento: {{TODO: ruta al .md de hallazgos}}
+- Prompt usado:
+```
+{{TODO: pegar el prompt de crítica/riesgos aplicado al caso}}
+```
+
+---
+
+## 11. INSUMO PARA AI-DLC (AWS)
 
 > Esta sección conecta el PRD con el framework AI-DLC. Ver `references/aidlc-mapping.md`.
 
@@ -183,6 +209,8 @@ Seguros Bolívar — Grupo Bolívar
 - [ ] Enfoque AI-First declarado (capacidad de IA + por qué IA)
 - [ ] Riesgos con mitigación y dependencias listadas
 - [ ] Límites de alcance (dentro / fuera del MVP)
+- [ ] **Deep research de validación/contexto** generado (y ejecutado si es posible)
+- [ ] **Deep research de crítica/riesgos** generado (y ejecutado si es posible)
 - [ ] Bloque AI-DLC completo (`intent` + mapeo por fase)
 - [ ] Sin `⚠️ POR VALIDAR` pendientes sin responsable
 - [ ] Sin PII ni datos reales de clientes/pólizas en el documento

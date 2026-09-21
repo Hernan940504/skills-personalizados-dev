@@ -15,6 +15,14 @@ pendiente, no un detalle.
 - [ ] Riesgos con mitigación accionable y dependencias externas listadas.
 - [ ] Límites de alcance: qué SÍ y qué NO entra en el MVP.
 
+## Deep research (obligatorio)
+
+- [ ] Deep research de **validación/contexto** generado y aplicado al caso.
+- [ ] Deep research de **crítica/riesgos** generado y aplicado al caso.
+- [ ] Ambos prompts piden fuentes citadas y honestidad sobre limitaciones.
+- [ ] Si se ejecutaron, los hallazgos están documentados en Markdown y citados en el PRD.
+- [ ] Sin PII ni datos reales en los prompts de deep research.
+
 ## Alineación con Seguros Bolívar
 
 - [ ] Stack propuesto dentro de lo aprobado (ver guardrails).

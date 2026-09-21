@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Análisis de rightsizing — Infraestructura productiva Ciencuadras</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+  :root{
+    --verde:#008d36; --verde-osc:#00662a; --verde-cl:#e8f5ec;
+    --gris:#5b6670; --gris-cl:#f4f6f8; --borde:#e2e8ec; --texto:#1f2933;
+    --amarillo:#f4a900; --rojo:#d64545; --azul:#2d6cdf;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    color:var(--texto);background:var(--gris-cl);line-height:1.5;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 20px 60px}
+  header.hero{background:linear-gradient(135deg,var(--verde-osc),var(--verde));color:#fff;padding:34px 0 30px;
+    box-shadow:0 2px 8px rgba(0,0,0,.12)}
+  header.hero .wrap{padding-bottom:0}
+  .eyebrow{text-transform:uppercase;letter-spacing:.14em;font-size:12px;font-weight:700;opacity:.85;margin:0}
+  header.hero h1{margin:6px 0 14px;font-size:27px;font-weight:700}
+  .meta{display:flex;flex-wrap:wrap;gap:10px 26px;font-size:14px}
+  .meta div{opacity:.95}
+  .meta b{opacity:.75;font-weight:600;margin-right:5px}
+  .card{background:#fff;border:1px solid var(--borde);border-radius:12px;padding:22px 24px;margin-top:22px;
+    box-shadow:0 1px 3px rgba(20,40,60,.05)}
+  h2{font-size:19px;margin:0 0 4px;display:flex;align-items:center;gap:9px}
+  h2 .n{background:var(--verde-cl);color:var(--verde-osc);border-radius:8px;font-size:14px;font-weight:700;
+    width:26px;height:26px;display:inline-flex;align-items:center;justify-content:center}
+  .sub{color:var(--gris);font-size:13.5px;margin:0 0 16px}
+  h3{font-size:15.5px;margin:20px 0 6px}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;margin-top:4px}
+  th{text-align:left;font-size:11.5px;text-transform:uppercase;letter-spacing:.04em;color:var(--gris);
+    border-bottom:2px solid var(--borde);padding:8px 9px}
+  td{padding:8px 9px;border-bottom:1px solid var(--borde);vertical-align:top}
+  tr:last-child td{border-bottom:none}
+  td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+  code{background:var(--gris-cl);border:1px solid var(--borde);border-radius:5px;padding:1px 6px;
+    font-family:"SF Mono",Menlo,Consolas,monospace;font-size:12px;color:#0b3d20}
+  .badge{display:inline-block;font-size:11px;font-weight:700;padding:2px 9px;border-radius:20px;white-space:nowrap}
+  .b-over{background:#fde8e8;color:#a02020}
+  .b-ok{background:var(--verde-cl);color:var(--verde-osc)}
+  .b-up{background:#fff3d6;color:#8a5b00}
+  .b-keep{background:#eef3ff;color:#2d4fb0}
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:2px}
+  .kpi{background:#fff;border:1px solid var(--borde);border-radius:12px;padding:16px 18px;text-align:center;
+    box-shadow:0 1px 3px rgba(20,40,60,.05)}
+  .kpi .v{font-size:28px;font-weight:800;color:var(--verde-osc);line-height:1}
+  .kpi .v.warn{color:var(--amarillo)} .kpi .v.bad{color:var(--rojo)}
+  .kpi .l{font-size:12.5px;color:var(--gris);margin-top:6px}
+  .lead{font-size:15px}
+  .lead b{color:var(--verde-osc)}
+  .note{background:var(--verde-cl);border-left:4px solid var(--verde);border-radius:0 8px 8px 0;
+    padding:13px 16px;font-size:13.5px;margin-top:12px}
+  .note.warn{background:#fff8e8;border-left-color:var(--amarillo)}
+  .note.bad{background:#fdecec;border-left-color:var(--rojo)}
+  .mermaid{margin:14px 0;text-align:center}
+  footer{color:var(--gris);font-size:12.5px;text-align:center;margin-top:30px}
+  .tag{font-size:11px;color:var(--gris)}
+  .right{color:var(--verde-osc);font-weight:700}
+  .down{color:var(--rojo);font-weight:700}
+  .up{color:var(--amarillo);font-weight:700}
+</style>
+</head>
+<body>
+<header class="hero">
+  <div class="wrap">
+    <p class="eyebrow">Ciencuadras · Optimización de infraestructura</p>
+    <h1>Análisis de rightsizing de la infraestructura productiva</h1>
+    <div class="meta">
+      <div><b>Cuenta AWS</b>290296201161</div>
+      <div><b>Región</b>us-east-1</div>
+      <div><b>Segmento</b>prod / www</div>
+      <div><b>Ventana</b>Sep 2025 – Sep 2026 (12 meses)</div>
+      <div><b>Acceso</b>ViewOnlyAccess (solo lectura)</div>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <!-- RESUMEN -->
+  <section class="card">
+    <h2><span class="n">1</span> Resumen ejecutivo</h2>
+    <p class="sub">Qué encontramos y cuánto vale ajustarlo, sin afectar el comportamiento productivo.</p>
+    <div class="kpis">
+      <div class="kpi"><div class="v">~$4,0k</div><div class="l">Gasto mensual analizado<br>(cómputo + datos prod)</div></div>
+      <div class="kpi"><div class="v">~$366</div><div class="l">Ahorro mensual neto<br>(~$4,4k / año)</div></div>
+      <div class="kpi"><div class="v bad">2–8%</div><div class="l">CPU promedio real en<br>Fargate (asignado x10)</div></div>
+      <div class="kpi"><div class="v warn">100%</div><div class="l">Memoria Redis prod<br>en picos (sin fallas)</div></div>
+    </div>
+    <div class="note" style="margin-top:14px">
+      <b>Escenario de crecimiento aplicado.</b> El análisis incorpora un <b>crecimiento vegetativo del 5% anual de transaccionalidad durante 5 años</b> (+27,6% acumulado). El detalle está en la sección 6. Conclusión anticipada: las decisiones de rightsizing <b>siguen siendo válidas</b> bajo ese escenario (el margen de CPU sobra), y la <b>base de datos no se mueve ahora</b> (decisión del equipo) — se gestiona con umbrales de vigilancia.
+    </div>
+    <p class="lead" style="margin-top:18px">
+      La producción de Ciencuadras corre casi por completo en <b>ECS Fargate</b> (~118 tareas, 79,8 vCPU y 186&nbsp;GB
+      asignados) más un cluster <b>Aurora MySQL</b> y un <b>Redis</b>. El patrón dominante es
+      <b>sobreaprovisionamiento de CPU</b>: los microservicios usan entre 2% y 8% de CPU sostenido, pero tienen
+      asignado el doble o el cuádruple de lo necesario. En contraste, la <b>base de datos está sana</b> (uso 40–60%)
+      y el <b>Redis está corto de memoria</b> (llega a 100%, aunque sin fallas reportadas). La recomendación no es solo bajar: es
+      <b>bajar CPU donde sobra, mantener la memoria donde está ajustada y subir donde hay riesgo</b>.
+    </p>
+    <div class="note">
+      <b>Sobre los "picos".</b> Contrario a la hipótesis inicial de picos altos en enero, el pico estacional real del
+      último año fue en <b>marzo–abril</b> (CPU de la BD 56–60%). El pico <b>nocturno sí existe</b>, pero está en la
+      base de datos (madrugada 03h–07h, ~57% CPU) por procesos batch/ETL, no en el front web (plano en 1,6% todo el día).
+      El dimensionamiento propuesto respeta ambos picos.
+    </div>
+  </section>
+
+  <!-- ARQUITECTURA -->
+  <section class="card">
+    <h2><span class="n">2</span> Arquitectura productiva identificada</h2>
+    <p class="sub">Recursos con nombre <code>prod</code> o <code>www</code> en us-east-1. Los demás ambientes (dev, qa, pre, stage) conviven en la misma cuenta y se excluyeron.</p>
+    <div class="mermaid">
+flowchart TB
+  CF["CloudFront<br/>cdn*.ciencuadras.com"] --> ALB["ALB públicos<br/>www-cluster / www-fargate-api-*"]
+  ALB --> FRONT["Fargate front + APIs Node<br/>www-cluster-ciencuadras · 25 tareas"]
+  ALB --> NLB["NLB interno<br/>ms-internal-prod"]
+  NLB --> MS["Fargate microservicios Java/Python<br/>ms-internal-prod · 83 tareas"]
+  FRONT --> RDS[("Aurora MySQL<br/>www-rds-production-cluster<br/>writer r7g.xlarge + reader r7g.large + reportes t3.medium<br/>325 GB")]
+  MS --> RDS
+  MS --> REDIS[("ElastiCache Valkey<br/>www-redis · t3.medium · 1 nodo")]
+  MS --> JAVA2["Fargate Java extra<br/>ciencuadras-prod-ms-java · 6 tareas"]
+  LOG["EC2 www-logstash<br/>r5a.xlarge (logs)"] -.-> RDS
+  classDef data fill:#e8f5ec,stroke:#008d36,color:#00662a;
+  classDef comp fill:#eef3ff,stroke:#2d4fb0,color:#2d4fb0;
+  class RDS,REDIS data;
+  class FRONT,MS,JAVA2 comp;
+    </div>
+    <h3>Inventario de cómputo Fargate prod por cluster</h3>
+    <table>
+      <thead><tr><th>Cluster</th><th class="num">Tareas</th><th class="num">vCPU asignados</th><th class="num">Memoria asignada</th><th>Rol</th></tr></thead>
+      <tbody>
+        <tr><td><code>ms-internal-prod-ecs-cluster</code></td><td class="num">83</td><td class="num">46,2</td><td class="num">93,0 GB</td><td>25 microservicios Java/Python (core)</td></tr>
+        <tr><td><code>www-cluster-ciencuadras</code></td><td class="num">25</td><td class="num">26,5</td><td class="num">77,0 GB</td><td>Front + APIs Node + WordPress</td></tr>
+        <tr><td><code>ciencuadras-prod-ms-java-fargate</code></td><td class="num">6</td><td class="num">3,0</td><td class="num">6,0 GB</td><td>Carrito, CRM, notificador, sitemaps</td></tr>
+        <tr><td><code>www-fargate-api-ciencuadras</code></td><td class="num">2</td><td class="num">2,0</td><td class="num">6,0 GB</td><td>API pública</td></tr>
+        <tr><td><code>www-fargate-api-images</code></td><td class="num">2</td><td class="num">2,0</td><td class="num">4,0 GB</td><td>API imágenes</td></tr>
+        <tr><td><code>www-fargate-ciencuadras-sqs</code></td><td class="num">1</td><td class="num">—</td><td class="num">—</td><td>Consumidor SQS</td></tr>
+        <tr style="font-weight:700"><td>Total Fargate prod</td><td class="num">118</td><td class="num">79,8</td><td class="num">186 GB</td><td></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- PICOS -->
+  <section class="card">
+    <h2><span class="n">3</span> Comportamiento del último año: estacional y horario</h2>
+    <p class="sub">Base para dimensionar sin romper producción. Los datos son de CloudWatch, promedios diarios y horarios.</p>
+
+    <h3>Estacionalidad — CPU del writer Aurora (r7g.xlarge)</h3>
+    <div class="mermaid">
+xychart-beta
+  title "CPU promedio mensual del writer Aurora (%)"
+  x-axis [Sep, Oct, Nov, Dic, Ene, Feb, Mar, Abr, May, Jun, Jul, Ago, Sep]
+  y-axis "CPU %" 0 --> 70
+  bar [50.3, 40.8, 43.0, 37.6, 40.8, 44.2, 56.4, 59.8, 48.6, 47.4, 46.0, 40.8, 49.3]
+    </div>
+    <p class="sub">El pico anual real es <b>marzo–abril (56–60%)</b>. Enero se comporta como un mes promedio (~41%). La base de datos nunca baja de ~38%: es el componente que <b>sí trabaja</b>.</p>
+
+    <h3>Patrón horario (hora Colombia, UTC-5) — writer Aurora vs front web</h3>
+    <div class="mermaid">
+xychart-beta
+  title "CPU promedio por hora del dia (%)"
+  x-axis [00h, 02h, 04h, 06h, 08h, 10h, 12h, 14h, 16h, 18h, 20h, 22h]
+  y-axis "CPU %" 0 --> 60
+  line [46.1, 50.4, 57.5, 54.0, 48.0, 44.5, 43.2, 54.0, 52.3, 50.5, 45.1, 44.0]
+  line [1.6, 1.6, 1.6, 1.6, 1.6, 1.6, 1.6, 1.6, 1.6, 1.6, 1.6, 1.6]
+    </div>
+    <p class="sub">Línea superior: writer Aurora. Línea inferior plana: front Fargate. La BD tiene <b>pico nocturno 03h–07h (hasta 57%)</b> y otro en la tarde 14h–17h; el front está plano en 1,6% porque el tráfico web es muy bajo frente a lo que tiene asignado.</p>
+
+    <div class="note warn">
+      <b>Conexiones a la BD en aumento.</b> El máximo mensual de conexiones pasó de 323 (sep-2025) a picos de 862–1284 en jun–sep-2026. Es la señal más clara de que <b>la BD se deja como está — no se mueve ahora</b> — y pasa a vigilancia por umbrales (sección 7).
+    </div>
+  </section>
+
+  <!-- RECOMENDACIONES DATOS/EC2 -->
+  <section class="card">
+    <h2><span class="n">4</span> Actual vs recomendado — Base de datos, caché y EC2</h2>
+    <p class="sub">Precios on-demand de referencia us-east-1 (USD/mes, 730 h). Con Savings Plans / Reserved los montos bajan, pero la proporción se mantiene.</p>
+    <table>
+      <thead><tr><th>Recurso</th><th>Actual</th><th class="num">$/mes</th><th>Uso medido (12m)</th><th>Recomendado</th><th class="num">$/mes</th><th>Acción</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><code>www-rds-production</code> (writer)</td>
+          <td>db.r7g.xlarge<br><span class="tag">4 vCPU / 32 GB</span></td><td class="num">440</td>
+          <td>CPU 40–60% · picos 60% · free mem mín. 2,1 GB · conexiones ↑</td>
+          <td>db.r7g.xlarge <b>(igual)</b></td><td class="num">440</td>
+          <td><span class="badge b-keep">Mantener</span></td>
+        </tr>
+        <tr>
+          <td><code>reader-rds-production</code></td>
+          <td>db.r7g.large<br><span class="tag">2 vCPU / 16 GB</span></td><td class="num">220</td>
+          <td>CPU 11–14% · absorbe failover del writer</td>
+          <td>db.r7g.large <b>(igual)</b></td><td class="num">220</td>
+          <td><span class="badge b-keep">Mantener (HA)</span></td>
+        </tr>
+        <tr>
+          <td><code>www-redis</code></td>
+          <td>cache.t3.medium<br><span class="tag">1 nodo · sin réplica</span></td><td class="num">50</td>
+          <td>CPU 3% · <b>memoria 100% en picos</b> · sin HA</td>
+          <td>cache.t4g.medium + réplica<br><span class="tag">Graviton</span></td><td class="num">~94</td>
+          <td><span class="badge b-up">Subir (HA + memoria)</span></td>
+        </tr>
+        <tr>
+          <td><code>www-logstash-ec2-V2</code></td>
+          <td>r5a.xlarge<br><span class="tag">4 vCPU / 32 GB</span></td><td class="num">165</td>
+          <td>CPU 2,4% prom · pico diario 99% a la 01:23 (job nocturno) · <b>RAM no monitoreada</b></td>
+          <td>Fargate <b>512 / 4096</b><br><span class="tag">migración a ECS ↓</span></td><td class="num">~18</td>
+          <td><span class="badge b-keep">Migrar a ECS</span></td>
+        </tr>
+        <tr>
+          <td><code>prod-legado-ciencuadras-am2</code></td>
+          <td>t3.large<br><span class="tag">2 vCPU / 8 GB</span></td><td class="num">61</td>
+          <td>CPU 2–5% promedio</td>
+          <td>Fargate <b>512 / 2048</b><br><span class="tag">migración a ECS ↓</span></td><td class="num">~18–36</td>
+          <td><span class="badge b-keep">Migrar a ECS</span></td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="note bad">
+      <b>Redis — mejora preventiva, no urgente.</b> El nodo <code>t3.medium</code> único (sin réplica) toca 100% de memoria varios meses, pero <b>el equipo no ha reportado fallas ni degradación</b> atribuibles a Redis: el comportamiento observado es estable. Por eso se mantiene la recomendación de <b>subir</b> a <code>t4g.medium</code> (Graviton) + réplica para cerrar el punto único de falla y dar holgura de memoria, pero se <b>reprograma a la última fase</b> del plan (sección 7): es una mejora de resiliencia a futuro, no un incendio a apagar. Costo ~$44/mes. Mientras tanto, se deja en vigilancia de <i>evictions</i> por si el patrón cambia.
+    </div>
+    <div class="note">
+      <b>Base de datos: decisión de negocio — NO se mueve ahora.</b> El writer y el reader se dejan <b>exactamente como están</b>. No es candidata a downsizing (uso sano 40–60%, memoria justa, conexiones al alza) ni se hace upsizing en este momento por decisión del equipo. Su gestión pasa a un esquema de <b>vigilancia con umbrales</b> (ver sección 6), para actuar solo cuando los datos lo exijan.
+    </div>
+    <div class="note warn">
+      <b>Logstash y legado van a migrar de EC2 a ECS/Fargate.</b> Por eso su recomendación no es cambiar de tipo de instancia, sino <b>dimensionar la task definition destino</b> — ver el detalle abajo. Las filas de EC2 de esta tabla quedan como línea base de costo antes de la migración.
+    </div>
+
+    <h3 style="margin-top:20px">Migración EC2 → ECS/Fargate: dimensionamiento propuesto</h3>
+    <p class="sub">El dimensionamiento se basa en el <b>comportamiento del EC2 productivo durante los últimos 12 meses</b>. La CPU se traduce a vCPU absolutas (CPU% × vCPUs de la instancia) para hacerla comparable con Fargate. La memoria se aborda aparte porque, como se explica abajo, <b>no es medible con los datos actuales</b>.</p>
+    <table>
+      <thead><tr><th>Componente</th><th>Hoy (EC2)</th><th class="num">CPU real 12m<br>media / p99 / día pico (vCPU)</th><th>CPU Fargate<br>recomendado</th><th class="num">Min–Max<br>tareas</th><th>Memoria<br>propuesta</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><code>logstash</code></td>
+          <td>r5a.xlarge<br><span class="tag">4 vCPU / 32 GB</span></td>
+          <td class="num">0,10 / 0,17 / 0,26</td>
+          <td><b>512</b> (0,5 vCPU)<br><span class="tag">65% margen sobre p99</span></td>
+          <td class="num">2–6</td>
+          <td>4096 <span class="tag">a validar</span></td>
+        </tr>
+        <tr>
+          <td><code>legado-am2</code></td>
+          <td>t3.large<br><span class="tag">2 vCPU / 8 GB</span></td>
+          <td class="num">0,08 / 0,51 / 1,04</td>
+          <td><b>512</b> (0,5 vCPU)</td>
+          <td class="num">2–4</td>
+          <td>2048 <span class="tag">a validar</span></td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="note">
+      <b>CPU — recomendación firme (datos de 12 meses).</b>
+      <ul style="margin:8px 0 0">
+        <li><b>logstash</b>: media <b>0,10 vCPU</b>, p99 diario 0,17, día más cargado 0,26. Los picos a 99% son ráfagas de minutos (job cron de la 01:23). Con <b>512 (0,5 vCPU) por tarea sobra un 65%</b> sobre el p99. Escalamiento definido <b>2–6 tareas</b>: el mínimo de 2 aporta alta disponibilidad (hoy es una sola EC2, un punto único de falla) y hasta 6 da margen amplio para el crecimiento.</li>
+        <li><b>legado</b>: media <b>0,08 vCPU</b>, pero con cola: p99 diario 0,51 y <b>4 días del año (1%)</b> promediaron por encima de 0,5 vCPU, con 2 días cerca de 1,0. Con el escalamiento definido <b>2–4 tareas</b>, el mínimo de 2 (2 × 0,5 = 1,0 vCPU) ya cubre de base el pico máximo observado del año, y escala hasta 4 si la demanda crece.</li>
+      </ul>
+    </div>
+    <div class="note bad">
+      <b>Memoria — dato NO medido con el acceso actual, pero SÍ obtenible antes de migrar.</b> La EC2 de logstash no expone memoria por CloudWatch (no hay métrica en ningún namespace) y el rol de solo lectura de este análisis no puede ejecutar comandos por SSM. No significa que el dato no exista: está dentro de la instancia y se obtiene en minutos con una sesión de solo lectura. Las cifras 4096 / 2048 son <b>puntos de partida prudentes, aún no confirmados con la medición</b>. Vías para obtener el dato real (cualquiera sirve):
+      <ul style="margin:8px 0 0">
+        <li><b>Entrar a la instancia</b> (SSM Session Manager o SSH) y leer: <code>free -m</code> para la RAM usada, y el heap de la JVM — <code>docker stats --no-stream</code> si logstash corre en contenedor, o <code>grep Xm[sx] /etc/logstash/jvm.options</code> si corre nativo. <b>Es la vía directa y la recomendada</b>: da el número exacto que consume hoy en prod.</li>
+        <li>O consultar la memoria del host en <b>Datadog</b>, si el agente ya observa esa EC2 (métrica <code>system.mem.used</code>).</li>
+      </ul>
+      Regla de dimensionamiento una vez obtenido el <code>-Xmx</code>: la tarea Fargate necesita <b><code>-Xmx</code> + ~1&nbsp;GB (SO/off-heap) + memoria del sidecar Datadog</b>. Ejemplo: si el heap productivo actual es 2&nbsp;GB, 4096 es correcto; si fuera 3&nbsp;GB, subir a 512/8192 (CPU 1024).
+    </div>
+    <h3 style="margin-top:20px">Política de escalamiento propuesta (target tracking)</h3>
+    <p class="sub"><b>logstash es parte crítica del proceso de sincronización de datos</b>, así que su escalado se define para <b>garantizar la ingesta</b>, no para ahorrar: debe escalar por la primera señal que se sature, sea CPU o memoria.</p>
+    <table>
+      <thead><tr><th>Componente</th><th class="num">Min–Max</th><th>Métrica de escalado</th><th class="num">Umbral objetivo</th><th>Racional</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><code>logstash</code></td>
+          <td class="num">2–6</td>
+          <td>Target tracking sobre <b>CPU y memoria</b> (dos políticas; escala con la que primero cruce)</td>
+          <td class="num">CPU 60% · <b>MEM 65%</b></td>
+          <td>Al ser JVM, la presión suele llegar por memoria antes que por CPU; el objetivo de MEM más bajo (65%) da margen de heap antes de saturar. Escala hasta 6 para absorber ráfagas de sincronización sin perder eventos.</td>
+        </tr>
+        <tr>
+          <td><code>legado-am2</code></td>
+          <td class="num">2–4</td>
+          <td>Target tracking sobre <b>CPU y memoria</b></td>
+          <td class="num">CPU 60% · MEM 70%</td>
+          <td>Mismo patrón que el resto de microservicios Java del cluster.</td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="note warn">
+      <b>Garantía de funcionamiento del logstash (proceso de sincronización).</b> Por su criticidad, además del escalado se recomienda:
+      <ul style="margin:8px 0 0">
+        <li><b>Doble métrica de escalado (CPU + memoria):</b> no depender solo de CPU — como su CPU real es baja, un cuello de botella de memoria en la JVM no dispararía el escalado si solo se vigila CPU. La política de memoria al 65% es la que realmente protege la ingesta.</li>
+        <li><b>Persistent queue de Logstash en disco efímero de la tarea:</b> Fargate permite hasta 200&nbsp;GB de almacenamiento efímero configurable (logstash tenía 200&nbsp;GB de EBS). Habilitar la <i>persistent queue</i> sobre ese efímero absorbe picos y evita pérdida de eventos ante reinicios de la tarea. La durabilidad de fondo la garantiza el destino (Elasticsearch/RDS), no el disco de logstash.</li>
+        <li><b>Health check de aplicación</b> que valide que el pipeline está consumiendo (no solo que el contenedor vive), para que ECS reemplace tareas atascadas.</li>
+        <li><b>Paralelismo seguro:</b> si el pipeline consume de una fuente que no admite consumidores en paralelo, validar que 2+ réplicas no dupliquen procesamiento; en ese caso el mínimo de 2 opera como HA activo-pasivo. Confirmar con el equipo el tipo de fuente (input) antes de subir réplicas.</li>
+      </ul>
+    </div>
+    <div class="note">
+      <b>Otras consideraciones</b> — Red: throughput bajísimo (logstash máx 288&nbsp;MB/día, legado 725&nbsp;MB/día), sin implicaciones de sizing.
+    </div>
+  </section>
+
+  <!-- FARGATE -->
+  <section class="card">
+    <h2><span class="n">5</span> Actual vs recomendado — Fargate, servicio por servicio</h2>
+    <p class="sub">Detalle de los 43 servicios prod con su <b>escalamiento horizontal actual</b> (min–max y política, que <b>no se modifica</b>) y el <b>comportamiento real de tareas del último año</b>: promedio de tareas en ejecución y % del tiempo en el máximo. Fuente de conteo: <code>RunningTaskCount</code> (Container Insights) donde existe; en el resto, derivado del <code>SampleCount</code> por minuto de las métricas del servicio (validado contra RunningTaskCount: coincidencia del promedio &lt;1%).</p>
+
+    <div class="note bad">
+      <b>Escalamiento recurrente al máximo — 10 servicios saturados.</b> Estos servicios pasaron <b>≥70% del último año en su tope de tareas</b>, señal de que el auto scaling los lleva al límite de forma crónica: su capacidad máxima (o su sizing por tarea) se quedó corta frente a la demanda. Aunque el escalamiento no se cambia por ahora, es donde el crecimiento del 5% anual pega primero.
+      <table style="margin-top:10px">
+        <thead><tr><th>Servicio</th><th class="num">Min–Max</th><th class="num">Prom. tareas (12m)</th><th class="num">% tiempo en máx</th></tr></thead>
+        <tbody>
+<tr><td><code>java-clasificador-imagenes-ms</code></td><td class="num">2–4</td><td class="num">3.9</td><td class="num"><span class="down"><b>99%</b></span></td></tr>
+<tr><td><code>java-leads-ms</code></td><td class="num">2–4</td><td class="num">4.0</td><td class="num"><span class="down"><b>98%</b></span></td></tr>
+<tr><td><code>java-admin-eventos-masivos-ms</code></td><td class="num">2–4</td><td class="num">4.0</td><td class="num"><span class="down"><b>97%</b></span></td></tr>
+<tr><td><code>python-asistente-ia-ms</code></td><td class="num">2–4</td><td class="num">4.0</td><td class="num"><span class="down"><b>92%</b></span></td></tr>
+<tr><td><code>java-leads-redes-sociales-ms</code></td><td class="num">2–4</td><td class="num">3.9</td><td class="num"><span class="down"><b>90%</b></span></td></tr>
+<tr><td><code>java-property-details-ms</code></td><td class="num">2–10</td><td class="num">9.9</td><td class="num"><span class="down"><b>90%</b></span></td></tr>
+<tr><td><code>java-sitios-interes-ms</code></td><td class="num">2–4</td><td class="num">3.9</td><td class="num"><span class="down"><b>88%</b></span></td></tr>
+<tr><td><code>java-metaetiquetas-seo-ms</code></td><td class="num">2–4</td><td class="num">3.9</td><td class="num"><span class="down"><b>87%</b></span></td></tr>
+<tr><td><code>java-descripciones-ms</code></td><td class="num">2–4</td><td class="num">3.7</td><td class="num"><span class="down"><b>76%</b></span></td></tr>
+<tr><td><code>java-modelos-ia-ms</code></td><td class="num">2–4</td><td class="num">3.8</td><td class="num"><span class="down"><b>75%</b></span></td></tr>
+      </tbody>
+      </table>
+      <p class="sub" style="margin-top:8px"><code>property-details</code> promedia <b>9,9 de 10</b> tareas y <code>clasificador-imagenes</code> vive al 99% en su tope de 4 (3,9 de 4): son los primeros candidatos a subir el máximo si crece la demanda. El resto orbita las 4 tareas (su tope) más del 85% del tiempo.</p>
+    </div>
+
+    <div class="note">
+      <b>Escalamiento actual (no cambia).</b> Target tracking sobre CPU/MEM promedio: Java <b>60%</b>, Node <b>50%</b>, front/APIs <b>40–45% CPU / 70% MEM</b>. Como la CPU real ronda 2–11% (muy por debajo del disparo), el escalado actúa por <b>memoria</b>, no por CPU. Nota de lectura: el promedio de tareas se calcula sobre los 12 meses; los picos puntuales por encima del máximo configurado corresponden a solapamiento de tareas durante redespliegues rolling.
+    </div>
+
+    <h3 style="margin-top:18px">Tabla completa (ordenada por impacto en $)</h3>
+    <div style="overflow-x:auto">
+    <table style="font-size:12.5px">
+      <thead><tr>
+        <th>Servicio</th><th class="num">Min–<br>Max</th><th class="num">Prom.<br>tareas</th><th class="num">%<br>máx</th>
+        <th class="num">CPU<br>avg</th><th class="num">CPU<br>pico</th><th class="num">MEM<br>avg</th><th class="num">MEM<br>pico</th>
+        <th>Actual<br>CPU/MEM</th><th>Recom.<br>CPU/MEM</th><th class="num">Δ $<br>/mes</th><th>Acción</th>
+      </tr></thead>
+      <tbody>
+<tr><td><code>www-wordpress</code></td><td class="num">2–10</td><td class="num">3.3</td><td class="num">1%</td><td class="num">12.9%</td><td class="num">114.5%</td><td class="num">39.6%</td><td class="num"><span class="down"><b>98.5%</b></span></td><td>2048/4096</td><td>1024/4096</td><td class="num"><span class="down">-118</span></td><td><span class="badge b-over">Bajar CPU</span></td></tr>
+<tr><td><code>java-resultados-ms</code></td><td class="num">2–10</td><td class="num">3.6</td><td class="num">1%</td><td class="num">23.1%</td><td class="num">114.2%</td><td class="num">58.3%</td><td class="num">69.4%</td><td>1024/2048</td><td>512/2048</td><td class="num"><span class="down">-59</span></td><td><span class="badge b-over">Bajar CPU</span></td></tr>
+<tr><td><code>www-listingapi</code></td><td class="num">2–20</td><td class="num">2.8</td><td class="num">1%</td><td class="num">10.0%</td><td class="num">103.1%</td><td class="num">41.3%</td><td class="num"><span class="down"><b>98.9%</b></span></td><td>1024/2048</td><td>512/2048</td><td class="num"><span class="down">-59</span></td><td><span class="badge b-over">Bajar CPU</span></td></tr>
+<tr><td><code>node-result-remate-service</code></td><td class="num">2–8</td><td class="num">2.0</td><td class="num">0%</td><td class="num">4.0%</td><td class="num">95.9%</td><td class="num">9.2%</td><td class="num">48.8%</td><td>1024/4096</td><td>512/2048</td><td class="num"><span class="down">-43</span></td><td><span class="badge b-over">Bajar CPU+MEM</span></td></tr>
+<tr><td><code>java-publicaciones-ms</code></td><td class="num">2–4</td><td class="num">2.0</td><td class="num">0%</td><td class="num">3.0%</td><td class="num">101.2%</td><td class="num">42.8%</td><td class="num">58.7%</td><td>1024/2048</td><td>512/2048</td><td class="num"><span class="down">-30</span></td><td><span class="badge b-over">Bajar CPU</span></td></tr>
+<tr><td><code>java-zona-privada-ms</code></td><td class="num">2–4</td><td class="num">3.1</td><td class="num"><span class="up">42%</span></td><td class="num">3.8%</td><td class="num">109.3%</td><td class="num">58.3%</td><td class="num">78.4%</td><td>1024/2048</td><td>512/2048</td><td class="num"><span class="down">-30</span></td><td><span class="badge b-over">Bajar CPU</span></td></tr>
+<tr><td><code>www-front</code></td><td class="num">2–20</td><td class="num">2.0</td><td class="num">0%</td><td class="num">1.5%</td><td class="num">100.1%</td><td class="num">16.8%</td><td class="num">49.5%</td><td>1024/2048</td><td>512/2048</td><td class="num"><span class="down">-30</span></td><td><span class="badge b-over">Bajar CPU</span></td></tr>
+<tr><td><code>www-fargate-api-images</code></td><td class="num">2–10</td><td class="num">2.0</td><td class="num">0%</td><td class="num">7.1%</td><td class="num">146.5%</td><td class="num">24.6%</td><td class="num"><span class="down"><b>101.0%</b></span></td><td>1024/2048</td><td>512/2048</td><td class="num"><span class="down">-30</span></td><td><span class="badge b-over">Bajar CPU</span></td></tr>
+<tr><td><code>java-images-ms</code></td><td class="num">2–4</td><td class="num">2.0</td><td class="num">0%</td><td class="num">2.2%</td><td class="num">116.5%</td><td class="num">39.1%</td><td class="num">58.1%</td><td>512/1024</td><td>512/1024</td><td class="num">0</td><td><span class="badge b-ok">Mantener</span></td></tr>
+<tr><td><code>java-clientes-ms</code></td><td class="num">2–4</td><td class="num">2.7</td><td class="num">8%</td><td class="num">4.4%</td><td class="num">107.9%</td><td class="num">57.3%</td><td class="num">63.6%</td><td>512/1024</td><td>512/1024</td><td class="num">0</td><td><span class="badge b-ok">Mantener</span></td></tr>
+<tr><td><code>java-admin-ms</code></td><td class="num">2–4</td><td class="num">3.5</td><td class="num"><span class="up">53%</span></td><td class="num">4.9%</td><td class="num">106.9%</td><td class="num">60.7%</td><td class="num">74.2%</td><td>512/1024</td><td>512/1024</td><td class="num">0</td><td><span class="badge b-ok">Mantener</span></td></tr>
+<tr><td><code>java-integracion-facturacion-ms</code></td><td class="num">2–4</td><td class="num">3.0</td><td class="num"><span class="up">42%</span></td><td class="num">4.1%</td><td class="num">117.7%</td><td class="num">59.1%</td><td class="num">71.6%</td><td>512/1024</td><td>512/1024</td><td class="num">0</td><td><span class="badge b-ok">Mantener</span></td></tr>
+<tr><td><code>python-mcp-inmuebles-ia-ms</code></td><td class="num">1–2</td><td class="num">1.0</td><td class="num">0%</td><td class="num">2.0%</td><td class="num">87.4%</td><td class="num">15.0%</td><td class="num">20.7%</td><td>512/1024</td><td>512/1024</td><td class="num">0</td><td><span class="badge b-ok">Mantener</span></td></tr>
+<tr><td><code>java-admin-eventos-masivos-ms</code></td><td class="num">2–4</td><td class="num">4.0</td><td class="num"><span class="down"><b>99%</b></span></td><td class="num">5.3%</td><td class="num">115.1%</td><td class="num">65.0%</td><td class="num">79.0%</td><td>512/1024</td><td>512/1024</td><td class="num">0</td><td><span class="badge b-ok">Mantener</span></td></tr>
+<tr><td><code>java-comunes-ms</code></td><td class="num">2–4</td><td class="num">2.7</td><td class="num">24%</td><td class="num">4.2%</td><td class="num">132.0%</td><td class="num">55.7%</td><td class="num">66.4%</td><td>512/1024</td><td>512/1024</td><td class="num">0</td><td><span class="badge b-ok">Mantener</span></td></tr>
+<tr><td><code>java-leads-ms</code></td><td class="num">2–4</td><td class="num">4.0</td><td class="num"><span class="down"><b>100%</b></span></td><td class="num">5.3%</td><td class="num">122.7%</td><td class="num">69.7%</td><td class="num">81.6%</td><td>512/1024</td><td>512/1024</td><td class="num">0</td><td><span class="badge b-ok">Mantener</span></td></tr>
+<tr><td><code>java-auth-ms</code></td><td class="num">2–4</td><td class="num">3.3</td><td class="num"><span class="up">64%</span></td><td class="num">4.7%</td><td class="num">107.8%</td><td class="num">61.3%</td><td class="num">75.8%</td><td>512/1024</td><td>512/1024</td><td class="num">0</td><td><span class="badge b-ok">Mantener</span></td></tr>
+<tr><td><code>java-sitios-interes-ms</code></td><td class="num">2–4</td><td class="num">3.9</td><td class="num"><span class="down"><b>90%</b></span></td><td class="num">4.3%</td><td class="num">115.3%</td><td class="num">67.3%</td><td class="num">78.2%</td><td>512/1024</td><td>512/1024</td><td class="num">0</td><td><span class="badge b-ok">Mantener</span></td></tr>
+<tr><td><code>java-descripciones-ms</code></td><td class="num">2–4</td><td class="num">3.7</td><td class="num"><span class="down"><b>79%</b></span></td><td class="num">5.1%</td><td class="num">110.6%</td><td class="num">68.8%</td><td class="num">84.3%</td><td>512/1024</td><td>512/1024</td><td class="num">0</td><td><span class="badge b-ok">Mantener</span></td></tr>
+<tr><td><code>java-modelos-ia-ms</code></td><td class="num">2–4</td><td class="num">3.8</td><td class="num"><span class="down"><b>76%</b></span></td><td class="num">4.8%</td><td class="num">131.8%</td><td class="num">67.3%</td><td class="num">77.1%</td><td>512/1024</td><td>512/1024</td><td class="num">0</td><td><span class="badge b-ok">Mantener</span></td></tr>
+<tr><td><code>java-metaetiquetas-seo-ms</code></td><td class="num">2–4</td><td class="num">3.9</td><td class="num"><span class="down"><b>89%</b></span></td><td class="num">11.1%</td><td class="num">121.4%</td><td class="num">63.9%</td><td class="num">84.9%</td><td>512/1024</td><td>512/1024</td><td class="num">0</td><td><span class="badge b-ok">Mantener</span></td></tr>
+<tr><td><code>java-automatic-auth-ms</code></td><td class="num">2–4</td><td class="num">2.0</td><td class="num">0%</td><td class="num">4.2%</td><td class="num">103.6%</td><td class="num">42.8%</td><td class="num">49.5%</td><td>512/1024</td><td>512/1024</td><td class="num">0</td><td><span class="badge b-ok">Mantener</span></td></tr>
+<tr><td><code>java-perfilamiento-ms</code></td><td class="num">1–2</td><td class="num">1.3</td><td class="num">26%</td><td class="num">4.3%</td><td class="num">107.0%</td><td class="num">56.0%</td><td class="num">65.0%</td><td>512/1024</td><td>512/1024</td><td class="num">0</td><td><span class="badge b-ok">Mantener</span></td></tr>
+<tr><td><code>java-integracion-marketo-ms</code></td><td class="num">2–4</td><td class="num">2.0</td><td class="num">0%</td><td class="num">4.2%</td><td class="num">106.9%</td><td class="num">48.7%</td><td class="num">55.8%</td><td>512/1024</td><td>512/1024</td><td class="num">0</td><td><span class="badge b-ok">Mantener</span></td></tr>
+<tr><td><code>java-property-details-ms</code></td><td class="num">2–10</td><td class="num">9.9</td><td class="num"><span class="down"><b>96%</b></span></td><td class="num">8.6%</td><td class="num">119.9%</td><td class="num">70.9%</td><td class="num">88.9%</td><td>512/1024</td><td>512/1024</td><td class="num">0</td><td><span class="badge b-ok">Mantener</span></td></tr>
+<tr><td><code>node-result-arriendo-service</code></td><td class="num">2–8</td><td class="num">2.2</td><td class="num">12%</td><td class="num">19.6%</td><td class="num">102.1%</td><td class="num">16.7%</td><td class="num"><span class="down"><b>100.0%</b></span></td><td>1024/4096</td><td>1024/4096</td><td class="num">0</td><td><span class="badge b-ok">Mantener</span></td></tr>
+<tr><td><code>www-wsapi</code></td><td class="num">2–10</td><td class="num">2.0</td><td class="num">0%</td><td class="num">4.2%</td><td class="num">100.0%</td><td class="num">25.9%</td><td class="num"><span class="down"><b>98.0%</b></span></td><td>512/1024</td><td>512/1024</td><td class="num">0</td><td><span class="badge b-ok">Mantener</span></td></tr>
+<tr><td><code>node-detail-inmueble-service</code></td><td class="num">2–8</td><td class="num">2.8</td><td class="num"><span class="up">30%</span></td><td class="num">16.4%</td><td class="num">101.0%</td><td class="num">21.0%</td><td class="num"><span class="down"><b>100.0%</b></span></td><td>1024/4096</td><td>1024/4096</td><td class="num">0</td><td><span class="badge b-ok">Mantener</span></td></tr>
+<tr><td><code>node-detail-proyecto-service</code></td><td class="num">2–8</td><td class="num">2.1</td><td class="num">0%</td><td class="num">2.1%</td><td class="num">100.4%</td><td class="num">16.4%</td><td class="num"><span class="down"><b>99.9%</b></span></td><td>1024/4096</td><td>1024/4096</td><td class="num">0</td><td><span class="badge b-ok">Mantener</span></td></tr>
+<tr><td><code>www-listingmysql</code></td><td class="num">2–10</td><td class="num">2.0</td><td class="num">0%</td><td class="num">4.3%</td><td class="num">100.6%</td><td class="num">27.2%</td><td class="num">70.5%</td><td>512/1024</td><td>512/1024</td><td class="num">0</td><td><span class="badge b-ok">Mantener</span></td></tr>
+<tr><td><code>node-result-proyectos-service</code></td><td class="num">2–8</td><td class="num">2.0</td><td class="num">8%</td><td class="num">5.0%</td><td class="num">100.1%</td><td class="num">10.6%</td><td class="num"><span class="down"><b>99.5%</b></span></td><td>1024/4096</td><td>1024/4096</td><td class="num">0</td><td><span class="badge b-ok">Mantener</span></td></tr>
+<tr><td><code>node-result-venta-service</code></td><td class="num">2–8</td><td class="num">2.1</td><td class="num">10%</td><td class="num">19.3%</td><td class="num">102.0%</td><td class="num">15.8%</td><td class="num"><span class="down"><b>100.0%</b></span></td><td>1024/4096</td><td>1024/4096</td><td class="num">0</td><td><span class="badge b-ok">Mantener</span></td></tr>
+<tr><td><code>java-notificador_transversal</code></td><td class="num">2–4</td><td class="num">2.0</td><td class="num">0%</td><td class="num">4.9%</td><td class="num">122.6%</td><td class="num">46.8%</td><td class="num">55.3%</td><td>512/1024</td><td>512/1024</td><td class="num">0</td><td><span class="badge b-ok">Mantener</span></td></tr>
+<tr><td><code>java-carrito_compras</code></td><td class="num">2–4</td><td class="num">2.0</td><td class="num">0%</td><td class="num">4.6%</td><td class="num">108.4%</td><td class="num">55.3%</td><td class="num">63.3%</td><td>512/1024</td><td>512/1024</td><td class="num">0</td><td><span class="badge b-ok">Mantener</span></td></tr>
+<tr><td><code>java-integracion-crm-ms</code></td><td class="num">2–4</td><td class="num">2.0</td><td class="num">0%</td><td class="num">4.5%</td><td class="num">106.4%</td><td class="num">52.3%</td><td class="num">60.3%</td><td>512/1024</td><td>512/1024</td><td class="num">0</td><td><span class="badge b-ok">Mantener</span></td></tr>
+<tr style="opacity:.6"><td><code>java-api-sitemaps-ms</code></td><td class="num">?–?</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td>—</td><td>—</td><td class="num">0</td><td><span class="badge b-keep">Sin réplicas</span></td></tr>
+<tr><td><code>www-fargate-api-ciencuadras</code></td><td class="num">2–20</td><td class="num">2.0</td><td class="num">0%</td><td class="num">3.1%</td><td class="num">100.6%</td><td class="num">15.4%</td><td class="num"><span class="down"><b>92.2%</b></span></td><td>1024/3072</td><td>1024/3072</td><td class="num">0</td><td><span class="badge b-ok">Mantener</span></td></tr>
+<tr><td><code>www-fargate-ciencuadras-sqs</code></td><td class="num">1–8</td><td class="num">1.0</td><td class="num">0%</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td>—</td><td>—</td><td class="num">—</td><td><span class="badge b-keep">Revisar</span></td></tr>
+<tr><td><code>java-publicaciones-caracteristicas-ms</code></td><td class="num">1–2</td><td class="num">1.7</td><td class="num"><span class="up">63%</span></td><td class="num">17.1%</td><td class="num">138.6%</td><td class="num">76.6%</td><td class="num"><span class="down"><b>100.9%</b></span></td><td>256/1024</td><td>512/2048</td><td class="num"><span class="up">+11</span></td><td><span class="badge b-up">Subir MEM</span></td></tr>
+<tr><td><code>python-asistente-2-0-ia-ms</code></td><td class="num">2–10</td><td class="num">2.6</td><td class="num">6%</td><td class="num">7.3%</td><td class="num">123.5%</td><td class="num">68.7%</td><td class="num"><span class="down"><b>99.6%</b></span></td><td>1024/2048</td><td>1024/4096</td><td class="num"><span class="up">+13</span></td><td><span class="badge b-up">Subir MEM</span></td></tr>
+<tr><td><code>python-asistente-ia-ms</code></td><td class="num">2–4</td><td class="num">4.0</td><td class="num"><span class="down"><b>95%</b></span></td><td class="num">2.8%</td><td class="num">108.7%</td><td class="num">70.9%</td><td class="num"><span class="down"><b>99.8%</b></span></td><td>512/1024</td><td>512/2048</td><td class="num"><span class="up">+13</span></td><td><span class="badge b-up">Subir MEM</span></td></tr>
+<tr><td><code>java-leads-redes-sociales-ms</code></td><td class="num">2–4</td><td class="num">3.9</td><td class="num"><span class="down"><b>92%</b></span></td><td class="num">6.6%</td><td class="num">141.2%</td><td class="num">66.1%</td><td class="num"><span class="down"><b>100.1%</b></span></td><td>512/1024</td><td>512/2048</td><td class="num"><span class="up">+13</span></td><td><span class="badge b-up">Subir MEM</span></td></tr>
+<tr><td><code>java-clasificador-imagenes-ms</code></td><td class="num">2–4</td><td class="num">3.9</td><td class="num"><span class="down"><b>99%</b></span></td><td class="num">17.5%</td><td class="num">200.0%</td><td class="num">84.0%</td><td class="num"><span class="down"><b>99.8%</b></span></td><td>256/512</td><td>512/1024</td><td class="num"><span class="up">+36</span></td><td><span class="badge b-up">Subir MEM</span></td></tr>
+      </tbody>
+    </table>
+    </div>
+
+    <div class="note">
+      <b>Cómo leer la tabla.</b> <b>CPU avg / CPU pico / MEM avg / MEM pico</b> son el uso real medido sobre los 12 meses (avg = promedio de los promedios diarios; pico = máximo diario del año). MEM pico ≥90% se resalta en rojo. Los picos de CPU por encima de 100% son arranques de JVM (boot), no carga sostenida — por eso el criterio de CPU se basa en el promedio y el de memoria en el pico, para no subdimensionar. <b>Prom. tareas</b> = tareas realmente en ejecución en promedio el último año (no el min configurado); <b>% máx</b>: rojo ≥70% (saturado), ámbar 30–69%. Min–Max y política de escalado son la configuración vigente y no se tocan. «Mantener» = ya en el piso de 512 (Datadog) o su memoria obliga a CPU mayor. Los cinco «Subir MEM» tienen presión sostenida real. <code>www-fargate-ciencuadras-sqs</code>: recursos a nivel de contenedor, revisión manual.
+    </div>
+  </section>
+
+  <!-- PROYECCION 5 AÑOS -->
+  <section class="card">
+    <h2><span class="n">6</span> Proyección a 5 años (crecimiento del 5% anual)</h2>
+    <p class="sub">Se aplica un crecimiento vegetativo de transaccionalidad del <b>5% anual compuesto</b> durante 5 años sobre el dimensionamiento recomendado. Factor acumulado 2031: <b>1,05⁵ = 1,276 (+27,6%)</b>.</p>
+
+    <div class="note warn">
+      <b>Contraste con la realidad medida.</b> El 5% vegetativo es un <b>piso conservador</b>, no el escenario central. El tráfico real del portal (RequestCount de los ALB, últimos 14 meses) creció muy por encima: <code>www-cluster</code> pasó de <b>~19,8M a ~66,7M req/mes (+236%)</b> y <code>www-fargate-api</code> de ~0,5M a picos de ~3,2M. Es decir: la infra debe planearse para <b>al menos</b> el 5%, sabiendo que la demanda observada es mucho mayor. La palanca de crecimiento en Fargate es el <b>número de réplicas (escalado horizontal)</b>, no el tamaño de cada tarea.
+    </div>
+
+    <h3>¿El rightsizing resiste el crecimiento? — impacto por capa</h3>
+    <table>
+      <thead><tr><th>Capa</th><th>Uso hoy</th><th class="num">Proyectado 2031 (+27,6%)</th><th>¿El tamaño recomendado aguanta?</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>Fargate — CPU por tarea</td>
+          <td>2–8% sostenido</td><td class="num">2,6–10,2%</td>
+          <td><span class="right">Sí, con amplio margen.</span> Aun con el piso de 512 (Datadog), la CPU real usada es 2–11%; se crece agregando réplicas, no tamaño.</td>
+        </tr>
+        <tr>
+          <td>Fargate — memoria por tarea</td>
+          <td>picos 50–100%</td><td class="num">se gestiona por réplica</td>
+          <td><span class="right">Sí.</span> Los servicios con memoria alta conservan su asignación; el volumen extra lo absorbe el autoescalado.</td>
+        </tr>
+        <tr>
+          <td>Aurora writer (r7g.xlarge)</td>
+          <td>49% prom · 60% pico</td><td class="num">63% prom · <b>77% pico</b></td>
+          <td><span class="up">Vigilar.</span> A 5% llega a ~77% de pico en 2031; con la demanda real, mucho antes. No se mueve hoy.</td>
+        </tr>
+        <tr>
+          <td>Redis (t4g.medium recomendado)</td>
+          <td>memoria 100% <b>ya hoy</b></td><td class="num">crítico si no se sube</td>
+          <td><span class="up">Requiere la subida propuesta.</span> El 5% solo agrava las evictions.</td>
+        </tr>
+        <tr>
+          <td>EC2 logstash</td>
+          <td>2,4% CPU</td><td class="num">~3,1%</td>
+          <td><span class="right">Irrelevante.</span> Los logs no escalan 1:1 con transaccionalidad.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>Aurora writer — CPU pico proyectada al 5% anual</h3>
+    <div class="mermaid">
+xychart-beta
+  title "CPU pico del writer Aurora proyectada al 5% anual (%)"
+  x-axis [2026, 2027, 2028, 2029, 2030, 2031]
+  y-axis "CPU pico %" 0 --> 100
+  bar [60.0, 63.0, 66.2, 69.5, 72.9, 76.6]
+  line [80, 80, 80, 80, 80, 80]
+    </div>
+    <p class="sub">Línea horizontal en 80% = umbral de acción sugerido. Con crecimiento del 5%, el writer cruza la zona de atención hacia 2031. <b>No se toca ahora</b> (decisión del equipo): se define un umbral de vigilancia y se actúa cuando la métrica real lo alcance.</p>
+
+    <div class="note warn">
+      <b>Dónde pega primero el crecimiento: los 10 servicios saturados (sección 5).</b> Los servicios que ya pasan ≥70% del año en su máximo de tareas (encabezados por <code>property-details</code>, 9,9/10, y <code>clasificador-imagenes</code>, 99% en su tope) no tienen margen de escalado horizontal para absorber el +27,6%. Aunque el escalamiento no se cambia hoy, con el crecimiento del 5% estos serán los primeros que requieran <b>subir el máximo de tareas</b> (no el tamaño). Conviene ponerles alarma temprana.
+    </div>
+    <div class="note">
+      <b>Conclusión.</b> El crecimiento del 5% <b>no revierte ninguna recomendación de bajar</b> (Fargate y EC2 mantienen margen enorme en CPU) y <b>refuerza las de subir/vigilar</b> (Redis, Aurora y los servicios saturados). Las decisiones de rightsizing por-tarea siguen siendo válidas bajo este escenario; el crecimiento se absorbe con réplicas, y ahí el foco son los 10 servicios que ya están en su tope.
+    </div>
+  </section>
+
+  <!-- PLAN -->
+  <section class="card">
+    <h2><span class="n">7</span> Consolidado y plan de ejecución</h2>
+    <table>
+      <thead><tr><th>Frente</th><th class="num">Actual $/mes</th><th class="num">Recomendado $/mes</th><th class="num">Δ mensual</th><th>Dirección</th></tr></thead>
+      <tbody>
+        <tr><td>Fargate microservicios prod</td><td class="num">2.967</td><td class="num">2.685</td><td class="num down">-282</td><td>Bajar CPU (8) · Subir MEM (5)</td></tr>
+        <tr><td>EC2 logstash + legado → Fargate</td><td class="num">226</td><td class="num">~98</td><td class="num down">-128</td><td>Migrar a ECS (512/4096 ·2–6 y 512/2048 ·2–4)</td></tr>
+        <tr><td>Redis prod</td><td class="num">50</td><td class="num">94</td><td class="num up">+44</td><td>Subir (HA)</td></tr>
+        <tr><td>Aurora (writer + reader)</td><td class="num">660</td><td class="num">660</td><td class="num">0</td><td>No mover ahora · vigilar</td></tr>
+        <tr style="font-weight:700"><td>Total</td><td class="num">3.903</td><td class="num">3.537</td><td class="num down">≈ -366</td><td></td></tr>
+      </tbody>
+    </table>
+    <p class="sub" style="margin-top:10px">Ahorro neto estimado <b>~$366/mes (~$4.400/año)</b> ya descontando la subida de Redis y la inversión en memoria de 5 servicios, y <b>sin tocar la base de datos</b> (decisión del equipo). El piso de CPU de 512 por Datadog topa el ahorro en los microservicios; el grueso viene de los servicios sobre-asignados en 1024/2048 y de la <b>migración de logstash y legado a Fargate</b> (de ~$226/mes en EC2 a ~$98/mes con el escalamiento definido de 2–6 y 2–4 tareas). El costo migrado incluye el mínimo de 2 tareas de cada uno, que además aporta alta disponibilidad que hoy no tienen.</p>
+
+    <div class="mermaid">
+flowchart LR
+  A["Fase 1 · Riesgo bajo<br/>Fargate CPU: 8 svc 1024→512<br/>por lotes con canary · ahorro directo"] --> B["Fase 2 · Fargate memoria<br/>5 svc suben MEM (evita OOM)<br/>observar 2 semanas"]
+  B --> C["Fase 3 · Migrar logstash+legado a ECS<br/>obtener heap real · 512/4096 y 512/2048<br/>escalado CPU+MEM · garantizar ingesta"]
+  C --> D["Fase 4 · Redis (mejora preventiva)<br/>t4g.medium + réplica<br/>sin urgencia: 100% mem pero sin fallas"]
+  D --> E["Continuo · Vigilar Aurora + Redis<br/>umbral 80% CPU Aurora · evictions Redis"]
+  classDef f fill:#e8f5ec,stroke:#008d36,color:#00662a;
+  class A,B,C,D,E f;
+    </div>
+
+    <div class="note warn">
+      <b>Cómo ejecutar sin afectar producción.</b> Cambiar CPU/memoria de una task definition fuerza un redespliegue rolling (ECS levanta la tarea nueva antes de bajar la vieja), así que no hay downtime si hay ≥2 réplicas — que es el caso en casi todos. Recomendado: aplicar por lotes de 3–5 servicios, validar 24–48 h con las alarmas de CPU/memoria y latencia, y recién ahí continuar. El writer Aurora y las réplicas de cada servicio se dejan intactos.
+    </div>
+
+    <h3>Umbrales de vigilancia de la base de datos (en lugar de moverla)</h3>
+    <table>
+      <thead><tr><th>Métrica writer Aurora</th><th>Valor hoy</th><th>Umbral de alerta</th><th>Acción al cruzarlo</th></tr></thead>
+      <tbody>
+        <tr><td>CPU pico sostenido</td><td>60%</td><td class="up">&gt; 80% por 3 días</td><td>Planear escalón a r7g.2xlarge</td></tr>
+        <tr><td>FreeableMemory mínima</td><td>2,1 GB</td><td class="up">&lt; 1,5 GB</td><td>Revisar buffer pool / escalar</td></tr>
+        <tr><td>Conexiones pico</td><td>~1.284</td><td class="up">&gt; 80% de max_connections</td><td>Revisar pooling / escalar</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Higiene adicional detectada (fuera del rightsizing)</h3>
+    <ul>
+      <li><b>5 NAT Gateways</b> activos (~$160/mes fijo + tráfico). Con 5 ambientes en una cuenta es esperable, pero vale revisar si dev/qa pueden compartir uno.</li>
+      <li><b>ASG <code>Produccion-Balanceador</code></b> con capacidad deseada 0: inactivo, candidato a eliminar si ya no se usa.</li>
+      <li><b>Agente CloudWatch ausente</b> en el logstash: instalarlo es prerrequisito para cualquier downsizing de esa instancia (hoy la RAM es un punto ciego).</li>
+      <li>Buena higiene: <b>sin volúmenes EBS huérfanos ni Elastic IPs sueltas</b>.</li>
+    </ul>
+  </section>
+
+  <section class="card">
+    <h2><span class="n">8</span> Notas de método y límites</h2>
+    <ul>
+      <li>Datos de <b>CloudWatch, ventana 12 meses</b> (promedios diarios), granularidad horaria de los últimos 14 días para el patrón día/noche, y RequestCount de ALB de hasta 15 meses para la tendencia de tráfico.</li>
+      <li>Segmentación prod por convención de nombre <code>prod</code>/<code>www</code>, confirmada con el equipo. Los recursos no tienen tag <code>Environment</code>.</li>
+      <li>Precios <b>on-demand de referencia</b> us-east-1. No reflejan Savings Plans / Reserved vigentes; el ahorro proporcional se mantiene.</li>
+      <li>El uso de memoria en Fargate se lee sobre el pico anual (<code>Maximum</code>) para no subdimensionar. Los picos de CPU a 100% se interpretan como arranque de JVM, no carga sostenida — por eso el criterio de CPU usa el promedio.</li>
+      <li><b>Piso de CPU de 512 unidades (lineamiento corporativo):</b> a cada imagen se le inyecta el sidecar de Datadog, que consume CPU/memoria propios. Por eso ningún servicio se recomienda por debajo de 512, aunque su CPU medida lo permitiría. Esto topa el ahorro alcanzable por rightsizing de CPU.</li>
+      <li><b>Escalamiento horizontal:</b> las columnas Min–Max y Política de la sección 5 se leyeron de Application Auto Scaling (<code>describe-scalable-targets</code> y <code>describe-scaling-policies</code>) y reflejan la configuración vigente. <b>No se propone modificarla</b> (decisión del equipo); se documenta como contexto. Todo el sizing propuesto es por-tarea y respeta esos rangos.</li>
+      <li><b>Promedio de tareas y % en máximo:</b> se contó con <code>RunningTaskCount</code> de Container Insights donde está habilitado (cluster <code>www-cluster</code>) y, en el resto, derivando el número de tareas del <code>SampleCount</code> por minuto de las métricas del servicio. <b>Corrección aplicada:</b> se detectó que <code>clasificador-imagenes</code> emite la métrica desde dos contenedores (principal + sidecar Datadog), lo que duplicaba su conteo (aparecía 7,8 tareas con un máximo de 4, físicamente imposible); se midió el factor por servicio comparando contra el <code>desiredCount</code> real y se corrigió a 3,9 (factor 2). El resto de servicios tiene factor 1 (validado &lt;1% vs RunningTaskCount). El % en máximo compara el conteo diario contra el máximo configurado; picos por encima del máximo son solapamiento de tareas durante despliegues rolling.</li>
+      <li><b>Proyección a 5 años</b> con crecimiento del 5% anual compuesto (factor 1,276). Es un escenario piso: el tráfico real observado crece muy por encima, por lo que las cifras proyectadas son un mínimo, no un techo.</li>
+      <li><b>Base de datos:</b> por decisión del equipo no se redimensiona en este momento (ni arriba ni abajo); se gestiona con los umbrales de la sección 7.</li>
+      <li><b>logstash y legado migran de EC2 a ECS/Fargate</b> (sección 4). El sizing se derivó del consumo absoluto real en vCPU (0,1 y 0,08 vCPU sostenidos) y del piso de 512 + Datadog; la memoria (heap JVM) es el único riesgo y se valida observando <code>MemoryUtilization</code> 2 semanas tras la migración. El <b>CPU</b> se dimensionó con el comportamiento del EC2 productivo de los últimos 12 meses (vCPU absolutas: logstash media 0,10 / p99 0,17; legado media 0,08 / p99 0,51 con 4 días sobre 0,5). La <b>memoria NO se pudo medir</b>: la EC2 nunca tuvo agente (sin métrica de RAM en CloudWatch) y el rol de solo lectura no permite leer el heap por SSM; los tamaños 4096/2048 son puntos de partida a validar, no cifras medidas. Es la primera vez que logstash corre en prod.</li>
+      <li>Análisis <b>de solo lectura</b>: no se modificó ningún recurso.</li>
+    </ul>
+  </section>
+
+  <!-- RESUMEN RESIZING -->
+  <section class="card">
+    <h2><span class="n">9</span> Resumen del resizing</h2>
+    <p class="sub">Vista de una sola página: qué se toca, cómo y por qué. Todo dimensionado para absorber el crecimiento del 5% anual a 5 años.</p>
+
+    <div class="kpis">
+      <div class="kpi"><div class="v" style="color:var(--rojo)">↓ 10</div><div class="l">A reducir<br>(8 Fargate CPU + 2 EC2)</div></div>
+      <div class="kpi"><div class="v" style="color:var(--amarillo)">↑ 6</div><div class="l">A subir<br>(5 Fargate MEM + Redis)</div></div>
+      <div class="kpi"><div class="v" style="color:var(--azul)">= 30</div><div class="l">A mantener/vigilar<br>(28 Fargate + Aurora x2)</div></div>
+      <div class="kpi"><div class="v" style="color:var(--verde)">-$366</div><div class="l">Neto mensual<br>(~$4,4k/año)</div></div>
+    </div>
+
+    <table style="margin-top:16px">
+      <thead><tr><th>Recurso</th><th>Actual</th><th>Recomendado</th><th class="num">Δ $/mes</th><th>Dirección</th><th>Motivo en una línea</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><code>Fargate</code> · 43 servicios <span class="tag">(detalle en sección 5)</span></td>
+          <td>79,8 vCPU / 186 GB</td>
+          <td>8 bajan CPU · 5 suben MEM · 28 se mantienen (piso 512)</td>
+          <td class="num down">-282</td>
+          <td><span class="badge b-over">Bajar CPU</span></td>
+          <td>Uso real 2–8%; se crece con réplicas, no tamaño</td>
+        </tr>
+        <tr>
+          <td><code>www-logstash-ec2-V2</code> → ECS</td>
+          <td>r5a.xlarge (32 GB)</td>
+          <td>Fargate 512 / 4096 · 2–6</td>
+          <td class="num down">-109</td>
+          <td><span class="badge b-keep">Migrar a ECS</span></td>
+          <td>Usa 0,1 vCPU; 2 tareas base dan HA; memoria a validar</td>
+        </tr>
+        <tr>
+          <td><code>prod-legado-ciencuadras-am2</code> → ECS</td>
+          <td>t3.large (8 GB)</td>
+          <td>Fargate 512 / 2048 · 2–4</td>
+          <td class="num down">-18</td>
+          <td><span class="badge b-keep">Migrar a ECS</span></td>
+          <td>Usa 0,08 vCPU; 2 tareas base cubren su día pico; mem a validar</td>
+        </tr>
+        <tr>
+          <td><code>www-redis</code></td>
+          <td>t3.medium · 1 nodo</td>
+          <td>t4g.medium + réplica</td>
+          <td class="num up">+44</td>
+          <td><span class="badge b-up">Subir (HA + mem)</span></td>
+          <td>Memoria al 100% hoy y sin alta disponibilidad</td>
+        </tr>
+        <tr>
+          <td><code>www-rds-production</code> (writer)</td>
+          <td>db.r7g.xlarge</td>
+          <td>db.r7g.xlarge <b>(igual)</b></td>
+          <td class="num">0</td>
+          <td><span class="badge b-keep">Vigilar</span></td>
+          <td>Uso sano 49–60%; decisión: no mover ahora</td>
+        </tr>
+        <tr>
+          <td><code>reader-rds-production</code></td>
+          <td>db.r7g.large</td>
+          <td>db.r7g.large <b>(igual)</b></td>
+          <td class="num">0</td>
+          <td><span class="badge b-keep">Vigilar</span></td>
+          <td>Da HA / failover del writer</td>
+        </tr>
+        <tr style="font-weight:700">
+          <td>Total prod (cómputo + datos)</td>
+          <td class="num">$3.903/mes</td>
+          <td class="num">$3.537/mes</td>
+          <td class="num down">≈ -366</td>
+          <td></td>
+          <td>-9% del gasto analizado</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="mermaid">
+flowchart LR
+  BAJAR["BAJAR · -$410/mes<br/>8 svc Fargate CPU · logstash+legado→ECS<br/>piso CPU 512 limita el resto"]:::down
+  SUBIR["SUBIR · +$44/mes<br/>Redis t4g.medium + réplica<br/>(5 svc Fargate suben MEM)"]:::up
+  VIGILAR["VIGILAR · $0<br/>Aurora writer + reader · 28 svc Fargate en piso<br/>umbral 80% CPU pico"]:::keep
+  BAJAR --> NETO["NETO ≈ -$366/mes<br/>~$4.400/año sin impacto productivo"]:::net
+  SUBIR --> NETO
+  VIGILAR --> NETO
+  classDef down fill:#fde8e8,stroke:#d64545,color:#a02020;
+  classDef up fill:#fff3d6,stroke:#f4a900,color:#8a5b00;
+  classDef keep fill:#eef3ff,stroke:#2d6cdf,color:#2d4fb0;
+  classDef net fill:#e8f5ec,stroke:#008d36,color:#00662a;
+    </div>
+
+    <div class="note">
+      <b>En una frase:</b> se reduce CPU en los 8 servicios sobre-asignados (los demás ya están en el piso de 512 por Datadog), se <b>migran logstash y legado a Fargate</b> dimensionados a su consumo real con el escalamiento definido (2–6 y 2–4 tareas, de ~$226 a ~$98/mes, ganando además alta disponibilidad), se sube memoria donde hay riesgo de OOM (5 servicios) y se refuerza Redis como <b>mejora preventiva en la última fase</b> (100% de memoria pero sin fallas reportadas), dejando la base de datos intacta bajo vigilancia. El resultado es <b>~$4.400/año</b> de ahorro neto sin degradar producción y con margen para el crecimiento del 5% anual. El potencial está topado por el lineamiento de CPU mínimo, no por falta de holgura técnica.
+    </div>
+  </section>
+
+  <footer>
+    Generado con acceso ViewOnlyAccess · cuenta 290296201161 · us-east-1 · septiembre 2026 · Análisis de rightsizing sin impacto productivo.
+  </footer>
+</div>
+
+<script>
+  mermaid.initialize({startOnLoad:true, theme:'base', themeVariables:{
+    primaryColor:'#e8f5ec', primaryBorderColor:'#008d36', primaryTextColor:'#00662a',
+    lineColor:'#5b6670', fontSize:'13px'
+  }});
+</script>
+</body>
+</html>
