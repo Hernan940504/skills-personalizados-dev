@@ -1,0 +1,1276 @@
+{
+  "pages": [
+    {
+      "diagramType": "Cloud",
+      "title": "01 · Panorama de componentes por environment",
+      "elements": [
+        {
+          "id": "overview_users",
+          "type": "users",
+          "name": "Usuarios y canales digitales",
+          "description": "Consumidores de experiencias web y APIs.",
+          "parent": "overview_context",
+          "tooltip": "Entrada pública por HTTPS; no se muestran dominios ni endpoints."
+        },
+        {
+          "id": "overview_integrations",
+          "type": "generic",
+          "name": "Sistemas externos",
+          "description": "CRM, marketing, facturación y capacidades corporativas.",
+          "parent": "overview_context",
+          "tooltip": "Representación agregada a partir de capacidades de integración observadas."
+        },
+        {
+          "id": "dev_edge",
+          "type": "cloudfront",
+          "name": "Entrada y entrega",
+          "description": "CloudFront, WAF, API Gateway y VPC Link.",
+          "parent": "overview_dev",
+          "properties": {
+            "Environment": "DEV",
+            "Origen": "Inventario de solo lectura",
+            "patron": "S3 + API Gateway + ALB"
+          }
+        },
+        {
+          "id": "dev_runtime",
+          "type": "ecs",
+          "name": "Runtime de aplicaciones",
+          "description": "ECS/Fargate para frontends, dominio, legado e IA.",
+          "parent": "overview_dev",
+          "tooltip": "Inventario: 45 servicios agrupados en 4 clústeres.",
+          "properties": {
+            "Servicios": "45",
+            "clusters": "4",
+            "Capacidades": "Frontend, Java, PHP, Python/IA, WordPress"
+          }
+        },
+        {
+          "id": "dev_data",
+          "type": "aurora",
+          "name": "Datos y caché",
+          "description": "Aurora MySQL cifrada y ElastiCache.",
+          "parent": "overview_dev",
+          "tooltip": "Aurora MySQL observada en tres zonas de disponibilidad.",
+          "properties": {
+            "Motor": "Aurora MySQL",
+            "alta_disponibilidad": "3 AZ",
+            "acceso_publico": "No"
+          }
+        },
+        {
+          "id": "dev_platform",
+          "type": "s3",
+          "name": "Objetos, eventos y serverless",
+          "description": "S3, SQS, Lambda y automatización.",
+          "parent": "overview_dev",
+          "properties": {
+            "Componentes": "S3 · SQS · Lambda · EventBridge",
+            "Uso": "Contenido, eventos y procesamiento asíncrono"
+          }
+        },
+        {
+          "id": "pre_edge",
+          "type": "cloudfront",
+          "name": "Entrada y entrega",
+          "description": "CDN, WAF, API Gateway y enlace privado.",
+          "parent": "overview_pre",
+          "properties": {
+            "Environment": "PRE",
+            "patron": "S3 + API Gateway + ALB"
+          }
+        },
+        {
+          "id": "pre_runtime",
+          "type": "ecs",
+          "name": "Runtime de validación",
+          "description": "ECS/Fargate con frontends, dominio y legado.",
+          "parent": "overview_pre",
+          "tooltip": "Se representa por capacidades agregadas; no por recursos individuales."
+        },
+        {
+          "id": "pre_data",
+          "type": "aurora",
+          "name": "Datos aislados",
+          "description": "Aurora MySQL cifrada en tres AZ.",
+          "parent": "overview_pre"
+        },
+        {
+          "id": "pre_platform",
+          "type": "s3",
+          "name": "Objetos y mensajería",
+          "description": "S3, SQS, Lambda y configuración por ambiente.",
+          "parent": "overview_pre"
+        },
+        {
+          "id": "stage_edge",
+          "type": "cloudfront",
+          "name": "Entrada y entrega",
+          "description": "CDN, WAF, API Gateway y enlace privado.",
+          "parent": "overview_stage",
+          "properties": {
+            "Environment": "STAGE",
+            "patron": "S3 + API Gateway + ALB"
+          }
+        },
+        {
+          "id": "stage_runtime",
+          "type": "ecs",
+          "name": "Runtime de preproducción",
+          "description": "ECS/Fargate con capacidades de frontend y dominio.",
+          "parent": "overview_stage"
+        },
+        {
+          "id": "stage_data",
+          "type": "aurora",
+          "name": "Datos aislados",
+          "description": "Aurora MySQL cifrada en tres AZ.",
+          "parent": "overview_stage"
+        },
+        {
+          "id": "stage_platform",
+          "type": "s3",
+          "name": "Objetos y mensajería",
+          "description": "S3, SQS, Lambda y configuración por ambiente.",
+          "parent": "overview_stage"
+        },
+        {
+          "id": "prod_edge",
+          "type": "cloudfront",
+          "name": "Entrada altamente disponible",
+          "description": "CloudFront, WAF, API Gateway, ALB/NLB público e interno.",
+          "parent": "overview_prod",
+          "tooltip": "Orígenes observados: S3, API Gateway y ALB.",
+          "properties": {
+            "Environment": "PROD",
+            "alta_disponibilidad": "3 AZ",
+            "Balanceo": "ALB/NLB público e interno"
+          }
+        },
+        {
+          "id": "prod_runtime",
+          "type": "ecs",
+          "name": "Runtime de producción",
+          "description": "ECS/Fargate para experiencia digital, dominio y legado.",
+          "parent": "overview_prod",
+          "properties": {
+            "Capacidades": "Frontends, dominio, legado web/WordPress",
+            "ejecucion": "ECS/Fargate"
+          }
+        },
+        {
+          "id": "prod_data",
+          "type": "aurora",
+          "name": "Datos de producción",
+          "description": "Aurora MySQL cifrada y almacenamiento de objetos.",
+          "parent": "overview_prod",
+          "properties": {
+            "Motor": "Aurora MySQL",
+            "alta_disponibilidad": "3 AZ",
+            "medios_objetivo": "S3"
+          }
+        },
+        {
+          "id": "prod_platform",
+          "type": "step_functions",
+          "name": "Automatización y eventos",
+          "description": "SQS/SNS, Lambda, Step Functions y DMS.",
+          "parent": "overview_prod",
+          "properties": {
+            "Uso": "Procesamiento asíncrono y flujos de datos",
+            "Controles": "Ejecución administrada por environment"
+          }
+        },
+        {
+          "id": "shared_ecr",
+          "type": "ecr",
+          "name": "Imágenes versionadas",
+          "description": "Registro de imágenes para los runtimes.",
+          "parent": "overview_shared"
+        },
+        {
+          "id": "shared_delivery",
+          "type": "codepipeline",
+          "name": "Entrega continua",
+          "description": "CodePipeline, CodeBuild y CodeDeploy observados.",
+          "parent": "overview_shared"
+        },
+        {
+          "id": "shared_config",
+          "type": "systems_manager",
+          "name": "Configuración y secretos",
+          "description": "Systems Manager, Secrets Manager, KMS e IAM.",
+          "parent": "overview_shared"
+        },
+        {
+          "id": "shared_observability",
+          "type": "cloudwatch",
+          "name": "Observabilidad",
+          "description": "Logs, métricas, alarmas y eventos operativos.",
+          "parent": "overview_shared"
+        }
+      ],
+      "groups": [
+        {
+          "id": "overview_context",
+          "type": "generic_group",
+          "name": "Contexto y dependencias externas"
+        },
+        {
+          "id": "overview_aws",
+          "type": "aws_cloud",
+          "name": "Arquitectura Ciencuadras en AWS"
+        },
+        {
+          "id": "overview_dev",
+          "type": "account",
+          "name": "Environment: DEV",
+          "parent": "overview_aws"
+        },
+        {
+          "id": "overview_pre",
+          "type": "account",
+          "name": "Environment: PRE",
+          "parent": "overview_aws"
+        },
+        {
+          "id": "overview_stage",
+          "type": "account",
+          "name": "Environment: STAGE",
+          "parent": "overview_aws"
+        },
+        {
+          "id": "overview_prod",
+          "type": "account",
+          "name": "Environment: PROD",
+          "parent": "overview_aws"
+        },
+        {
+          "id": "overview_shared",
+          "type": "generic_group",
+          "name": "Servicios transversales de plataforma",
+          "parent": "overview_aws"
+        }
+      ],
+      "relationships": [
+        {
+          "source": "overview_users",
+          "target": "dev_edge",
+          "description": "Consume experiencias",
+          "technology": "HTTPS"
+        },
+        {
+          "source": "overview_users",
+          "target": "prod_edge",
+          "description": "Consume experiencias",
+          "technology": "HTTPS"
+        },
+        {
+          "source": "dev_edge",
+          "target": "dev_runtime",
+          "description": "Enruta tráfico dinámico",
+          "technology": "HTTPS"
+        },
+        {
+          "source": "dev_runtime",
+          "target": "dev_data",
+          "description": "Accede a datos",
+          "technology": "TLS / SQL"
+        },
+        {
+          "source": "dev_runtime",
+          "target": "dev_platform",
+          "description": "Publica y consume eventos",
+          "technology": "AWS SDK",
+          "async": true
+        },
+        {
+          "source": "pre_edge",
+          "target": "pre_runtime",
+          "description": "Enruta tráfico dinámico",
+          "technology": "HTTPS"
+        },
+        {
+          "source": "pre_runtime",
+          "target": "pre_data",
+          "description": "Accede a datos",
+          "technology": "TLS / SQL"
+        },
+        {
+          "source": "stage_edge",
+          "target": "stage_runtime",
+          "description": "Enruta tráfico dinámico",
+          "technology": "HTTPS"
+        },
+        {
+          "source": "stage_runtime",
+          "target": "stage_data",
+          "description": "Accede a datos",
+          "technology": "TLS / SQL"
+        },
+        {
+          "source": "prod_edge",
+          "target": "prod_runtime",
+          "description": "Enruta tráfico dinámico",
+          "technology": "HTTPS"
+        },
+        {
+          "source": "prod_runtime",
+          "target": "prod_data",
+          "description": "Accede a datos",
+          "technology": "TLS / SQL"
+        },
+        {
+          "source": "prod_runtime",
+          "target": "prod_platform",
+          "description": "Publica y consume eventos",
+          "technology": "AWS SDK",
+          "async": true
+        },
+        {
+          "source": "shared_delivery",
+          "target": "shared_ecr",
+          "description": "Publica imágenes",
+          "technology": "HTTPS"
+        },
+        {
+          "source": "shared_ecr",
+          "target": "prod_runtime",
+          "description": "Suministra artefactos",
+          "technology": "ECR pull"
+        },
+        {
+          "source": "prod_runtime",
+          "target": "overview_integrations",
+          "description": "Integra capacidades de negocio",
+          "technology": "HTTPS"
+        }
+      ]
+    },
+    {
+      "diagramType": "Cloud",
+      "title": "02 · DEV · Catálogo de runtime",
+      "elements": [
+        {
+          "id": "dev_users",
+          "type": "users",
+          "name": "Usuarios y canales digitales",
+          "description": "Consumidores web y API.",
+          "parent": "dev_context"
+        },
+        {
+          "id": "dev_external",
+          "type": "generic",
+          "name": "Sistemas externos",
+          "description": "CRM, marketing, facturación y otros sistemas corporativos.",
+          "parent": "dev_context",
+          "tooltip": "Capacidad agregada; no contiene endpoints ni contratos de integración."
+        },
+        {
+          "id": "dev_cloudfront",
+          "type": "cloudfront",
+          "name": "CloudFront",
+          "description": "CDN con orígenes S3, API Gateway, ALB y origen personalizado.",
+          "parent": "dev_edge",
+          "properties": {
+            "Environment": "DEV",
+            "origenes_observados": "S3 · API Gateway · ALB · personalizado"
+          }
+        },
+        {
+          "id": "dev_waf",
+          "type": "waf",
+          "name": "AWS WAF",
+          "description": "Protección de capa de aplicación para la entrada.",
+          "parent": "dev_edge"
+        },
+        {
+          "id": "dev_api_gateway",
+          "type": "api_gateway",
+          "name": "API Gateway",
+          "description": "Exposición de APIs y rutas dinámicas.",
+          "parent": "dev_edge",
+          "properties": {
+            "integracion_privada": "VPC Link disponible",
+            "Canal": "HTTPS"
+          }
+        },
+        {
+          "id": "dev_vpc_link",
+          "type": "generic",
+          "name": "VPC Link",
+          "description": "Conector privado de API Gateway hacia el ingreso interno.",
+          "parent": "dev_edge",
+          "properties": {
+            "estado_observado": "Disponible",
+            "Uso": "Enlace privado a balanceadores"
+          }
+        },
+        {
+          "id": "dev_internal_lb",
+          "type": "alb",
+          "name": "Balanceo interno",
+          "description": "ALB/NLB internos para distribuir solicitudes hacia workloads.",
+          "parent": "dev_private",
+          "properties": {
+            "balanceadores_observados": "ALB y NLB internos",
+            "Canal": "HTTP/HTTPS"
+          }
+        },
+        {
+          "id": "dev_frontends",
+          "type": "ecs",
+          "name": "Microfrontends",
+          "description": "Shell, experiencia de búsqueda, detalle, resultados y portales.",
+          "parent": "dev_private",
+          "members": [
+            "Shell y front principal",
+            "Resultados de venta, arriendo, proyectos y remates",
+            "Detalle de inmueble y proyecto",
+            "Búsqueda asistida"
+          ],
+          "properties": {
+            "Runtime": "ECS/Fargate",
+            "capacidad_observada": "10 servicios agrupados",
+            "Dominio": "Experiencia digital"
+          }
+        },
+        {
+          "id": "dev_domain_services",
+          "type": "ecs",
+          "name": "Servicios de dominio",
+          "description": "Autenticación, inmuebles, publicaciones, clientes, resultados, carrito y leads.",
+          "parent": "dev_private",
+          "members": [
+            "Autenticación y zona privada",
+            "Inmuebles, publicaciones y características",
+            "Clientes, resultados y descripciones",
+            "Carrito y leads",
+            "SEO, sitemap y sitios de interés"
+          ],
+          "properties": {
+            "Runtime": "ECS/Fargate",
+            "capacidad_observada": "26 servicios Java agrupados",
+            "Integraciones": "CRM, marketing y facturación"
+          }
+        },
+        {
+          "id": "dev_legacy_services",
+          "type": "ecs",
+          "name": "Servicios PHP y legado",
+          "description": "APIs de compatibilidad, listing y servicios web heredados.",
+          "parent": "dev_private",
+          "properties": {
+            "Runtime": "ECS/Fargate",
+            "capacidad_observada": "5 servicios agrupados"
+          }
+        },
+        {
+          "id": "dev_ai_services",
+          "type": "ecs",
+          "name": "Servicios Python e IA",
+          "description": "Asistentes, clasificación de imágenes y capacidades de modelos.",
+          "parent": "dev_private",
+          "properties": {
+            "Runtime": "ECS/Fargate",
+            "capacidad_observada": "3 servicios agrupados"
+          }
+        },
+        {
+          "id": "dev_wordpress",
+          "type": "ecs",
+          "name": "WordPress",
+          "description": "Carga editorial aislada dentro del catálogo de runtime.",
+          "parent": "dev_private",
+          "properties": {
+            "Runtime": "ECS/Fargate",
+            "medios_objetivo": "S3"
+          }
+        },
+        {
+          "id": "dev_aurora",
+          "type": "aurora",
+          "name": "Aurora MySQL",
+          "description": "Base relacional cifrada y no pública.",
+          "parent": "dev_private",
+          "properties": {
+            "Motor": "Aurora MySQL",
+            "Disponibilidad": "3 AZ",
+            "Cifrado": "Habilitado",
+            "acceso_publico": "No"
+          }
+        },
+        {
+          "id": "dev_cache",
+          "type": "elasticache",
+          "name": "ElastiCache",
+          "description": "Caché administrada para capacidades que la requieran.",
+          "parent": "dev_private"
+        },
+        {
+          "id": "dev_s3",
+          "type": "s3",
+          "name": "Amazon S3",
+          "description": "Contenido estático, objetos y medios de aplicación.",
+          "parent": "dev_platform",
+          "properties": {
+            "Uso": "Contenido, documentos y medios",
+            "exposicion": "Mediante CDN"
+          }
+        },
+        {
+          "id": "dev_sqs",
+          "type": "sqs",
+          "name": "Amazon SQS",
+          "description": "Mensajería y desacoplamiento asíncrono.",
+          "parent": "dev_platform",
+          "properties": {
+            "Uso": "Eventos y trabajos desacoplados"
+          }
+        },
+        {
+          "id": "dev_lambda",
+          "type": "lambda",
+          "name": "AWS Lambda",
+          "description": "Funciones para procesamiento de soporte y automatización.",
+          "parent": "dev_platform",
+          "properties": {
+            "capacidad_observada": "Funciones agregadas por dominio",
+            "activacion": "Eventos y APIs"
+          }
+        },
+        {
+          "id": "dev_cognito",
+          "type": "cognito",
+          "name": "Amazon Cognito",
+          "description": "Identidad y autorización de capacidades digitales.",
+          "parent": "dev_platform"
+        },
+        {
+          "id": "dev_ecr",
+          "type": "ecr",
+          "name": "Amazon ECR",
+          "description": "Imágenes versionadas de contenedores.",
+          "parent": "dev_platform"
+        },
+        {
+          "id": "dev_ssm",
+          "type": "systems_manager",
+          "name": "Systems Manager",
+          "description": "Configuración parametrizada y controles de operación.",
+          "parent": "dev_platform"
+        },
+        {
+          "id": "dev_cloudwatch",
+          "type": "cloudwatch",
+          "name": "CloudWatch",
+          "description": "Logs, métricas, alarmas y eventos operativos.",
+          "parent": "dev_platform"
+        }
+      ],
+      "groups": [
+        {
+          "id": "dev_context",
+          "type": "generic_group",
+          "name": "Contexto y dependencias externas"
+        },
+        {
+          "id": "dev_aws",
+          "type": "aws_cloud",
+          "name": "AWS"
+        },
+        {
+          "id": "dev_environment",
+          "type": "account",
+          "name": "Environment: DEV",
+          "parent": "dev_aws"
+        },
+        {
+          "id": "dev_region",
+          "type": "region",
+          "name": "us-east-1",
+          "parent": "dev_environment"
+        },
+        {
+          "id": "dev_edge",
+          "type": "generic_group",
+          "name": "Edge y servicios regionales",
+          "parent": "dev_region"
+        },
+        {
+          "id": "dev_vpc",
+          "type": "vpc",
+          "name": "VPC de aplicación · 3 AZ",
+          "parent": "dev_region"
+        },
+        {
+          "id": "dev_public",
+          "type": "public_subnet",
+          "name": "Subredes públicas · 3 AZ",
+          "parent": "dev_vpc"
+        },
+        {
+          "id": "dev_private",
+          "type": "private_subnet",
+          "name": "Subredes privadas · 3 AZ",
+          "parent": "dev_vpc"
+        },
+        {
+          "id": "dev_platform",
+          "type": "generic_group",
+          "name": "Datos, integración y operación",
+          "parent": "dev_region"
+        }
+      ],
+      "relationships": [
+        {
+          "source": "dev_users",
+          "target": "dev_cloudfront",
+          "description": "Accede a la experiencia",
+          "technology": "HTTPS"
+        },
+        {
+          "source": "dev_waf",
+          "target": "dev_cloudfront",
+          "description": "Protege entrada",
+          "technology": "WAF"
+        },
+        {
+          "source": "dev_cloudfront",
+          "target": "dev_s3",
+          "description": "Sirve contenido estático",
+          "technology": "HTTPS"
+        },
+        {
+          "source": "dev_cloudfront",
+          "target": "dev_api_gateway",
+          "description": "Enruta APIs dinámicas",
+          "technology": "HTTPS"
+        },
+        {
+          "source": "dev_cloudfront",
+          "target": "dev_internal_lb",
+          "description": "Usa origen de aplicación",
+          "technology": "HTTPS"
+        },
+        {
+          "source": "dev_api_gateway",
+          "target": "dev_vpc_link",
+          "description": "Conecta ingreso privado",
+          "technology": "HTTPS"
+        },
+        {
+          "source": "dev_vpc_link",
+          "target": "dev_internal_lb",
+          "description": "Reenvía a balanceo interno",
+          "technology": "HTTP/HTTPS"
+        },
+        {
+          "source": "dev_internal_lb",
+          "target": "dev_frontends",
+          "description": "Distribuye experiencia web",
+          "technology": "HTTP/HTTPS"
+        },
+        {
+          "source": "dev_internal_lb",
+          "target": "dev_domain_services",
+          "description": "Distribuye APIs internas",
+          "technology": "HTTP/HTTPS"
+        },
+        {
+          "source": "dev_frontends",
+          "target": "dev_api_gateway",
+          "description": "Consume APIs",
+          "technology": "HTTPS"
+        },
+        {
+          "source": "dev_domain_services",
+          "target": "dev_aurora",
+          "description": "Persiste datos de dominio",
+          "technology": "TLS / SQL"
+        },
+        {
+          "source": "dev_domain_services",
+          "target": "dev_cache",
+          "description": "Consulta caché",
+          "technology": "TLS"
+        },
+        {
+          "source": "dev_domain_services",
+          "target": "dev_s3",
+          "description": "Gestiona objetos",
+          "technology": "AWS SDK"
+        },
+        {
+          "source": "dev_domain_services",
+          "target": "dev_sqs",
+          "description": "Publica eventos",
+          "technology": "AWS SDK",
+          "async": true
+        },
+        {
+          "source": "dev_sqs",
+          "target": "dev_lambda",
+          "description": "Dispara procesamiento",
+          "technology": "Evento",
+          "async": true
+        },
+        {
+          "source": "dev_domain_services",
+          "target": "dev_external",
+          "description": "Integra capacidades externas",
+          "technology": "HTTPS"
+        },
+        {
+          "source": "dev_ecr",
+          "target": "dev_frontends",
+          "description": "Entrega imágenes",
+          "technology": "ECR pull"
+        },
+        {
+          "source": "dev_ecr",
+          "target": "dev_domain_services",
+          "description": "Entrega imágenes",
+          "technology": "ECR pull"
+        },
+        {
+          "source": "dev_ecr",
+          "target": "dev_legacy_services",
+          "description": "Entrega imágenes",
+          "technology": "ECR pull"
+        },
+        {
+          "source": "dev_ecr",
+          "target": "dev_ai_services",
+          "description": "Entrega imágenes",
+          "technology": "ECR pull"
+        },
+        {
+          "source": "dev_ssm",
+          "target": "dev_domain_services",
+          "description": "Provee configuración",
+          "technology": "IAM / SDK"
+        },
+        {
+          "source": "dev_cognito",
+          "target": "dev_api_gateway",
+          "description": "Autoriza solicitudes",
+          "technology": "JWT / OAuth"
+        }
+      ]
+    },
+    {
+      "diagramType": "Cloud",
+      "title": "03 · PROD · Topología objetivo",
+      "elements": [
+        {
+          "id": "prod_users",
+          "type": "users",
+          "name": "Usuarios y canales digitales",
+          "description": "Consumidores de experiencias públicas y APIs.",
+          "parent": "prod_context"
+        },
+        {
+          "id": "prod_external",
+          "type": "generic",
+          "name": "Sistemas externos",
+          "description": "CRM, marketing, facturación y capacidades corporativas.",
+          "parent": "prod_context",
+          "tooltip": "Capacidad de integración agregada; no muestra endpoints ni contratos."
+        },
+        {
+          "id": "prod_cloudfront",
+          "type": "cloudfront",
+          "name": "CloudFront",
+          "description": "CDN de producción con orígenes S3, API Gateway, ALB y orígenes personalizados.",
+          "parent": "prod_edge",
+          "properties": {
+            "Environment": "PROD",
+            "origenes_observados": "S3 · API Gateway · ALB · personalizado",
+            "Canal": "HTTPS"
+          }
+        },
+        {
+          "id": "prod_waf",
+          "type": "waf",
+          "name": "AWS WAF",
+          "description": "Protección de aplicación en el borde de producción.",
+          "parent": "prod_edge"
+        },
+        {
+          "id": "prod_api_gateway",
+          "type": "api_gateway",
+          "name": "API Gateway",
+          "description": "Capa de APIs y rutas dinámicas de producción.",
+          "parent": "prod_edge",
+          "properties": {
+            "integracion_privada": "VPC Link disponible",
+            "Canal": "HTTPS"
+          }
+        },
+        {
+          "id": "prod_vpc_link",
+          "type": "generic",
+          "name": "VPC Link",
+          "description": "Conector privado hacia balanceadores internos.",
+          "parent": "prod_edge",
+          "properties": {
+            "estado_observado": "Disponible",
+            "Environment": "PROD"
+          }
+        },
+        {
+          "id": "prod_public_lb",
+          "type": "alb",
+          "name": "Balanceo público",
+          "description": "ALB/NLB de entrada para experiencias de producción.",
+          "parent": "prod_public",
+          "properties": {
+            "topologia": "Balanceadores públicos activos",
+            "Disponibilidad": "Distribuido en 3 AZ"
+          }
+        },
+        {
+          "id": "prod_internal_lb",
+          "type": "nlb",
+          "name": "Balanceo interno",
+          "description": "ALB/NLB internos para APIs y servicios privados.",
+          "parent": "prod_private",
+          "properties": {
+            "topologia": "Balanceadores internos activos",
+            "Canal": "HTTP/HTTPS"
+          }
+        },
+        {
+          "id": "prod_frontends",
+          "type": "ecs",
+          "name": "Experiencia digital",
+          "description": "Microfrontends de resultados, detalle, proyectos, ventas, arriendo y remates.",
+          "parent": "prod_private",
+          "members": [
+            "Shell y front principal",
+            "Resultados de venta y arriendo",
+            "Resultados y detalle de proyectos",
+            "Resultados de remates",
+            "Detalle de inmuebles"
+          ],
+          "properties": {
+            "Runtime": "ECS/Fargate",
+            "capacidad_observada": "Servicios de frontend agrupados",
+            "Escalamiento": "Gestionado por servicio"
+          }
+        },
+        {
+          "id": "prod_domain_services",
+          "type": "ecs",
+          "name": "Servicios de dominio",
+          "description": "Capacidades de carrito, sitemap, integración CRM y notificación transversal.",
+          "parent": "prod_private",
+          "members": [
+            "Carrito y transacciones",
+            "Sitemaps y SEO",
+            "Integración CRM",
+            "Notificación transversal"
+          ],
+          "properties": {
+            "Runtime": "ECS/Fargate",
+            "capacidad_observada": "Servicios de dominio agrupados",
+            "Escalamiento": "Gestionado por servicio"
+          }
+        },
+        {
+          "id": "prod_legacy_web",
+          "type": "ecs",
+          "name": "Web legado y WordPress",
+          "description": "Servicios web heredados y carga editorial en transición a medios S3.",
+          "parent": "prod_private",
+          "properties": {
+            "Runtime": "ECS/Fargate",
+            "persistencia_objetivo": "Medios en S3",
+            "Nota": "EFS legada no forma parte del target"
+          }
+        },
+        {
+          "id": "prod_aurora",
+          "type": "aurora",
+          "name": "Aurora MySQL",
+          "description": "Base relacional privada, cifrada y distribuida en tres AZ.",
+          "parent": "prod_private",
+          "properties": {
+            "Motor": "Aurora MySQL",
+            "Disponibilidad": "3 AZ",
+            "Cifrado": "Habilitado",
+            "acceso_publico": "No"
+          }
+        },
+        {
+          "id": "prod_s3",
+          "type": "s3",
+          "name": "Amazon S3",
+          "description": "Contenido estático, objetos, medios objetivo y datos de soporte.",
+          "parent": "prod_platform",
+          "properties": {
+            "Uso": "Static assets, objetos y medios",
+            "Entrega": "CloudFront"
+          }
+        },
+        {
+          "id": "prod_messaging",
+          "type": "sqs",
+          "name": "SQS y SNS",
+          "description": "Eventos, notificaciones y procesamiento desacoplado.",
+          "parent": "prod_platform",
+          "properties": {
+            "patron": "Asíncrono",
+            "Servicios": "SQS / SNS"
+          }
+        },
+        {
+          "id": "prod_serverless",
+          "type": "step_functions",
+          "name": "Lambda y Step Functions",
+          "description": "Funciones y orquestación administrada para automatización.",
+          "parent": "prod_platform",
+          "properties": {
+            "activacion": "Eventos y APIs",
+            "Capacidades": "Lambda · Step Functions"
+          }
+        },
+        {
+          "id": "prod_dms",
+          "type": "generic",
+          "name": "AWS DMS",
+          "description": "Replicación y migración controlada de datos cuando aplica.",
+          "parent": "prod_platform",
+          "properties": {
+            "Rol": "Flujo de datos controlado",
+            "no_representa": "Tráfico de aplicación síncrono"
+          }
+        },
+        {
+          "id": "prod_ecr",
+          "type": "ecr",
+          "name": "Amazon ECR",
+          "description": "Registro de imágenes para workloads de producción.",
+          "parent": "prod_delivery"
+        },
+        {
+          "id": "prod_pipeline",
+          "type": "codepipeline",
+          "name": "Entrega continua",
+          "description": "CodePipeline, CodeBuild y CodeDeploy para entrega controlada.",
+          "parent": "prod_delivery",
+          "properties": {
+            "Capacidades": "Build · deploy · orquestación de entrega"
+          }
+        },
+        {
+          "id": "prod_security",
+          "type": "secrets_manager",
+          "name": "Secretos y llaves",
+          "description": "Secrets Manager, KMS, IAM y configuración protegida.",
+          "parent": "prod_delivery",
+          "properties": {
+            "Principio": "Mínimo privilegio",
+            "Valores": "No representados"
+          }
+        },
+        {
+          "id": "prod_cloudwatch",
+          "type": "cloudwatch",
+          "name": "CloudWatch",
+          "description": "Logs, métricas, alarmas y eventos de operación.",
+          "parent": "prod_delivery",
+          "properties": {
+            "Observabilidad": "Aplicación, infraestructura y escalamiento"
+          }
+        }
+      ],
+      "groups": [
+        {
+          "id": "prod_context",
+          "type": "generic_group",
+          "name": "Contexto y dependencias externas"
+        },
+        {
+          "id": "prod_aws",
+          "type": "aws_cloud",
+          "name": "AWS"
+        },
+        {
+          "id": "prod_environment",
+          "type": "account",
+          "name": "Environment: PROD",
+          "parent": "prod_aws"
+        },
+        {
+          "id": "prod_region",
+          "type": "region",
+          "name": "us-east-1",
+          "parent": "prod_environment"
+        },
+        {
+          "id": "prod_edge",
+          "type": "generic_group",
+          "name": "Edge y servicios regionales",
+          "parent": "prod_region"
+        },
+        {
+          "id": "prod_vpc",
+          "type": "vpc",
+          "name": "VPC de producción · 3 AZ",
+          "parent": "prod_region"
+        },
+        {
+          "id": "prod_public",
+          "type": "public_subnet",
+          "name": "Subredes públicas · 3 AZ",
+          "parent": "prod_vpc"
+        },
+        {
+          "id": "prod_private",
+          "type": "private_subnet",
+          "name": "Subredes privadas · 3 AZ",
+          "parent": "prod_vpc"
+        },
+        {
+          "id": "prod_platform",
+          "type": "generic_group",
+          "name": "Datos y automatización",
+          "parent": "prod_region"
+        },
+        {
+          "id": "prod_delivery",
+          "type": "generic_group",
+          "name": "Entrega, seguridad y operación",
+          "parent": "prod_region"
+        }
+      ],
+      "relationships": [
+        {
+          "source": "prod_users",
+          "target": "prod_cloudfront",
+          "description": "Accede a la experiencia",
+          "technology": "HTTPS"
+        },
+        {
+          "source": "prod_waf",
+          "target": "prod_cloudfront",
+          "description": "Protege entrada",
+          "technology": "WAF"
+        },
+        {
+          "source": "prod_cloudfront",
+          "target": "prod_s3",
+          "description": "Sirve contenido estático",
+          "technology": "HTTPS"
+        },
+        {
+          "source": "prod_cloudfront",
+          "target": "prod_api_gateway",
+          "description": "Enruta APIs dinámicas",
+          "technology": "HTTPS"
+        },
+        {
+          "source": "prod_cloudfront",
+          "target": "prod_public_lb",
+          "description": "Usa origen de aplicación",
+          "technology": "HTTPS"
+        },
+        {
+          "source": "prod_api_gateway",
+          "target": "prod_vpc_link",
+          "description": "Conecta ingreso privado",
+          "technology": "HTTPS"
+        },
+        {
+          "source": "prod_vpc_link",
+          "target": "prod_internal_lb",
+          "description": "Reenvía a balanceo interno",
+          "technology": "HTTP/HTTPS"
+        },
+        {
+          "source": "prod_public_lb",
+          "target": "prod_frontends",
+          "description": "Distribuye experiencia web",
+          "technology": "HTTP/HTTPS"
+        },
+        {
+          "source": "prod_internal_lb",
+          "target": "prod_domain_services",
+          "description": "Distribuye APIs privadas",
+          "technology": "HTTP/HTTPS"
+        },
+        {
+          "source": "prod_frontends",
+          "target": "prod_api_gateway",
+          "description": "Consume APIs",
+          "technology": "HTTPS"
+        },
+        {
+          "source": "prod_domain_services",
+          "target": "prod_aurora",
+          "description": "Persiste datos de dominio",
+          "technology": "TLS / SQL"
+        },
+        {
+          "source": "prod_domain_services",
+          "target": "prod_s3",
+          "description": "Gestiona objetos",
+          "technology": "AWS SDK"
+        },
+        {
+          "source": "prod_legacy_web",
+          "target": "prod_s3",
+          "description": "Gestiona medios objetivo",
+          "technology": "AWS SDK"
+        },
+        {
+          "source": "prod_domain_services",
+          "target": "prod_messaging",
+          "description": "Publica eventos",
+          "technology": "AWS SDK",
+          "async": true
+        },
+        {
+          "source": "prod_messaging",
+          "target": "prod_serverless",
+          "description": "Dispara automatización",
+          "technology": "Evento",
+          "async": true
+        },
+        {
+          "source": "prod_domain_services",
+          "target": "prod_external",
+          "description": "Integra capacidades externas",
+          "technology": "HTTPS"
+        },
+        {
+          "source": "prod_pipeline",
+          "target": "prod_ecr",
+          "description": "Publica imágenes",
+          "technology": "HTTPS"
+        },
+        {
+          "source": "prod_ecr",
+          "target": "prod_frontends",
+          "description": "Entrega imágenes",
+          "technology": "ECR pull"
+        },
+        {
+          "source": "prod_ecr",
+          "target": "prod_domain_services",
+          "description": "Entrega imágenes",
+          "technology": "ECR pull"
+        },
+        {
+          "source": "prod_ecr",
+          "target": "prod_legacy_web",
+          "description": "Entrega imágenes",
+          "technology": "ECR pull"
+        },
+        {
+          "source": "prod_dms",
+          "target": "prod_aurora",
+          "description": "Replica o migra datos",
+          "technology": "DMS",
+          "async": true
+        },
+        {
+          "source": "prod_security",
+          "target": "prod_domain_services",
+          "description": "Provee secretos y permisos",
+          "technology": "IAM / SDK"
+        }
+      ]
+    },
+    {
+      "diagramType": "Cloud",
+      "title": "04 · DEV · Componentes detallados",
+      "elements": [
+        {"id":"detail_users","type":"users","name":"Usuarios y canales digitales","description":"Consumidores de experiencias web y APIs.","parent":"detail_context"},
+        {"id":"detail_external","type":"generic","name":"Sistemas externos","description":"CRM, marketing, facturación y capacidades corporativas.","parent":"detail_context"},
+        {"id":"detail_cloudfront","type":"cloudfront","name":"CloudFront","description":"CDN con orígenes S3, API Gateway, ALB y orígenes personalizados.","parent":"detail_edge"},
+        {"id":"detail_waf","type":"waf","name":"AWS WAF","description":"Protección de capa de aplicación en el borde.","parent":"detail_edge"},
+        {"id":"detail_api","type":"api_gateway","name":"API Gateway","description":"Entrada de APIs y rutas dinámicas.","parent":"detail_edge"},
+        {"id":"detail_vpc_link","type":"generic","name":"VPC Link","description":"Conector privado disponible hacia el ingreso interno.","parent":"detail_edge"},
+        {"id":"detail_internal_lb","type":"alb","name":"Balanceo interno","description":"ALB/NLB internos para distribución de solicitudes.","parent":"detail_private"},
+        {"id":"detail_shell","type":"ecs","name":"Shell y front principal","description":"Composición de la experiencia digital.","parent":"detail_frontend"},
+        {"id":"detail_search","type":"ecs","name":"Búsqueda asistida","description":"Experiencia de búsqueda y descubrimiento.","parent":"detail_frontend"},
+        {"id":"detail_sale","type":"ecs","name":"Resultados de venta","description":"Microfrontend de resultados de venta.","parent":"detail_frontend"},
+        {"id":"detail_rent","type":"ecs","name":"Resultados de arriendo","description":"Microfrontend de resultados de arriendo.","parent":"detail_frontend"},
+        {"id":"detail_projects","type":"ecs","name":"Resultados de proyectos","description":"Microfrontend de proyectos.","parent":"detail_frontend"},
+        {"id":"detail_auction","type":"ecs","name":"Resultados de remates","description":"Microfrontend de remates.","parent":"detail_frontend"},
+        {"id":"detail_property","type":"ecs","name":"Detalle de inmueble","description":"Microfrontend de detalle de propiedades.","parent":"detail_frontend"},
+        {"id":"detail_project_detail","type":"ecs","name":"Detalle de proyecto","description":"Microfrontend de detalle de proyectos.","parent":"detail_frontend"},
+        {"id":"detail_editorial","type":"ecs","name":"Experiencia editorial","description":"WordPress y front legado dentro del runtime.","parent":"detail_frontend"},
+        {"id":"detail_auth","type":"ecs","name":"Autenticación","description":"Autenticación y autorización de dominio.","parent":"detail_domain"},
+        {"id":"detail_admin","type":"ecs","name":"Administración y eventos","description":"Administración funcional y eventos masivos.","parent":"detail_domain"},
+        {"id":"detail_catalog","type":"ecs","name":"Catálogo de inmuebles","description":"Propiedades, características y sitios de interés.","parent":"detail_domain"},
+        {"id":"detail_publications","type":"ecs","name":"Publicaciones","description":"Publicaciones y características de contenido.","parent":"detail_domain"},
+        {"id":"detail_results","type":"ecs","name":"Resultados y descripciones","description":"Resultados, descripciones y clasificación funcional.","parent":"detail_domain"},
+        {"id":"detail_customers","type":"ecs","name":"Clientes y zona privada","description":"Clientes, perfilamiento y zona privada.","parent":"detail_domain"},
+        {"id":"detail_leads","type":"ecs","name":"Leads y redes sociales","description":"Captación, seguimiento y leads de redes.","parent":"detail_domain"},
+        {"id":"detail_cart","type":"ecs","name":"Carrito y transacciones","description":"Carrito y capacidades transaccionales.","parent":"detail_domain"},
+        {"id":"detail_integrations","type":"ecs","name":"Integraciones de negocio","description":"CRM, marketing y facturación.","parent":"detail_domain"},
+        {"id":"detail_seo","type":"ecs","name":"SEO y sitemaps","description":"Meta-etiquetas, sitemap y optimización SEO.","parent":"detail_domain"},
+        {"id":"detail_images","type":"ecs","name":"Imágenes y clasificación","description":"Gestión y clasificación de imágenes.","parent":"detail_domain"},
+        {"id":"detail_legacy_api","type":"ecs","name":"API de compatibilidad","description":"API web principal de servicios heredados.","parent":"detail_legacy"},
+        {"id":"detail_listing_api","type":"ecs","name":"Listing API","description":"Compatibilidad de consultas de listing.","parent":"detail_legacy"},
+        {"id":"detail_listing_data","type":"ecs","name":"Listing de datos","description":"Adaptación de acceso a datos heredados.","parent":"detail_legacy"},
+        {"id":"detail_ws_api","type":"ecs","name":"Servicios web heredados","description":"Compatibilidad de servicios web existentes.","parent":"detail_legacy"},
+        {"id":"detail_ai_assistant","type":"ecs","name":"Asistentes IA","description":"Asistentes conversacionales y de dominio.","parent":"detail_ai"},
+        {"id":"detail_ai_mcp","type":"ecs","name":"Asistente de inmuebles IA","description":"Capacidad IA para contexto de inmuebles.","parent":"detail_ai"},
+        {"id":"detail_ai_models","type":"ecs","name":"Modelos IA","description":"Gestión y consumo de modelos de IA.","parent":"detail_ai"},
+        {"id":"detail_ai_images","type":"ecs","name":"Procesamiento de imágenes IA","description":"Clasificación y servicios de imagen.","parent":"detail_ai"},
+        {"id":"detail_aurora","type":"aurora","name":"Aurora MySQL","description":"Datos relacionales privados, cifrados y distribuidos en 3 AZ.","parent":"detail_data"},
+        {"id":"detail_cache","type":"elasticache","name":"ElastiCache","description":"Caché administrada para capacidades que la requieren.","parent":"detail_data"},
+        {"id":"detail_s3","type":"s3","name":"Amazon S3","description":"Contenido estático, objetos y medios de aplicación.","parent":"detail_platform"},
+        {"id":"detail_sqs","type":"sqs","name":"Amazon SQS","description":"Colas para trabajos y eventos desacoplados.","parent":"detail_platform"},
+        {"id":"detail_lambda","type":"lambda","name":"AWS Lambda","description":"Funciones agrupadas por automatización e integración.","parent":"detail_platform","properties":{"funciones":"Capacidades agregadas por dominio"}},
+        {"id":"detail_cognito","type":"cognito","name":"Amazon Cognito","description":"Identidad y autorización digital.","parent":"detail_platform"},
+        {"id":"detail_ecr","type":"ecr","name":"Amazon ECR","description":"Registro de imágenes de los componentes.","parent":"detail_platform"},
+        {"id":"detail_ssm","type":"systems_manager","name":"Systems Manager","description":"Configuración parametrizada y controles de operación.","parent":"detail_platform"},
+        {"id":"detail_cloudwatch","type":"cloudwatch","name":"CloudWatch","description":"Logs, métricas, alarmas y eventos operativos.","parent":"detail_platform"}
+      ],
+      "groups": [
+        {"id":"detail_context","type":"generic_group","name":"Contexto y dependencias externas"},
+        {"id":"detail_aws","type":"aws_cloud","name":"AWS"},
+        {"id":"detail_environment","type":"account","name":"Environment: DEV","parent":"detail_aws"},
+        {"id":"detail_region","type":"region","name":"us-east-1","parent":"detail_environment"},
+        {"id":"detail_edge","type":"generic_group","name":"Edge y servicios regionales","parent":"detail_region"},
+        {"id":"detail_vpc","type":"vpc","name":"VPC de aplicación · 3 AZ","parent":"detail_region"},
+        {"id":"detail_public","type":"public_subnet","name":"Subredes públicas · 3 AZ","parent":"detail_vpc"},
+        {"id":"detail_private","type":"private_subnet","name":"Subredes privadas · 3 AZ","parent":"detail_vpc"},
+        {"id":"detail_frontend","type":"generic_group","name":"Microfrontends y experiencia digital","parent":"detail_private"},
+        {"id":"detail_domain","type":"generic_group","name":"Servicios Java de dominio","parent":"detail_private"},
+        {"id":"detail_legacy","type":"generic_group","name":"Servicios PHP y compatibilidad","parent":"detail_private"},
+        {"id":"detail_ai","type":"generic_group","name":"Servicios Python e IA","parent":"detail_private"},
+        {"id":"detail_data","type":"generic_group","name":"Datos y caché","parent":"detail_private"},
+        {"id":"detail_platform","type":"generic_group","name":"Objetos, integración y operación","parent":"detail_region"}
+      ],
+      "relationships": [
+        {"source":"detail_users","target":"detail_cloudfront","description":"Accede a la experiencia","technology":"HTTPS"},
+        {"source":"detail_waf","target":"detail_cloudfront","description":"Protege entrada","technology":"WAF"},
+        {"source":"detail_cloudfront","target":"detail_s3","description":"Sirve contenido estático","technology":"HTTPS"},
+        {"source":"detail_cloudfront","target":"detail_api","description":"Enruta APIs dinámicas","technology":"HTTPS"},
+        {"source":"detail_api","target":"detail_vpc_link","description":"Conecta ingreso privado","technology":"HTTPS"},
+        {"source":"detail_vpc_link","target":"detail_internal_lb","description":"Reenvía al balanceo interno","technology":"HTTP/HTTPS"},
+        {"source":"detail_internal_lb","target":"detail_shell","description":"Distribuye experiencia","technology":"HTTP/HTTPS"},
+        {"source":"detail_internal_lb","target":"detail_auth","description":"Distribuye APIs","technology":"HTTP/HTTPS"},
+        {"source":"detail_shell","target":"detail_api","description":"Consume APIs","technology":"HTTPS"},
+        {"source":"detail_auth","target":"detail_cognito","description":"Autentica solicitudes","technology":"JWT / OAuth"},
+        {"source":"detail_catalog","target":"detail_aurora","description":"Consulta datos de dominio","technology":"TLS / SQL"},
+        {"source":"detail_publications","target":"detail_aurora","description":"Persiste publicaciones","technology":"TLS / SQL"},
+        {"source":"detail_images","target":"detail_s3","description":"Gestiona objetos","technology":"AWS SDK"},
+        {"source":"detail_leads","target":"detail_sqs","description":"Publica eventos","technology":"AWS SDK","async":true},
+        {"source":"detail_sqs","target":"detail_lambda","description":"Dispara procesamiento","technology":"Evento","async":true},
+        {"source":"detail_integrations","target":"detail_external","description":"Integra capacidades externas","technology":"HTTPS"},
+        {"source":"detail_ecr","target":"detail_shell","description":"Entrega imágenes","technology":"ECR pull"},
+        {"source":"detail_ecr","target":"detail_catalog","description":"Entrega imágenes","technology":"ECR pull"},
+        {"source":"detail_ecr","target":"detail_ai_assistant","description":"Entrega imágenes","technology":"ECR pull"},
+        {"source":"detail_ssm","target":"detail_catalog","description":"Provee configuración","technology":"IAM / SDK"}
+      ]
+    }
+  ]
+}

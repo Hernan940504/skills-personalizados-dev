@@ -1,0 +1,8 @@
+# google-drive-manager — dependencias (Python 3.12+)
+# Versiones pinneadas exactas (política de seguridad: sin rangos abiertos).
+# Descargar desde el mirror institucional JFrog Artifactory.
+# Si alguna versión no está en JFrog, ajustar a la aprobada más cercana y documentarlo en el README.
+google-api-python-client==2.198.0
+google-auth==2.48.0
+google-auth-oauthlib==1.2.2
+google-auth-httplib2==0.2.0

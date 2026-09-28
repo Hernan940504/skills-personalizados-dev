@@ -3,6 +3,7 @@ __pycache__/
 *.py[cod]
 *.egg-info/
 .venv/
+.venv-*/
 venv/
 
 # Node
@@ -32,3 +33,9 @@ Thumbs.db
 .env.*
 !.env.example
 .gemini-key
+
+# google-drive-manager: credenciales y tokens OAuth (nunca versionar)
+credentials.json
+token.json
+gdrive-credentials.json
+gdrive-token.json

@@ -3,6 +3,7 @@
 ## [No publicado]
 
 ### Agregado
+- Se generó `lineas_negocio/ciencuadras/arquitectura-componentes-ciencuadras-aws.drawio` con vistas multipágina por environment, catálogo de runtime y catálogo funcional detallado de DEV, y topología objetivo PROD, basado en inventario AWS de solo lectura. Incluye íconos AWS, componentes agrupados por capacidad, relaciones trazables y exclusión de cuentas, ARN, CIDR y secretos; se incorporaron el modelo JSON editable y la especificación de requisitos, diseño y tareas.
 - Se generó `lineas_negocio/ciencuadras/comparativa-dms-vs-snapshot-prod.md` con la comparativa de estrategias de migración (DMS vs snapshot cross-account) para la BD productiva de Ciencuadras, incluyendo beneficios, riesgos, consideraciones y tiempo/costo como variables, basada en datos medidos contra la API de AWS
 - Se generó `lineas_negocio/ciencuadras/estimacion-dms-migracion-prod.md` con la estimación de instancia DMS para la migración de la BD productiva de Ciencuadras (cuenta legada `290296201161` → nueva PROD `844669095517`), basada en peso y concurrencia medidos contra la API de AWS (rol ViewOnlyAccess)
 - Se creó script `scripts/jira_update_issues.py` para actualizar issues en Jira reemplazando referencias de TASD-1 por TASD-4 en summary y description
