@@ -39,3 +39,8 @@ credentials.json
 token.json
 gdrive-credentials.json
 gdrive-token.json
+
+# obsidian-manager: material temporal de ingesta y vaults locales de prueba
+.brain/tmp/
+second-brain/
+*.vault-test/
