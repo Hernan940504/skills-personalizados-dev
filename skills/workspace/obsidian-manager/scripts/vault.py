@@ -194,8 +194,16 @@ class VaultClient:
             slug = base_slug
 
         fm: dict[str, Any] = {"title": title, "created": self._today()}
-        if tags:
-            fm["tags"] = list(tags)
+        # El slug del proyecto se agrega como tag canónico de la línea de negocio para que
+        # los grupos de color del grafo (basados en tags) coloreen la nota por su dominio.
+        # Va primero y sin duplicar; respeta cualquier tag que ya venga en la lista.
+        effective_tags = list(tags) if tags else []
+        if project:
+            project_tag = slugify(project)
+            if project_tag not in effective_tags:
+                effective_tags.insert(0, project_tag)
+        if effective_tags:
+            fm["tags"] = effective_tags
         if aliases:
             fm["aliases"] = list(aliases)
         if project:

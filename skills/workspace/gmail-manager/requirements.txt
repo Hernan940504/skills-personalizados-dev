@@ -1,0 +1,8 @@
+# gmail-manager — dependencias (Python 3.12+)
+# Versiones pinneadas exactas (política de seguridad: sin rangos abiertos).
+# Descargar desde el mirror institucional JFrog Artifactory.
+# Mismas librerías cliente de Google que google-drive-manager (reutilizables).
+google-api-python-client==2.198.0
+google-auth==2.48.0
+google-auth-oauthlib==1.2.2
+google-auth-httplib2==0.2.0

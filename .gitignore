@@ -44,3 +44,9 @@ gdrive-token.json
 .brain/tmp/
 second-brain/
 *.vault-test/
+
+# gmail-manager: credenciales, token y estado (nunca versionar)
+gmail-credentials.json
+gmail-token.json
+state.json
+.venv-gmail*

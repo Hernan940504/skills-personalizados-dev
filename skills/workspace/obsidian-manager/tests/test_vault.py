@@ -110,6 +110,31 @@ class TestCreateNote(VaultTestCase):
         )
         self.assertIn(f"[[{res['name']}]]", contexto)
 
+    def test_create_con_project_agrega_tag_canonico(self):
+        # Given un project, When create_note sin tags, Then el slug del proyecto queda como tag
+        # (para que el grafo coloree la nota por su línea de negocio).
+        res = self.client.create_note("Nota", body="x", project="Ciencuadras")
+        nota = (self.vault_dir / res["path"]).read_text(encoding="utf-8")
+        self.assertIn("tags: [ciencuadras]", nota)
+
+    def test_create_con_project_no_duplica_tag_existente(self):
+        # Given tags que ya incluyen el slug del proyecto, When create_note, Then no se duplica.
+        res = self.client.create_note(
+            "Nota", body="x", project="Libertador", tags=["libertador", "aws"]
+        )
+        nota = (self.vault_dir / res["path"]).read_text(encoding="utf-8")
+        # el tag no se duplica dentro de la lista de tags
+        self.assertIn("tags: [libertador, aws]", nota)
+
+    def test_create_con_project_antepone_tag_a_los_existentes(self):
+        # Given tags temáticos y un project distinto, When create_note, Then el tag de la línea
+        # de negocio va primero y conserva los demás.
+        res = self.client.create_note(
+            "Nota", body="x", project="Ciencuadras", tags=["drive", "aws"]
+        )
+        nota = (self.vault_dir / res["path"]).read_text(encoding="utf-8")
+        self.assertIn("tags: [ciencuadras, drive, aws]", nota)
+
 
 class TestAppendNote(VaultTestCase):
     def test_append_no_toca_frontmatter(self):

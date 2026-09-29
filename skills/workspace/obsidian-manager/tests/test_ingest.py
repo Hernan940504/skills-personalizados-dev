@@ -64,6 +64,27 @@ class TestIngest(unittest.TestCase):
         )
         self.assertIn(f"[[{res['name']}]]", contexto)
 
+    def test_ingesta_con_project_agrega_tag_canonico(self):
+        # Given ingest --project sin tags, Then el slug del proyecto queda como tag para el grafo.
+        res = self.client.ingest(stdin_text="hallazgo", title="Nota CC", project="Libertador")
+        nota = (self.vault_dir / res["path"]).read_text(encoding="utf-8")
+        self.assertIn("tags: [libertador]", nota)
+
+    def test_ingesta_markdown_con_project_agrega_tag_sin_duplicar(self):
+        # Given un .md con tags propios y ingest --project, Then se antepone el tag de la línea
+        # de negocio sin duplicar los que ya trae el frontmatter del archivo.
+        md = self.ext / "doc.md"
+        md.write_text("---\ntitle: Doc\ntags: [aws, drive]\n---\ncuerpo", encoding="utf-8")
+        res = self.client.ingest(source_path=str(md), project="Ciencuadras")
+        nota = (self.vault_dir / res["path"]).read_text(encoding="utf-8")
+        import re
+        tags_line = re.search(r"^tags:\s*\[(.*?)\]", nota, re.MULTILINE).group(1)
+        tag_list = [t.strip() for t in tags_line.split(",")]
+        self.assertIn("ciencuadras", tag_list)
+        self.assertEqual(tag_list.count("ciencuadras"), 1)
+        self.assertIn("aws", tag_list)
+        self.assertIn("drive", tag_list)
+
     def test_ingesta_drawio_va_como_adjunto_no_como_cuerpo(self):
         # Un .drawio es XML (texto) pero debe tratarse como adjunto, no embeberse como cuerpo.
         drawio = self.ext / "diagrama.drawio"

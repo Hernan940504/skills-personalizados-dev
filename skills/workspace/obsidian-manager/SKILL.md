@@ -89,7 +89,7 @@ python3 scripts/obsidian_cli.py note append <nota> "línea a añadir"
 python3 scripts/obsidian_cli.py note update <nota> --frontmatter '{"estado":"activo"}'
 python3 scripts/obsidian_cli.py --yes note update <nota> --body "nuevo cuerpo"   # destructivo
 ```
-`<nota>` acepta el nombre de archivo (slug) o una ruta relativa. Con `--project`, la nota se enlaza al contexto del proyecto y el contexto la registra.
+`<nota>` acepta el nombre de archivo (slug) o una ruta relativa. Con `--project`, la nota se enlaza al contexto del proyecto, el contexto la registra y el slug del proyecto se agrega automáticamente como tag canónico de la línea de negocio (sin duplicar, va primero) para que los grupos de color del grafo coloreen la nota por su dominio. Aplica igual en `note create` e `ingest`.
 
 ### Buscar
 ```bash
